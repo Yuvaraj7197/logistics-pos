@@ -1,0 +1,74 @@
+<!-- BILLING COMPONENT -->
+<section id="billing" class="hidden p-4">
+  <div class="content-header">
+    <div>
+      <h2><i class="pi pi-credit-card"></i> Billing & Payments</h2>
+      <p style="color: var(--gray-600); margin: 0;">Manage invoices, payments, and financial records</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="openCreateInvoiceModal()">
+        <i class="pi pi-plus"></i> Create Invoice
+      </button>
+      <button class="btn btn-secondary" onclick="backToDashboard()">
+        <i class="pi pi-arrow-left"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">₹2.4M</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">₹45,780</div>
+      <div class="stat-label">Pending Payments</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">156</div>
+      <div class="stat-label">Invoices Generated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">12</div>
+      <div class="stat-label">Overdue Payments</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Payment Status</label>
+      <select>
+        <option>All Invoices</option>
+        <option>Paid</option>
+        <option>Unpaid</option>
+        <option>Overdue</option>
+        <option>Partial</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Date Range</label>
+      <input type="date" />
+    </div>
+    <div class="filter-group">
+      <label>Search Invoices</label>
+      <input type="text" placeholder="Invoice # or customer..." />
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="billingTbody"></tbody>
+    </table>
+  </div>
+</section>

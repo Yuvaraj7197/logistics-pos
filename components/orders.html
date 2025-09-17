@@ -1,0 +1,93 @@
+<!-- ORDER MANAGEMENT COMPONENT -->
+<section id="orders" class="hidden p-4">
+  <div class="content-header">
+    <div>
+      <h2><i class="pi pi-shopping-cart"></i> Order Management</h2>
+      <p style="color: var(--gray-600); margin: 0;">Track and manage all customer orders</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="receiveOrder()">
+        <i class="pi pi-plus"></i> New Order
+      </button>
+      <button class="btn btn-secondary" onclick="testModalFix()">
+        <i class="pi pi-cog"></i> Test Modal
+      </button>
+      <button class="btn btn-secondary" onclick="backToDashboard()">
+        <i class="pi pi-arrow-left"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="margin-bottom: 1.5rem;">
+    <div class="stat-card">
+      <div class="stat-value" id="pendingOrdersCount">0</div>
+      <div class="stat-label">Pending Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="completedOrdersCount">0</div>
+      <div class="stat-label">Completed Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="totalOrdersValue">₹0</div>
+      <div class="stat-label">Total Value</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="avgOrderValue">₹0</div>
+      <div class="stat-label">Avg Order Value</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Order Status</label>
+      <select id="statusFilter" onchange="applyFilters()">
+        <option value="">All Orders</option>
+        <option value="Pending">Pending</option>
+        <option value="Completed">Completed</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Date Range (From)</label>
+      <input type="date" id="orderDateStart" onchange="applyFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>Date Range (To)</label>
+      <input type="date" id="orderDateEnd" onchange="applyFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>Search Orders</label>
+      <input type="text" id="searchOrders" placeholder="Order ID, Customer, or Material..." oninput="applyFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>Sort By</label>
+      <select id="sortOrders" onchange="applyFilters()">
+        <option value="date-desc">Date (Newest First)</option>
+        <option value="date-asc">Date (Oldest First)</option>
+        <option value="amount-desc">Amount (Highest First)</option>
+        <option value="amount-asc">Amount (Lowest First)</option>
+        <option value="customer">Customer Name</option>
+        <option value="status">Status</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTbody">
+      </tbody>
+    </table>
+  </div>
+</section>

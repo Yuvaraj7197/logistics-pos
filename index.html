@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Logosic Logistics • Admin Suite</title>
+
+  <!-- External Dependencies -->
+  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.3.1/primeflex.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- LOGIN PAGE CONTAINER -->
+  <div id="loginContainer">
+    <!-- LOGIN PAGE COMPONENT -->
+    <section id="loginPage" class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <i class="pi pi-truck"></i>
+          <h2>Admin Login</h2>
+          <p style="color: var(--gray-600); margin: 0;">Access your logistics dashboard</p>
+        </div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" required placeholder="Enter your username" value="admin" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" required placeholder="Enter your password" value="password" />
+          </div>
+          <button type="submit" class="btn btn-primary w-full mt-3">
+            <i class="pi pi-sign-in"></i> 
+            Sign In
+          </button>
+          <p style="text-align: center; margin-top: 1rem; font-size: .8rem; color: var(--gray-500);">
+            Demo credentials: admin / password
+          </p>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTAINER -->
+  <div id="dashboardPage" class="hidden">
+    <header>
+      <div class="logo">
+        <i class="pi pi-truck"></i>
+        Logosic Logistics
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <span style="color: var(--gray-600); font-size: .875rem;">Welcome, Admin</span>
+        <button class="btn btn-secondary btn-sm" onclick="logout()">
+          <i class="pi pi-sign-out"></i> 
+          Logout
+        </button>
+      </div>
+    </header>
+    
+    <div class="app-container">
+      <aside class="sidebar">
+        <button class="nav-button active" data-target="dashboard" onclick="goTo('dashboard', this)">
+          <i class="pi pi-home"></i> Dashboard
+        </button>
+        <button class="nav-button" data-target="orders" onclick="goTo('orders', this)">
+          <i class="pi pi-shopping-cart"></i> Orders
+        </button>
+        <button class="nav-button" data-target="stock" onclick="goTo('stock', this)">
+          <i class="pi pi-box"></i> Stock
+        </button>
+        <button class="nav-button" data-target="inventory" onclick="goTo('inventory', this)">
+          <i class="pi pi-list"></i> Inventory
+        </button>
+        <button class="nav-button" data-target="staff" onclick="goTo('staff', this)">
+          <i class="pi pi-users"></i> Staff
+        </button>
+        <button class="nav-button" data-target="billing" onclick="goTo('billing', this)">
+          <i class="pi pi-credit-card"></i> Billing
+        </button>
+        <button class="nav-button" data-target="financial" onclick="goTo('financial', this)">
+          <i class="pi pi-calculator"></i> Financial
+        </button>
+        <button class="nav-button" data-target="gst" onclick="goTo('gst', this)">
+          <i class="pi pi-percentage"></i> GST
+        </button>
+      </aside>
+      
+      <main class="app-main">
+        <div class="app-main-inner">
+          <!-- Component Containers -->
+          <div id="dashboardContainer">
+            <!-- DASHBOARD GRID COMPONENT -->
+            <section id="dashboardGrid" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h1>Admin Dashboard</h1>
+                  <p style="color: var(--gray-600); margin: 0;">Manage your logistics operations</p>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value" id="totalOrdersCount">247</div>
+                  <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">1,432</div>
+                  <div class="stat-label">Items in Stock</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">28</div>
+                  <div class="stat-label">Active Staff</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">₹2.4M</div>
+                  <div class="stat-label">Monthly Revenue</div>
+                </div>
+              </div>
+
+              <div class="grid">
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-shopping-cart"></i></div>
+                      <h3>Order Management</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Track and manage customer orders</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('orders')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-box"></i></div>
+                      <h3>Stock Management</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Monitor stock levels and inventory</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('stock')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-list"></i></div>
+                      <h3>Inventory</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Complete inventory overview</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('inventory')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+                
+                
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-users"></i></div>
+                      <h3>Staff Management</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Manage team members and roles</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('staff')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-credit-card"></i></div>
+                      <h3>Billing & Payments</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Handle invoices and payments</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('billing')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-calculator"></i></div>
+                      <h3>Financial Management</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Machine EMI, Electric Bills, Transport & Commission</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('financial')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6 lg:col-4">
+                  <div class="card dashboard-card">
+                    <div>
+                      <div class="icon"><i class="pi pi-percentage"></i></div>
+                      <h3>GST Management</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">GST compliance and returns</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showScreen('gst')">
+                      <i class="pi pi-arrow-right"></i> Open
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div id="ordersContainer" class="hidden">
+            <!-- ORDER MANAGEMENT COMPONENT -->
+            <section id="orders" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-shopping-cart"></i> Order Management</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Track and manage all customer orders</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" onclick="receiveOrder()">
+                    <i class="pi pi-plus"></i> New Order
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid" style="margin-bottom: 1.5rem;">
+                <div class="stat-card">
+                  <div class="stat-value" id="pendingOrdersCount">0</div>
+                  <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="completedOrdersCount">0</div>
+                  <div class="stat-label">Completed Today</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="totalOrdersValue">₹0</div>
+                  <div class="stat-label">Total Value</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="avgOrderValue">₹0</div>
+                  <div class="stat-label">Avg Order Value</div>
+                </div>
+              </div>
+
+              <div class="filters">
+                <div class="filter-group">
+                  <label>Order Status</label>
+                  <select id="statusFilter" onchange="applyFilters()">
+                    <option value="">All Orders</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Date Range (From)</label>
+                  <input type="date" id="orderDateStart" onchange="applyFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Date Range (To)</label>
+                  <input type="date" id="orderDateEnd" onchange="applyFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Search Orders</label>
+                  <input type="text" id="searchOrders" placeholder="Order ID, Customer, or Material..." oninput="applyFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Sort By</label>
+                  <select id="sortOrders" onchange="applyFilters()">
+                    <option value="date-desc">Date (Newest First)</option>
+                    <option value="date-asc">Date (Oldest First)</option>
+                    <option value="amount-desc">Amount (Highest First)</option>
+                    <option value="amount-asc">Amount (Lowest First)</option>
+                    <option value="customer">Customer Name</option>
+                    <option value="status">Status</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Items</th>
+                      <th>Total Amount</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTbody">
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <div id="stockContainer" class="hidden">
+            <!-- STOCK MANAGEMENT COMPONENT -->
+            <section id="stock" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-box"></i> Stock Management</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Monitor and manage inventory levels</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" onclick="addStockItem()">
+                    <i class="pi pi-plus"></i> Add Stock
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid" style="margin-bottom: 1.5rem;">
+                <div class="stat-card">
+                  <div class="stat-value" id="totalItemsCount">0</div>
+                  <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="lowStockCount">0</div>
+                  <div class="stat-label">Low Stock Items</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="outOfStockCount">0</div>
+                  <div class="stat-label">Out of Stock</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="totalStockValue">₹0</div>
+                  <div class="stat-label">Total Stock Value</div>
+                </div>
+              </div>
+
+              <div class="filters">
+                <div class="filter-group">
+                  <label>Category</label>
+                  <select id="stockCategoryFilter" onchange="applyStockFilters()">
+                    <option value="">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Medical">Medical</option>
+                    <option value="Industrial">Industrial</option>
+                    <option value="Automotive">Automotive</option>
+                    <option value="Textiles">Textiles</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Stock Level</label>
+                  <select id="stockLevelFilter" onchange="applyStockFilters()">
+                    <option value="">All Items</option>
+                    <option value="In Stock">In Stock</option>
+                    <option value="Low Stock">Low Stock</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Search Items</label>
+                  <input type="text" id="searchStockItems" placeholder="Item name, code, or supplier..." oninput="applyStockFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Sort By</label>
+                  <select id="sortStockItems" onchange="applyStockFilters()">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="stock-desc">Stock (High to Low)</option>
+                    <option value="stock-asc">Stock (Low to High)</option>
+                    <option value="price-desc">Price (High to Low)</option>
+                    <option value="price-asc">Price (Low to High)</option>
+                    <option value="category">Category</option>
+                    <option value="status">Status</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Item Code</th>
+                      <th>Product Name</th>
+                      <th>Category</th>
+                      <th>Current Stock</th>
+                      <th>Min. Required</th>
+                      <th>Unit Price</th>
+                      <th>Total Value</th>
+                      <th>Status</th>
+                      <th>Supplier</th>
+                      <th>Last Updated</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="stockTbody">
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <div id="inventoryContainer" class="hidden">
+            <!-- INVENTORY COMPONENT -->
+            <section id="inventory" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-list"></i> Inventory Overview</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Complete inventory management and tracking</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary">
+                    <i class="pi pi-download"></i> Export Report
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value">1,432</div>
+                  <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">₹45.2L</div>
+                  <div class="stat-label">Inventory Value</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">28</div>
+                  <div class="stat-label">Low Stock Items</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">5</div>
+                  <div class="stat-label">Out of Stock</div>
+                </div>
+              </div>
+
+              <div class="grid">
+                <div class="col-12 md:col-6">
+                  <div class="card">
+                    <h3>Category Breakdown</h3>
+                    <div style="margin: 1rem 0;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+                        <span>Electronics</span>
+                        <span>425 items</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+                        <span>Furniture</span>
+                        <span>287 items</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+                        <span>Medical</span>
+                        <span>356 items</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+                        <span>Industrial</span>
+                        <span>198 items</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Others</span>
+                        <span>166 items</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6">
+                  <div class="card">
+                    <h3>Recent Movements</h3>
+                    <div style="margin: 1rem 0;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
+                        <div>
+                          <strong>Samsung Galaxy Smartphone</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">Stock Added: +25 units</div>
+                        </div>
+                        <span style="color: var(--success-500); font-weight: 500;">+25</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
+                        <div>
+                          <strong>Office Chair Premium</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">Order Fulfilled: -7 units</div>
+                        </div>
+                        <span style="color: var(--error-500); font-weight: 500;">-7</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
+                        <div>
+                          <strong>Digital Thermometer</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">Stock Added: +50 units</div>
+                        </div>
+                        <span style="color: var(--success-500); font-weight: 500;">+50</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                          <strong>Laptop Dell Inspiron</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">Order Fulfilled: -12 units</div>
+                        </div>
+                        <span style="color: var(--error-500); font-weight: 500;">-12</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div id="staffContainer" class="hidden">
+            <!-- STAFF MANAGEMENT COMPONENT -->
+            <section id="staff" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-users"></i> Staff Management</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Manage employee attendance, payroll, and leave requests</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" onclick="addStaff()">
+                    <i class="pi pi-plus"></i> Add Staff
+                  </button>
+                  <button class="btn btn-secondary" onclick="viewLeaveRequests()">
+                    <i class="pi pi-calendar"></i> Leave Requests
+                  </button>
+                  <button class="btn btn-secondary" onclick="viewAttendanceReport()">
+                    <i class="pi pi-chart-bar"></i> Attendance Report
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value" id="totalStaffCount">0</div>
+                  <div class="stat-label">Total Staff</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="presentTodayCount">0</div>
+                  <div class="stat-label">Present Today</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="onLeaveCount">0</div>
+                  <div class="stat-label">On Leave</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="pendingLeaveCount">0</div>
+                  <div class="stat-label">Pending Leave</div>
+                </div>
+              </div>
+
+              <div class="filters">
+                <div class="filter-group">
+                  <label>Department</label>
+                  <select id="deptFilter" onchange="renderStaff()">
+                    <option value="">All Departments</option>
+                    <option value="Production">Production</option>
+                    <option value="Quality">Quality</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Admin">Admin</option>
+                    <option value="HR">HR</option>
+                    <option value="Finance">Finance</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Status</label>
+                  <select id="statusFilter" onchange="renderStaff()">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="On Leave">On Leave</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Shift</label>
+                  <select id="shiftFilter" onchange="renderStaff()">
+                    <option value="">All Shifts</option>
+                    <option value="Morning">Morning (9 AM - 6 PM)</option>
+                    <option value="Evening">Evening (2 PM - 11 PM)</option>
+                    <option value="Night">Night (10 PM - 7 AM)</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Search</label>
+                  <input type="text" id="searchStaff" placeholder="Search staff..." oninput="renderStaff()" />
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Department</th>
+                      <th>Shift</th>
+                      <th>Contact</th>
+                      <th>Join Date</th>
+                      <th>Status</th>
+                      <th>Today's Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="staffTbody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <div id="billingContainer" class="hidden">
+            <!-- BILLING COMPONENT -->
+            <section id="billing" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-credit-card"></i> Billing & Payments</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Manage invoices, payments, and financial records</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" onclick="openCreateInvoiceModal()">
+                    <i class="pi pi-plus"></i> Create Invoice
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value">₹2.4M</div>
+                  <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">₹45,780</div>
+                  <div class="stat-label">Pending Payments</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">156</div>
+                  <div class="stat-label">Invoices Generated</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">12</div>
+                  <div class="stat-label">Overdue Payments</div>
+                </div>
+              </div>
+
+              <div class="filters">
+                <div class="filter-group">
+                  <label>Payment Status</label>
+                  <select>
+                    <option>All Invoices</option>
+                    <option>Paid</option>
+                    <option>Unpaid</option>
+                    <option>Overdue</option>
+                    <option>Partial</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Date Range</label>
+                  <input type="date" />
+                </div>
+                <div class="filter-group">
+                  <label>Search Invoices</label>
+                  <input type="text" placeholder="Invoice # or customer..." />
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Invoice #</th>
+                      <th>Customer</th>
+                      <th>Amount</th>
+                      <th>Issue Date</th>
+                      <th>Due Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="billingTbody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <div id="financialContainer" class="hidden">
+            <!-- FINANCIAL MANAGEMENT COMPONENT -->
+            <section id="financial" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-calculator"></i> Financial Management</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Manage Machine EMI, Electric Bills, Transport Costs, and Commission</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" onclick="addFinancialRecord()">
+                    <i class="pi pi-plus"></i> Add Record
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value" id="totalFinancialAmount">₹0</div>
+                  <div class="stat-label">Total Amount</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="paidFinancialAmount">₹0</div>
+                  <div class="stat-label">Paid Amount</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="pendingFinancialAmount">₹0</div>
+                  <div class="stat-label">Pending Amount</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="overdueFinancialAmount">₹0</div>
+                  <div class="stat-label">Overdue Amount</div>
+                </div>
+              </div>
+
+              <div class="filters">
+                <div class="filter-group">
+                  <label>Type</label>
+                  <select id="financialTypeFilter" onchange="applyFinancialFilters()">
+                    <option value="">All Types</option>
+                    <option value="Machine EMI">Machine EMI</option>
+                    <option value="Electric Bill">Electric Bill</option>
+                    <option value="Transport Cost">Transport Cost</option>
+                    <option value="Commission">Commission</option>
+                    <option value="Rent">Rent</option>
+                    <option value="Insurance">Insurance</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Status</label>
+                  <select id="financialStatusFilter" onchange="applyFinancialFilters()">
+                    <option value="">All Status</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Overdue">Overdue</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Date Range (From)</label>
+                  <input type="date" id="financialDateStart" onchange="applyFinancialFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Date Range (To)</label>
+                  <input type="date" id="financialDateEnd" onchange="applyFinancialFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Search Records</label>
+                  <input type="text" id="searchFinancialRecords" placeholder="Description or amount..." oninput="applyFinancialFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Sort By</label>
+                  <select id="sortFinancialRecords" onchange="applyFinancialFilters()">
+                    <option value="date-desc">Date (Newest First)</option>
+                    <option value="date-asc">Date (Oldest First)</option>
+                    <option value="amount-desc">Amount (Highest First)</option>
+                    <option value="amount-asc">Amount (Lowest First)</option>
+                    <option value="type">Type</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Description</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Payment Method</th>
+                      <th>Reference</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="financialTbody">
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <div id="gstContainer" class="hidden">
+            <!-- GST MANAGEMENT COMPONENT -->
+            <section id="gst" class="p-4">
+              <div class="content-header">
+                <div>
+                  <h2><i class="pi pi-percentage"></i> GST Management</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Handle GST compliance, returns, and tax calculations</p>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" onclick="openGstReturnModal()">
+                    <i class="pi pi-plus"></i> File Return
+                  </button>
+                  <button class="btn btn-secondary" onclick="backToDashboard()">
+                    <i class="pi pi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value">₹4.32L</div>
+                  <div class="stat-label">Total GST Collected</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">₹1.85L</div>
+                  <div class="stat-label">GST Paid</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">₹2.47L</div>
+                  <div class="stat-label">GST Payable</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">8</div>
+                  <div class="stat-label">Returns Filed</div>
+                </div>
+              </div>
+
+              <div class="grid">
+                <div class="col-12 md:col-6">
+                  <div class="card">
+                    <h3>Monthly GST Summary</h3>
+                    <div style="margin: 1rem 0;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
+                        <div>
+                          <strong>August 2025</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
+                        </div>
+                        <span class="status-badge status-filed">Filed</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
+                        <div>
+                          <strong>July 2025</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
+                        </div>
+                        <span class="status-badge status-filed">Filed</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; padding: .75rem; background: var(--warning-500); background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                        <div>
+                          <strong>September 2025</strong>
+                          <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 Due: Sept 11</div>
+                        </div>
+                        <span class="status-badge status-draft">Draft</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6">
+                  <div class="card">
+                    <h3>GST Rate Breakdown</h3>
+                    <div style="margin: 1rem 0;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
+                        <span>CGST (9%)</span>
+                        <span style="font-weight: 600;">₹1,94,400</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
+                        <span>SGST (9%)</span>
+                        <span style="font-weight: 600;">₹1,94,400</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
+                        <span>IGST (18%)</span>
+                        <span style="font-weight: 600;">₹43,200</span>
+                      </div>
+                      <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--gray-200);">
+                      <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1rem;">
+                        <span>Total GST</span>
+                        <span style="color: var(--brand-600);">₹4,32,000</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>GSTIN</th>
+                      <th>Return</th>
+                      <th>Period</th>
+                      <th>Taxable Value</th>
+                      <th>IGST</th>
+                      <th>CGST</th>
+                      <th>SGST</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gstTbody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>© <span id="currentYear"></span> Logosic Logistics • Admin Application</p>
+      <p style="margin: .5rem 0 0 0; font-size: .8rem;">Built with modern web technologies for optimal performance</p>
+    </footer>
+  </div>
+
+  <!-- Modal & Toast Roots -->
+  <div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">Modal Title</h3>
+        <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-500);">&times;</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+      <div id="modalFooter" class="modal-footer"></div>
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- JavaScript Files -->
+  <script src="js/modal.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/stock.js"></script>
+  <script src="js/staff.js"></script>
+  <script src="js/billing.js"></script>
+  <script src="js/financial.js"></script>
+  <script src="js/gst.js"></script>
+
+</body>
+</html>

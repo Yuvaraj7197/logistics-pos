@@ -1,0 +1,102 @@
+<!-- INVENTORY COMPONENT -->
+<section id="inventory" class="hidden p-4">
+  <div class="content-header">
+    <div>
+      <h2><i class="pi pi-list"></i> Inventory Overview</h2>
+      <p style="color: var(--gray-600); margin: 0;">Complete inventory management and tracking</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary">
+        <i class="pi pi-download"></i> Export Report
+      </button>
+      <button class="btn btn-secondary" onclick="backToDashboard()">
+        <i class="pi pi-arrow-left"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">1,432</div>
+      <div class="stat-label">Total Items</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">₹45.2L</div>
+      <div class="stat-label">Inventory Value</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">28</div>
+      <div class="stat-label">Low Stock Items</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">5</div>
+      <div class="stat-label">Out of Stock</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col-12 md:col-6">
+      <div class="card">
+        <h3>Category Breakdown</h3>
+        <div style="margin: 1rem 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+            <span>Electronics</span>
+            <span>425 items</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+            <span>Furniture</span>
+            <span>287 items</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+            <span>Medical</span>
+            <span>356 items</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
+            <span>Industrial</span>
+            <span>198 items</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Others</span>
+            <span>166 items</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6">
+      <div class="card">
+        <h3>Recent Movements</h3>
+        <div style="margin: 1rem 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
+            <div>
+              <strong>Samsung Galaxy Smartphone</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">Stock Added: +25 units</div>
+            </div>
+            <span style="color: var(--success-500); font-weight: 500;">+25</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
+            <div>
+              <strong>Office Chair Premium</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">Order Fulfilled: -7 units</div>
+            </div>
+            <span style="color: var(--error-500); font-weight: 500;">-7</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
+            <div>
+              <strong>Digital Thermometer</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">Stock Added: +50 units</div>
+            </div>
+            <span style="color: var(--success-500); font-weight: 500;">+50</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>Laptop Dell Inspiron</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">Order Fulfilled: -12 units</div>
+            </div>
+            <span style="color: var(--error-500); font-weight: 500;">-12</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

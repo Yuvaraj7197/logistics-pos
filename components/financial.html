@@ -1,0 +1,104 @@
+<!-- FINANCIAL MANAGEMENT COMPONENT -->
+<section id="financial" class="hidden p-4">
+  <div class="content-header">
+    <div>
+      <h2><i class="pi pi-calculator"></i> Financial Management</h2>
+      <p style="color: var(--gray-600); margin: 0;">Manage Machine EMI, Electric Bills, Transport Costs, and Commission</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="addFinancialRecord()">
+        <i class="pi pi-plus"></i> Add Record
+      </button>
+      <button class="btn btn-secondary" onclick="backToDashboard()">
+        <i class="pi pi-arrow-left"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="totalFinancialAmount">₹0</div>
+      <div class="stat-label">Total Amount</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="paidFinancialAmount">₹0</div>
+      <div class="stat-label">Paid Amount</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="pendingFinancialAmount">₹0</div>
+      <div class="stat-label">Pending Amount</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="overdueFinancialAmount">₹0</div>
+      <div class="stat-label">Overdue Amount</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Type</label>
+      <select id="financialTypeFilter" onchange="applyFinancialFilters()">
+        <option value="">All Types</option>
+        <option value="Machine EMI">Machine EMI</option>
+        <option value="Electric Bill">Electric Bill</option>
+        <option value="Transport Cost">Transport Cost</option>
+        <option value="Commission">Commission</option>
+        <option value="Rent">Rent</option>
+        <option value="Insurance">Insurance</option>
+        <option value="Maintenance">Maintenance</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Status</label>
+      <select id="financialStatusFilter" onchange="applyFinancialFilters()">
+        <option value="">All Status</option>
+        <option value="Paid">Paid</option>
+        <option value="Pending">Pending</option>
+        <option value="Overdue">Overdue</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Date Range (From)</label>
+      <input type="date" id="financialDateStart" onchange="applyFinancialFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>Date Range (To)</label>
+      <input type="date" id="financialDateEnd" onchange="applyFinancialFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>Search Records</label>
+      <input type="text" id="searchFinancialRecords" placeholder="Description or amount..." oninput="applyFinancialFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>Sort By</label>
+      <select id="sortFinancialRecords" onchange="applyFinancialFilters()">
+        <option value="date-desc">Date (Newest First)</option>
+        <option value="date-asc">Date (Oldest First)</option>
+        <option value="amount-desc">Amount (Highest First)</option>
+        <option value="amount-asc">Amount (Lowest First)</option>
+        <option value="type">Type</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Payment Method</th>
+          <th>Reference</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="financialTbody">
+      </tbody>
+    </table>
+  </div>
+</section>

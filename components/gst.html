@@ -1,0 +1,112 @@
+<!-- GST MANAGEMENT COMPONENT -->
+<section id="gst" class="hidden p-4">
+  <div class="content-header">
+    <div>
+      <h2><i class="pi pi-percentage"></i> GST Management</h2>
+      <p style="color: var(--gray-600); margin: 0;">Handle GST compliance, returns, and tax calculations</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="openGstReturnModal()">
+        <i class="pi pi-plus"></i> File Return
+      </button>
+      <button class="btn btn-secondary" onclick="backToDashboard()">
+        <i class="pi pi-arrow-left"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">₹4.32L</div>
+      <div class="stat-label">Total GST Collected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">₹1.85L</div>
+      <div class="stat-label">GST Paid</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">₹2.47L</div>
+      <div class="stat-label">GST Payable</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">8</div>
+      <div class="stat-label">Returns Filed</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col-12 md:col-6">
+      <div class="card">
+        <h3>Monthly GST Summary</h3>
+        <div style="margin: 1rem 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
+            <div>
+              <strong>August 2025</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
+            </div>
+            <span class="status-badge status-filed">Filed</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
+            <div>
+              <strong>July 2025</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
+            </div>
+            <span class="status-badge status-filed">Filed</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: .75rem; background: var(--warning-500); background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+            <div>
+              <strong>September 2025</strong>
+              <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 Due: Sept 11</div>
+            </div>
+            <span class="status-badge status-draft">Draft</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6">
+      <div class="card">
+        <h3>GST Rate Breakdown</h3>
+        <div style="margin: 1rem 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
+            <span>CGST (9%)</span>
+            <span style="font-weight: 600;">₹1,94,400</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
+            <span>SGST (9%)</span>
+            <span style="font-weight: 600;">₹1,94,400</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
+            <span>IGST (18%)</span>
+            <span style="font-weight: 600;">₹43,200</span>
+          </div>
+          <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--gray-200);">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1rem;">
+            <span>Total GST</span>
+            <span style="color: var(--brand-600);">₹4,32,000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>GSTIN</th>
+          <th>Return</th>
+          <th>Period</th>
+          <th>Taxable Value</th>
+          <th>IGST</th>
+          <th>CGST</th>
+          <th>SGST</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="gstTbody"></tbody>
+    </table>
+  </div>
+</section>

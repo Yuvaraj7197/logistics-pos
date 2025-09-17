@@ -1,0 +1,134 @@
+<!-- DASHBOARD GRID COMPONENT -->
+<section id="dashboardGrid" class="p-4">
+  <div class="content-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p style="color: var(--gray-600); margin: 0;">Manage your logistics operations</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="totalOrdersCount">247</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1,432</div>
+      <div class="stat-label">Items in Stock</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">28</div>
+      <div class="stat-label">Active Staff</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">₹2.4M</div>
+      <div class="stat-label">Monthly Revenue</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-shopping-cart"></i></div>
+          <h3>Order Management</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Track and manage customer orders</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('orders')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-box"></i></div>
+          <h3>Stock Management</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Monitor stock levels and inventory</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('stock')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-list"></i></div>
+          <h3>Inventory</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Complete inventory overview</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('inventory')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-cog"></i></div>
+          <h3>Test Modal</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Test modal functionality</p>
+        </div>
+        <button class="btn btn-primary" onclick="testModalFix()" style="background: #28a745;">
+          <i class="pi pi-check"></i> Test
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-users"></i></div>
+          <h3>Staff Management</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Manage team members and roles</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('staff')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-credit-card"></i></div>
+          <h3>Billing & Payments</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Handle invoices and payments</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('billing')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-calculator"></i></div>
+          <h3>Financial Management</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">Machine EMI, Electric Bills, Transport & Commission</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('financial')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+    
+    <div class="col-12 md:col-6 lg:col-4">
+      <div class="card dashboard-card">
+        <div>
+          <div class="icon"><i class="pi pi-percentage"></i></div>
+          <h3>GST Management</h3>
+          <p style="color: var(--gray-600); font-size: .875rem;">GST compliance and returns</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('gst')">
+          <i class="pi pi-arrow-right"></i> Open
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
