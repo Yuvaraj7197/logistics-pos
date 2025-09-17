@@ -1,14 +1,8 @@
 // GST Management JavaScript
 const GST_STORAGE_KEY = 'logosic_gst_v1';
 
-// Sample GST data
-const GST_RECORDS = [
-  { id: 'GST-001', gstin: '29ABCDE1234F1Z5', returnType: 'GSTR-1', period: '2025-08', taxableValue: 2400000, igst: 432000, cgst: 0, sgst: 0, total: 432000, status: 'Filed', filedDate: '2025-09-11' },
-  { id: 'GST-002', gstin: '29ABCDE1234F1Z5', returnType: 'GSTR-3B', period: '2025-08', taxableValue: 2400000, igst: 432000, cgst: 0, sgst: 0, total: 432000, status: 'Filed', filedDate: '2025-09-20' },
-  { id: 'GST-003', gstin: '29ABCDE1234F1Z5', returnType: 'GSTR-1', period: '2025-07', taxableValue: 2200000, igst: 396000, cgst: 0, sgst: 0, total: 396000, status: 'Filed', filedDate: '2025-08-11' },
-  { id: 'GST-004', gstin: '29ABCDE1234F1Z5', returnType: 'GSTR-3B', period: '2025-07', taxableValue: 2200000, igst: 396000, cgst: 0, sgst: 0, total: 396000, status: 'Filed', filedDate: '2025-08-20' },
-  { id: 'GST-005', gstin: '29ABCDE1234F1Z5', returnType: 'GSTR-1', period: '2025-09', taxableValue: 2600000, igst: 468000, cgst: 0, sgst: 0, total: 468000, status: 'Draft', filedDate: '' }
-];
+// Sample GST data - cleared
+const GST_RECORDS = [];
 
 const GST_RETURN_TYPES = ['GSTR-1', 'GSTR-3B', 'GSTR-2A', 'GSTR-2B', 'GSTR-9'];
 const GST_STATUS = ['Draft', 'Filed', 'Approved', 'Rejected'];
@@ -96,17 +90,15 @@ function renderGstReturns() {
       <td>${formatINR(ret.total)}</td>
       <td><span class="${gstBadgeClass(ret.status)}">${ret.status}</span></td>
       <td>
-        <div class="btn-group">
-          <button class="btn btn-primary btn-sm" onclick="viewGstReturn('${ret.id}')">
-            <i class="pi pi-eye"></i> View
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="editGstReturn('${ret.id}')">
-            <i class="pi pi-pencil"></i> Edit
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="printGstReturn('${ret.id}')">
-            <i class="pi pi-print"></i> Print
-          </button>
-        </div>
+        ${createTableActionsDropdown(ret.id, [
+          { label: 'View Return', icon: 'pi pi-eye', onclick: `viewGstReturn('${ret.id}')` },
+          { label: 'Edit Return', icon: 'pi pi-pencil', onclick: `editGstReturn('${ret.id}')` },
+          { label: 'File Return', icon: 'pi pi-upload', onclick: `fileGstReturn('${ret.id}')`, class: 'success' },
+          { label: 'Print Return', icon: 'pi pi-print', onclick: `printGstReturn('${ret.id}')` },
+          { label: 'Download PDF', icon: 'pi pi-download', onclick: `downloadGstPDF('${ret.id}')` },
+          { label: 'Export Data', icon: 'pi pi-file-excel', onclick: `exportGstData('${ret.id}')` },
+          { label: 'Delete', icon: 'pi pi-trash', onclick: `deleteGstReturn('${ret.id}')`, class: 'danger' }
+        ])}
       </td>
     </tr>
   `).join('');
@@ -115,51 +107,66 @@ function renderGstReturns() {
 // GST return management functions
 function openGstReturnModal() {
   const body = `
-    <div class="form-group">
-      <label>GSTIN *</label>
-      <input id="gstGstin" type="text" placeholder="Enter 15-digit GSTIN" maxlength="15" required />
+    <div class="form-section">
+      <h4>GST Return Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>GSTIN *</label>
+          <input id="gstGstin" type="text" placeholder="Enter 15-digit GSTIN" maxlength="15" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Return Type *</label>
+          <select id="gstReturnType" required>
+            <option value="">Select return type...</option>
+            ${GST_RETURN_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Period (YYYY-MM) *</label>
+          <input id="gstPeriod" type="month" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Status *</label>
+          <select id="gstStatus" required>
+            <option value="">Select status...</option>
+            ${GST_STATUS.map(status => `<option value="${status}">${status}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Taxable Value (INR) *</label>
+        <input id="gstTaxableValue" type="number" min="0" step="0.01" placeholder="Enter taxable value" required />
+      </div>
     </div>
-    <div class="form-group">
-      <label>Return Type *</label>
-      <select id="gstReturnType" required>
-        <option value="">Select return type...</option>
-        ${GST_RETURN_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Period (YYYY-MM) *</label>
-      <input id="gstPeriod" type="month" required />
-    </div>
-    <div class="form-group">
-      <label>Taxable Value (INR) *</label>
-      <input id="gstTaxableValue" type="number" min="0" step="0.01" placeholder="Enter taxable value" required />
-    </div>
-    <div class="form-group">
-      <label>IGST (INR)</label>
-      <input id="gstIgst" type="number" min="0" step="0.01" placeholder="Enter IGST amount" />
-    </div>
-    <div class="form-group">
-      <label>CGST (INR)</label>
-      <input id="gstCgst" type="number" min="0" step="0.01" placeholder="Enter CGST amount" />
-    </div>
-    <div class="form-group">
-      <label>SGST (INR)</label>
-      <input id="gstSgst" type="number" min="0" step="0.01" placeholder="Enter SGST amount" />
-    </div>
-    <div class="form-group">
-      <label>Status *</label>
-      <select id="gstStatus" required>
-        <option value="">Select status...</option>
-        ${GST_STATUS.map(status => `<option value="${status}">${status}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Filed Date</label>
-      <input id="gstFiledDate" type="date" />
-    </div>
-    <div class="form-group">
-      <label>Notes</label>
-      <textarea id="gstNotes" placeholder="Enter any notes" rows="3"></textarea>
+
+    <div class="form-section">
+      <h4>Tax Details</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>IGST (INR)</label>
+          <input id="gstIgst" type="number" min="0" step="0.01" placeholder="Enter IGST amount" />
+        </div>
+        <div class="form-group col-6">
+          <label>CGST (INR)</label>
+          <input id="gstCgst" type="number" min="0" step="0.01" placeholder="Enter CGST amount" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>SGST (INR)</label>
+          <input id="gstSgst" type="number" min="0" step="0.01" placeholder="Enter SGST amount" />
+        </div>
+        <div class="form-group col-6">
+          <label>Filed Date</label>
+          <input id="gstFiledDate" type="date" />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Notes</label>
+        <textarea id="gstNotes" placeholder="Enter any notes" rows="3"></textarea>
+      </div>
     </div>
   `;
   

@@ -1,14 +1,8 @@
 // Financial Management JavaScript
 const FINANCIAL_STORAGE_KEY = 'logosic_financial_v1';
 
-// Sample financial data
-const FINANCIAL_RECORDS = [
-  { id: 'FIN-001', type: 'Machine EMI', description: 'CNC Machine EMI - September 2025', amount: 45000, status: 'Paid', paymentMethod: 'Bank Transfer', reference: 'EMI-SEP-001', date: '2025-09-01', dueDate: '2025-09-05', notes: 'Monthly EMI for CNC Machine' },
-  { id: 'FIN-002', type: 'Electric Bill', description: 'Factory Electricity Bill - August 2025', amount: 12500, status: 'Paid', paymentMethod: 'UPI', reference: 'EB-AUG-001', date: '2025-08-28', dueDate: '2025-09-15', notes: 'Monthly electricity consumption' },
-  { id: 'FIN-003', type: 'Transport Cost', description: 'Delivery Vehicle Maintenance', amount: 8500, status: 'Paid', paymentMethod: 'Cash', reference: 'TRANS-001', date: '2025-09-03', dueDate: '2025-09-03', notes: 'Vehicle service and maintenance' },
-  { id: 'FIN-004', type: 'Commission', description: 'Sales Commission - August 2025', amount: 25000, status: 'Paid', paymentMethod: 'Bank Transfer', reference: 'COMM-AUG-001', date: '2025-09-01', dueDate: '2025-09-01', notes: 'Monthly sales commission payout' },
-  { id: 'FIN-005', type: 'Machine EMI', description: 'Laser Cutting Machine EMI - September 2025', amount: 32000, status: 'Pending', paymentMethod: 'Bank Transfer', reference: 'EMI-SEP-002', date: '2025-09-05', dueDate: '2025-09-10', notes: 'Monthly EMI for Laser Cutting Machine' }
-];
+// Sample financial data - cleared
+const FINANCIAL_RECORDS = [];
 
 const FINANCIAL_TYPES = ['Machine EMI', 'Electric Bill', 'Transport Cost', 'Commission', 'Rent', 'Insurance', 'Maintenance', 'Other'];
 // PAYMENT_METHODS is defined in billing.js
@@ -133,17 +127,15 @@ function renderFinancialRecords() {
       <td>${record.paymentMethod}</td>
       <td>${record.reference || '-'}</td>
       <td>
-        <div class="btn-group">
-          <button class="btn btn-primary btn-sm" onclick="viewFinancialRecord('${record.id}')">
-            <i class="pi pi-eye"></i> View
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="editFinancialRecord('${record.id}')">
-            <i class="pi pi-pencil"></i> Edit
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="deleteFinancialRecord('${record.id}')">
-            <i class="pi pi-trash"></i> Delete
-          </button>
-        </div>
+        ${createTableActionsDropdown(record.id, [
+          { label: 'View Details', icon: 'pi pi-eye', onclick: `viewFinancialRecord('${record.id}')` },
+          { label: 'Edit Record', icon: 'pi pi-pencil', onclick: `editFinancialRecord('${record.id}')` },
+          { label: 'Mark Paid', icon: 'pi pi-check', onclick: `markFinancialPaid('${record.id}')`, class: 'success' },
+          { label: 'Print Receipt', icon: 'pi pi-print', onclick: `printFinancialReceipt('${record.id}')` },
+          { label: 'Export', icon: 'pi pi-download', onclick: `exportFinancialRecord('${record.id}')` },
+          { label: 'Duplicate', icon: 'pi pi-copy', onclick: `duplicateFinancialRecord('${record.id}')` },
+          { label: 'Delete', icon: 'pi pi-trash', onclick: `deleteFinancialRecord('${record.id}')`, class: 'danger' }
+        ])}
       </td>
     </tr>
   `).join('');
@@ -173,50 +165,59 @@ function updateFinancialStats() {
 // Financial record management functions
 function addFinancialRecord() {
   const body = `
-    <div class="form-group">
-      <label>Type *</label>
-      <select id="financialType" required>
-        <option value="">Select type...</option>
-        ${FINANCIAL_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Description *</label>
-      <input id="financialDescription" type="text" placeholder="Enter description" required />
-    </div>
-    <div class="form-group">
-      <label>Amount (INR) *</label>
-      <input id="financialAmount" type="number" min="0" step="0.01" placeholder="Enter amount" required />
-    </div>
-    <div class="form-group">
-      <label>Status *</label>
-      <select id="financialStatus" required>
-        <option value="">Select status...</option>
-        ${FINANCIAL_STATUS.map(status => `<option value="${status}">${status}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Payment Method *</label>
-      <select id="financialPaymentMethod" required>
-        <option value="">Select method...</option>
-        ${window.PAYMENT_METHODS ? window.PAYMENT_METHODS.map(method => `<option value="${method}">${method}</option>`).join('') : ''}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Reference Number</label>
-      <input id="financialReference" type="text" placeholder="Enter reference number" />
-    </div>
-    <div class="form-group">
-      <label>Date *</label>
-      <input id="financialDate" type="date" required />
-    </div>
-    <div class="form-group">
-      <label>Due Date</label>
-      <input id="financialDueDate" type="date" />
-    </div>
-    <div class="form-group">
-      <label>Notes</label>
-      <textarea id="financialNotes" placeholder="Enter notes" rows="3"></textarea>
+    <div class="form-section">
+      <h4>Financial Record Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Type *</label>
+          <select id="financialType" required>
+            <option value="">Select type...</option>
+            ${FINANCIAL_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Amount (INR) *</label>
+          <input id="financialAmount" type="number" min="0" step="0.01" placeholder="Enter amount" required />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Description *</label>
+        <input id="financialDescription" type="text" placeholder="Enter description" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Status *</label>
+          <select id="financialStatus" required>
+            <option value="">Select status...</option>
+            ${FINANCIAL_STATUS.map(status => `<option value="${status}">${status}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Payment Method *</label>
+          <select id="financialPaymentMethod" required>
+            <option value="">Select method...</option>
+            ${window.PAYMENT_METHODS ? window.PAYMENT_METHODS.map(method => `<option value="${method}">${method}</option>`).join('') : ''}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Date *</label>
+          <input id="financialDate" type="date" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Due Date</label>
+          <input id="financialDueDate" type="date" />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Reference Number</label>
+        <input id="financialReference" type="text" placeholder="Enter reference number" />
+      </div>
+      <div class="form-group col-12">
+        <label>Notes</label>
+        <textarea id="financialNotes" placeholder="Enter notes" rows="3"></textarea>
+      </div>
     </div>
   `;
   
@@ -320,50 +321,59 @@ function editFinancialRecord(recordId) {
   if (!record) return;
   
   const body = `
-    <div class="form-group">
-      <label>Type *</label>
-      <select id="editFinancialType" required>
-        <option value="">Select type...</option>
-        ${FINANCIAL_TYPES.map(type => `<option value="${type}" ${record.type === type ? 'selected' : ''}>${type}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Description *</label>
-      <input id="editFinancialDescription" type="text" value="${record.description}" required />
-    </div>
-    <div class="form-group">
-      <label>Amount (INR) *</label>
-      <input id="editFinancialAmount" type="number" min="0" step="0.01" value="${record.amount}" required />
-    </div>
-    <div class="form-group">
-      <label>Status *</label>
-      <select id="editFinancialStatus" required>
-        <option value="">Select status...</option>
-        ${FINANCIAL_STATUS.map(status => `<option value="${status}" ${record.status === status ? 'selected' : ''}>${status}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Payment Method *</label>
-      <select id="editFinancialPaymentMethod" required>
-        <option value="">Select method...</option>
-        ${window.PAYMENT_METHODS ? window.PAYMENT_METHODS.map(method => `<option value="${method}" ${record.paymentMethod === method ? 'selected' : ''}>${method}</option>`).join('') : ''}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Reference Number</label>
-      <input id="editFinancialReference" type="text" value="${record.reference}" />
-    </div>
-    <div class="form-group">
-      <label>Date *</label>
-      <input id="editFinancialDate" type="date" value="${record.date}" required />
-    </div>
-    <div class="form-group">
-      <label>Due Date</label>
-      <input id="editFinancialDueDate" type="date" value="${record.dueDate}" />
-    </div>
-    <div class="form-group">
-      <label>Notes</label>
-      <textarea id="editFinancialNotes" rows="3">${record.notes}</textarea>
+    <div class="form-section">
+      <h4>Financial Record Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Type *</label>
+          <select id="editFinancialType" required>
+            <option value="">Select type...</option>
+            ${FINANCIAL_TYPES.map(type => `<option value="${type}" ${record.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Amount (INR) *</label>
+          <input id="editFinancialAmount" type="number" min="0" step="0.01" value="${record.amount}" required />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Description *</label>
+        <input id="editFinancialDescription" type="text" value="${record.description}" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Status *</label>
+          <select id="editFinancialStatus" required>
+            <option value="">Select status...</option>
+            ${FINANCIAL_STATUS.map(status => `<option value="${status}" ${record.status === status ? 'selected' : ''}>${status}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Payment Method *</label>
+          <select id="editFinancialPaymentMethod" required>
+            <option value="">Select method...</option>
+            ${window.PAYMENT_METHODS ? window.PAYMENT_METHODS.map(method => `<option value="${method}" ${record.paymentMethod === method ? 'selected' : ''}>${method}</option>`).join('') : ''}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Date *</label>
+          <input id="editFinancialDate" type="date" value="${record.date}" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Due Date</label>
+          <input id="editFinancialDueDate" type="date" value="${record.dueDate}" />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Reference Number</label>
+        <input id="editFinancialReference" type="text" value="${record.reference}" />
+      </div>
+      <div class="form-group col-12">
+        <label>Notes</label>
+        <textarea id="editFinancialNotes" rows="3">${record.notes}</textarea>
+      </div>
     </div>
   `;
   

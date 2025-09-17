@@ -1,38 +1,21 @@
 // Stock Management JavaScript
 const STOCK_STORAGE_KEY = 'logosic_stock_v1';
-
 const STOCK_CATEGORIES = ['Electronics', 'Furniture', 'Medical', 'Industrial', 'Automotive', 'Textiles', 'Food & Beverage', 'Other'];
 const STOCK_STATUS = ['In Stock', 'Low Stock', 'Out of Stock'];
 
-// Sample stock data
-const STOCK_ITEMS = [
-  { id: 'STK-001', name: 'Samsung Galaxy Smartphone', category: 'Electronics', currentStock: 25, minRequired: 10, unitPrice: 25000, supplier: 'Samsung India', lastUpdated: '2025-09-01', description: 'Latest Samsung Galaxy model' },
-  { id: 'STK-002', name: 'Office Chair Premium', category: 'Furniture', currentStock: 15, minRequired: 5, unitPrice: 8500, supplier: 'Furniture Co.', lastUpdated: '2025-08-28', description: 'Ergonomic office chair' },
-  { id: 'STK-003', name: 'Digital Thermometer', category: 'Medical', currentStock: 50, minRequired: 20, unitPrice: 1200, supplier: 'MediTech', lastUpdated: '2025-09-03', description: 'Digital medical thermometer' },
-  { id: 'STK-004', name: 'Laptop Dell Inspiron', category: 'Electronics', currentStock: 8, minRequired: 15, unitPrice: 45000, supplier: 'Dell India', lastUpdated: '2025-08-30', description: 'Dell Inspiron laptop' },
-  { id: 'STK-005', name: 'Industrial Drill Machine', category: 'Industrial', currentStock: 3, minRequired: 5, unitPrice: 15000, supplier: 'Industrial Tools', lastUpdated: '2025-09-02', description: 'Heavy-duty drill machine' }
-];
+// Initialize storage manager
+const stockStorage = createStorageManager(STOCK_STORAGE_KEY, []);
 
-// Storage functions
+// Storage functions (using common utilities)
 function loadStockItems() {
-  try {
-    const stored = localStorage.getItem(STOCK_STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch (e) {
-    console.error('Error loading stock items:', e);
-  }
-  return STOCK_ITEMS;
+  return stockStorage.load();
 }
 
 function saveStockItems(items) {
-  try {
-    localStorage.setItem(STOCK_STORAGE_KEY, JSON.stringify(items));
-  } catch (e) {
-    console.error('Error saving stock items:', e);
-  }
+  return stockStorage.save(items);
 }
 
-// Utility functions
+// Utility functions (using common utilities)
 function getStockStatus(currentStock, minRequired) {
   if (currentStock === 0) return 'Out of Stock';
   if (currentStock <= minRequired) return 'Low Stock';
@@ -40,22 +23,11 @@ function getStockStatus(currentStock, minRequired) {
 }
 
 function stockBadgeClass(status) {
-  const s = (status || '').toLowerCase();
-  if (s === 'in stock') return 'status-badge status-active';
-  if (s === 'low stock') return 'status-badge status-pending';
-  if (s === 'out of stock') return 'status-badge status-inactive';
-  return 'status-badge status-pending';
+  return getStatusBadgeClass(status, 'stock');
 }
 
 function generateStockId() {
-  const items = loadStockItems();
-  let max = 0;
-  items.forEach(item => {
-    const n = parseInt((item.id || '').replace(/[^0-9]/g, ''), 10);
-    if (!isNaN(n)) max = Math.max(max, n);
-  });
-  const next = String(max + 1).padStart(3, '0');
-  return `STK-${next}`;
+  return generateId('STK', loadStockItems());
 }
 
 // Main render function
@@ -150,17 +122,15 @@ function renderStock() {
         <td>${item.supplier}</td>
         <td>${formatDate(item.lastUpdated)}</td>
         <td>
-          <div class="btn-group">
-            <button class="btn btn-primary btn-sm" onclick="viewStockItem('${item.id}')">
-              <i class="pi pi-eye"></i> View
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="editStockItem('${item.id}')">
-              <i class="pi pi-pencil"></i> Edit
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="deleteStockItem('${item.id}')">
-              <i class="pi pi-trash"></i> Delete
-            </button>
-          </div>
+          ${createTableActionsDropdown(item.id, [
+            { label: 'View Details', icon: 'pi pi-eye', onclick: `viewStockItem('${item.id}')` },
+            { label: 'Edit Item', icon: 'pi pi-pencil', onclick: `editStockItem('${item.id}')` },
+            { label: 'Add Stock', icon: 'pi pi-plus', onclick: `addStockQuantity('${item.id}')` },
+            { label: 'Remove Stock', icon: 'pi pi-minus', onclick: `removeStockQuantity('${item.id}')` },
+            { label: 'Print Label', icon: 'pi pi-print', onclick: `printStockLabel('${item.id}')` },
+            { label: 'Export', icon: 'pi pi-download', onclick: `exportStockItem('${item.id}')` },
+            { label: 'Delete', icon: 'pi pi-trash', onclick: `deleteStockItem('${item.id}')`, class: 'danger' }
+          ])}
         </td>
       </tr>
     `;
@@ -191,36 +161,45 @@ function updateStockStats() {
 // Stock item management functions
 function addStockItem() {
   const body = `
-    <div class="form-group">
-      <label>Product Name *</label>
-      <input id="stockName" type="text" placeholder="Enter product name" required />
-    </div>
-    <div class="form-group">
-      <label>Category *</label>
-      <select id="stockCategory" required>
-        <option value="">Select category...</option>
-        ${STOCK_CATEGORIES.map(category => `<option value="${category}">${category}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Current Stock *</label>
-      <input id="stockQuantity" type="number" min="0" placeholder="Enter current stock" required />
-    </div>
-    <div class="form-group">
-      <label>Minimum Required *</label>
-      <input id="stockMinRequired" type="number" min="0" placeholder="Enter minimum required" required />
-    </div>
-    <div class="form-group">
-      <label>Unit Price (INR) *</label>
-      <input id="stockUnitPrice" type="number" min="0" step="0.01" placeholder="Enter unit price" required />
-    </div>
-    <div class="form-group">
-      <label>Supplier *</label>
-      <input id="stockSupplier" type="text" placeholder="Enter supplier name" required />
-    </div>
-    <div class="form-group">
-      <label>Description</label>
-      <textarea id="stockDescription" placeholder="Product description or notes..." rows="3"></textarea>
+    <div class="form-section">
+      <h4>Product Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Product Name *</label>
+          <input id="stockName" type="text" placeholder="Enter product name" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Category *</label>
+          <select id="stockCategory" required>
+            <option value="">Select category...</option>
+            ${STOCK_CATEGORIES.map(category => `<option value="${category}">${category}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Current Stock *</label>
+          <input id="stockQuantity" type="number" min="0" placeholder="Enter current stock" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Minimum Required *</label>
+          <input id="stockMinRequired" type="number" min="0" placeholder="Enter minimum required" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Unit Price (INR) *</label>
+          <input id="stockUnitPrice" type="number" min="0" step="0.01" placeholder="Enter unit price" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Supplier *</label>
+          <input id="stockSupplier" type="text" placeholder="Enter supplier name" required />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Description</label>
+        <textarea id="stockDescription" placeholder="Product description or notes..." rows="3"></textarea>
+      </div>
     </div>
   `;
   
@@ -318,36 +297,45 @@ function editStockItem(itemId) {
   if (!item) return;
   
   const body = `
-    <div class="form-group">
-      <label>Product Name *</label>
-      <input id="editStockName" type="text" value="${item.name}" required />
-    </div>
-    <div class="form-group">
-      <label>Category *</label>
-      <select id="editStockCategory" required>
-        <option value="">Select category...</option>
-        ${STOCK_CATEGORIES.map(category => `<option value="${category}" ${item.category === category ? 'selected' : ''}>${category}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Current Stock *</label>
-      <input id="editStockQuantity" type="number" min="0" value="${item.currentStock}" required />
-    </div>
-    <div class="form-group">
-      <label>Minimum Required *</label>
-      <input id="editStockMinRequired" type="number" min="0" value="${item.minRequired}" required />
-    </div>
-    <div class="form-group">
-      <label>Unit Price (INR) *</label>
-      <input id="editStockUnitPrice" type="number" min="0" step="0.01" value="${item.unitPrice}" required />
-    </div>
-    <div class="form-group">
-      <label>Supplier *</label>
-      <input id="editStockSupplier" type="text" value="${item.supplier}" required />
-    </div>
-    <div class="form-group">
-      <label>Description</label>
-      <textarea id="editStockDescription" placeholder="Product description or notes..." rows="3">${item.description || ''}</textarea>
+    <div class="form-section">
+      <h4>Product Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Product Name *</label>
+          <input id="editStockName" type="text" value="${item.name}" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Category *</label>
+          <select id="editStockCategory" required>
+            <option value="">Select category...</option>
+            ${STOCK_CATEGORIES.map(category => `<option value="${category}" ${item.category === category ? 'selected' : ''}>${category}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Current Stock *</label>
+          <input id="editStockQuantity" type="number" min="0" value="${item.currentStock}" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Minimum Required *</label>
+          <input id="editStockMinRequired" type="number" min="0" value="${item.minRequired}" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Unit Price (INR) *</label>
+          <input id="editStockUnitPrice" type="number" min="0" step="0.01" value="${item.unitPrice}" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Supplier *</label>
+          <input id="editStockSupplier" type="text" value="${item.supplier}" required />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Description</label>
+        <textarea id="editStockDescription" placeholder="Product description or notes..." rows="3">${item.description || ''}</textarea>
+      </div>
     </div>
   `;
   
@@ -405,6 +393,103 @@ function deleteStockItem(itemId) {
 }
 
 // Filter functions
+// Additional stock actions for dropdown
+function addStockQuantity(itemId) {
+  const items = loadStockItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+  
+  const quantity = prompt(`Add stock quantity for ${item.name}:`, '1');
+  if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+    const qty = parseInt(quantity);
+    item.currentStock += qty;
+    item.lastUpdated = new Date().toISOString().slice(0, 10);
+    
+    saveStockItems(items);
+    renderStock();
+    showToast(`Added ${qty} units to ${item.name}`, 'success');
+  }
+}
+
+function removeStockQuantity(itemId) {
+  const items = loadStockItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+  
+  const quantity = prompt(`Remove stock quantity for ${item.name} (Current: ${item.currentStock}):`, '1');
+  if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+    const qty = parseInt(quantity);
+    if (qty <= item.currentStock) {
+      item.currentStock -= qty;
+      item.lastUpdated = new Date().toISOString().slice(0, 10);
+      
+      saveStockItems(items);
+      renderStock();
+      showToast(`Removed ${qty} units from ${item.name}`, 'success');
+    } else {
+      showToast('Cannot remove more than current stock', 'error');
+    }
+  }
+}
+
+function printStockLabel(itemId) {
+  const items = loadStockItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+  
+  const printContent = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #000;">
+      <h2>Stock Label</h2>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Item Code:</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${item.id}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Name:</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${item.name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Category:</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${item.category}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Current Stock:</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${item.currentStock}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Unit Price:</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${formatINR(item.unitPrice)}</td>
+        </tr>
+      </table>
+    </div>
+  `;
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  printWindow.print();
+}
+
+function exportStockItem(itemId) {
+  const items = loadStockItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+  
+  const csvContent = `Item Code,Name,Category,Current Stock,Min Required,Unit Price,Total Value,Supplier,Last Updated
+${item.id},${item.name},${item.category},${item.currentStock},${item.minRequired},${item.unitPrice},${item.currentStock * item.unitPrice},${item.supplier},${item.lastUpdated}`;
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `stock-${item.id}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  
+  showToast('Stock item exported successfully', 'success');
+}
+
 function applyStockFilters() {
   renderStock();
 }

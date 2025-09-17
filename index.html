@@ -55,6 +55,10 @@
       </div>
       <div style="display: flex; align-items: center; gap: 1rem;">
         <span style="color: var(--gray-600); font-size: .875rem;">Welcome, Admin</span>
+        <button class="btn btn-danger btn-sm" onclick="clearStorageAndRefresh()" title="Clear all data">
+          <i class="pi pi-trash"></i> 
+          Clear Data
+        </button>
         <button class="btn btn-secondary btn-sm" onclick="logout()">
           <i class="pi pi-sign-out"></i> 
           Logout
@@ -105,19 +109,19 @@
 
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-value" id="totalOrdersCount">247</div>
+                  <div class="stat-value" id="totalOrdersCount">0</div>
                   <div class="stat-label">Total Orders</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">1,432</div>
+                  <div class="stat-value" id="totalStockItems">0</div>
                   <div class="stat-label">Items in Stock</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">28</div>
+                  <div class="stat-value" id="totalStaffCount">0</div>
                   <div class="stat-label">Active Staff</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">₹2.4M</div>
+                  <div class="stat-value" id="monthlyRevenue">₹0</div>
                   <div class="stat-label">Monthly Revenue</div>
                 </div>
               </div>
@@ -228,6 +232,12 @@
                 <div class="actions">
                   <button class="btn btn-primary" onclick="receiveOrder()">
                     <i class="pi pi-plus"></i> New Order
+                  </button>
+                  <button class="btn btn-success" onclick="receiveDCOrder()">
+                    <i class="pi pi-check-circle"></i> Received DC Order
+                  </button>
+                  <button class="btn btn-warning" onclick="clearAllOrders()" title="Clear all order data">
+                    <i class="pi pi-trash"></i> Clear Orders
                   </button>
                   <button class="btn btn-secondary" onclick="backToDashboard()">
                     <i class="pi pi-arrow-left"></i> Back
@@ -432,19 +442,19 @@
 
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-value">1,432</div>
+                  <div class="stat-value" id="inventoryTotalItems">0</div>
                   <div class="stat-label">Total Items</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">₹45.2L</div>
+                  <div class="stat-value" id="inventoryValue">₹0</div>
                   <div class="stat-label">Inventory Value</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">28</div>
+                  <div class="stat-value" id="inventoryLowStock">0</div>
                   <div class="stat-label">Low Stock Items</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">5</div>
+                  <div class="stat-value" id="inventoryOutOfStock">0</div>
                   <div class="stat-label">Out of Stock</div>
                 </div>
               </div>
@@ -454,25 +464,9 @@
                   <div class="card">
                     <h3>Category Breakdown</h3>
                     <div style="margin: 1rem 0;">
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
-                        <span>Electronics</span>
-                        <span>425 items</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
-                        <span>Furniture</span>
-                        <span>287 items</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
-                        <span>Medical</span>
-                        <span>356 items</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;">
-                        <span>Industrial</span>
-                        <span>198 items</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Others</span>
-                        <span>166 items</span>
+                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+                        <i class="pi pi-chart-pie" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        No data available
                       </div>
                     </div>
                   </div>
@@ -482,33 +476,9 @@
                   <div class="card">
                     <h3>Recent Movements</h3>
                     <div style="margin: 1rem 0;">
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
-                        <div>
-                          <strong>Samsung Galaxy Smartphone</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">Stock Added: +25 units</div>
-                        </div>
-                        <span style="color: var(--success-500); font-weight: 500;">+25</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
-                        <div>
-                          <strong>Office Chair Premium</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">Order Fulfilled: -7 units</div>
-                        </div>
-                        <span style="color: var(--error-500); font-weight: 500;">-7</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-100);">
-                        <div>
-                          <strong>Digital Thermometer</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">Stock Added: +50 units</div>
-                        </div>
-                        <span style="color: var(--success-500); font-weight: 500;">+50</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                          <strong>Laptop Dell Inspiron</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">Order Fulfilled: -12 units</div>
-                        </div>
-                        <span style="color: var(--error-500); font-weight: 500;">-12</span>
+                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+                        <i class="pi pi-history" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        No recent movements
                       </div>
                     </div>
                   </div>
@@ -629,6 +599,9 @@
                   <button class="btn btn-primary" onclick="openCreateInvoiceModal()">
                     <i class="pi pi-plus"></i> Create Invoice
                   </button>
+                  <button class="btn btn-success" onclick="openCreateQuotationModal()">
+                    <i class="pi pi-file-edit"></i> Create Quotation
+                  </button>
                   <button class="btn btn-secondary" onclick="backToDashboard()">
                     <i class="pi pi-arrow-left"></i> Back
                   </button>
@@ -637,19 +610,19 @@
 
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-value">₹2.4M</div>
+                  <div class="stat-value" id="billingTotalRevenue">₹0</div>
                   <div class="stat-label">Total Revenue</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">₹45,780</div>
+                  <div class="stat-value" id="billingPendingPayments">₹0</div>
                   <div class="stat-label">Pending Payments</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">156</div>
+                  <div class="stat-value" id="billingInvoicesGenerated">0</div>
                   <div class="stat-label">Invoices Generated</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">12</div>
+                  <div class="stat-value" id="billingOverduePayments">0</div>
                   <div class="stat-label">Overdue Payments</div>
                 </div>
               </div>
@@ -819,19 +792,19 @@
 
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-value">₹4.32L</div>
+                  <div class="stat-value" id="gstTotalCollected">₹0</div>
                   <div class="stat-label">Total GST Collected</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">₹1.85L</div>
+                  <div class="stat-value" id="gstPaid">₹0</div>
                   <div class="stat-label">GST Paid</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">₹2.47L</div>
+                  <div class="stat-value" id="gstPayable">₹0</div>
                   <div class="stat-label">GST Payable</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">8</div>
+                  <div class="stat-value" id="gstReturnsFiled">0</div>
                   <div class="stat-label">Returns Filed</div>
                 </div>
               </div>
@@ -841,26 +814,9 @@
                   <div class="card">
                     <h3>Monthly GST Summary</h3>
                     <div style="margin: 1rem 0;">
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
-                        <div>
-                          <strong>August 2025</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
-                        </div>
-                        <span class="status-badge status-filed">Filed</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
-                        <div>
-                          <strong>July 2025</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
-                        </div>
-                        <span class="status-badge status-filed">Filed</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; padding: .75rem; background: var(--warning-500); background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
-                        <div>
-                          <strong>September 2025</strong>
-                          <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 Due: Sept 11</div>
-                        </div>
-                        <span class="status-badge status-draft">Draft</span>
+                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+                        <i class="pi pi-calendar" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        No GST returns filed yet
                       </div>
                     </div>
                   </div>
@@ -870,22 +826,9 @@
                   <div class="card">
                     <h3>GST Rate Breakdown</h3>
                     <div style="margin: 1rem 0;">
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
-                        <span>CGST (9%)</span>
-                        <span style="font-weight: 600;">₹1,94,400</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
-                        <span>SGST (9%)</span>
-                        <span style="font-weight: 600;">₹1,94,400</span>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
-                        <span>IGST (18%)</span>
-                        <span style="font-weight: 600;">₹43,200</span>
-                      </div>
-                      <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--gray-200);">
-                      <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1rem;">
-                        <span>Total GST</span>
-                        <span style="color: var(--brand-600);">₹4,32,000</span>
+                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+                        <i class="pi pi-percentage" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        No GST data available
                       </div>
                     </div>
                   </div>
@@ -937,6 +880,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- JavaScript Files -->
+  <script src="js/utils.js"></script>
   <script src="js/modal.js"></script>
   <script src="js/app.js"></script>
   <script src="js/orders.js"></script>

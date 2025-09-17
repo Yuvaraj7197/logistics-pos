@@ -20,13 +20,7 @@ function loadStaff() {
     const raw = localStorage.getItem(STAFF_STORAGE_KEY); 
     if (raw) return JSON.parse(raw); 
   } catch (_) {}
-  const seeded = [
-    { id:'EMP-001', name:'Rahul Verma', role:'Delivery Driver', dept:'Logistics', contact:'+91 98765 43210', join:'2023-01-15', status:'Active' },
-    { id:'EMP-002', name:'Meera Joshi', role:'Warehouse Manager', dept:'Warehouse', contact:'+91 87654 32109', join:'2022-08-10', status:'Active' },
-    { id:'EMP-003', name:'Suresh Kumar', role:'Inventory Clerk', dept:'Warehouse', contact:'+91 76543 21098', join:'2023-03-22', status:'Active' },
-    { id:'EMP-004', name:'Anita Sharma', role:'Customer Service Rep', dept:'Customer Service', contact:'+91 65432 10987', join:'2023-07-01', status:'Active' },
-    { id:'EMP-005', name:'Deepak Singh', role:'Operations Supervisor', dept:'Administration', contact:'+91 54321 09876', join:'2022-12-05', status:'On Leave' }
-  ];
+  const seeded = [];
   saveStaff(seeded); 
   return seeded;
 }
@@ -307,54 +301,69 @@ function generatePayslip(empId, evt){
 // Staff management functions
 function addStaff() {
   const body = `
-    <div class="form-group">
-      <label>Full Name *</label>
-      <input id="staffName" type="text" placeholder="Enter full name" required />
+    <div class="form-section">
+      <h4>Personal Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Full Name *</label>
+          <input id="staffName" type="text" placeholder="Enter full name" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Email Address</label>
+          <input id="staffEmail" type="email" placeholder="Enter email address" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Contact Number *</label>
+          <input id="staffContact" type="tel" placeholder="Enter contact number" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Emergency Contact</label>
+          <input id="staffEmergencyContact" type="tel" placeholder="Enter emergency contact" />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Address</label>
+        <textarea id="staffAddress" placeholder="Enter address" rows="3"></textarea>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Role *</label>
-      <select id="staffRole" required>
-        <option value="">Select role...</option>
-        ${STAFF_ROLES.map(role => `<option value="${role}">${role}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Department *</label>
-      <select id="staffDepartment" required>
-        <option value="">Select department...</option>
-        ${STAFF_DEPARTMENTS.map(dept => `<option value="${dept}">${dept}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Shift *</label>
-      <select id="staffShift" required>
-        <option value="">Select shift...</option>
-        ${SHIFT_TYPES.map(shift => `<option value="${shift.name}">${shift.name} (${shift.start} - ${shift.end})</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Contact Number *</label>
-      <input id="staffContact" type="tel" placeholder="Enter contact number" required />
-    </div>
-    <div class="form-group">
-      <label>Email Address</label>
-      <input id="staffEmail" type="email" placeholder="Enter email address" />
-    </div>
-    <div class="form-group">
-      <label>Address</label>
-      <textarea id="staffAddress" placeholder="Enter address" rows="3"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Join Date *</label>
-      <input id="staffJoinDate" type="date" required />
-    </div>
-    <div class="form-group">
-      <label>Basic Salary (INR) *</label>
-      <input id="staffSalary" type="number" min="0" placeholder="Enter basic salary" required />
-    </div>
-    <div class="form-group">
-      <label>Emergency Contact</label>
-      <input id="staffEmergencyContact" type="tel" placeholder="Enter emergency contact" />
+
+    <div class="form-section">
+      <h4>Work Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Role *</label>
+          <select id="staffRole" required>
+            <option value="">Select role...</option>
+            ${STAFF_ROLES.map(role => `<option value="${role}">${role}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Department *</label>
+          <select id="staffDepartment" required>
+            <option value="">Select department...</option>
+            ${STAFF_DEPARTMENTS.map(dept => `<option value="${dept}">${dept}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Shift *</label>
+          <select id="staffShift" required>
+            <option value="">Select shift...</option>
+            ${SHIFT_TYPES.map(shift => `<option value="${shift.name}">${shift.name} (${shift.start} - ${shift.end})</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Join Date *</label>
+          <input id="staffJoinDate" type="date" required />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Basic Salary (INR) *</label>
+        <input id="staffSalary" type="number" min="0" placeholder="Enter basic salary" required />
+      </div>
     </div>
   `;
   
@@ -439,5 +448,278 @@ function updateStaffStats() {
   if (pendingLeaveEl) pendingLeaveEl.textContent = pendingLeave;
 }
 
-// Additional staff functions would go here...
-// (editStaff, deleteStaff, biometricCheckIn, biometricCheckOut, etc.)
+// =============================================================================
+// STAFF MANAGEMENT FUNCTIONS
+// =============================================================================
+
+/**
+ * Edit staff member
+ */
+function editStaff(empId, evt) {
+  if (evt) evt.stopPropagation();
+  
+  const staff = loadStaff();
+  const emp = staff.find(s => s.id === empId);
+  if (!emp) {
+    showToast('Staff member not found', 'error');
+    return;
+  }
+  
+  const body = `
+    <div class="form-section">
+      <h4>Personal Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Full Name *</label>
+          <input id="editStaffName" type="text" value="${emp.name}" placeholder="Enter full name" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Email Address</label>
+          <input id="editStaffEmail" type="email" value="${emp.email || ''}" placeholder="Enter email address" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Contact Number *</label>
+          <input id="editStaffContact" type="tel" value="${emp.contact}" placeholder="Enter contact number" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Emergency Contact</label>
+          <input id="editStaffEmergencyContact" type="tel" value="${emp.emergencyContact || ''}" placeholder="Enter emergency contact" />
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Address</label>
+        <textarea id="editStaffAddress" placeholder="Enter address" rows="3">${emp.address || ''}</textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Work Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Role *</label>
+          <select id="editStaffRole" required>
+            <option value="">Select role...</option>
+            ${STAFF_ROLES.map(role => `<option value="${role}" ${role === emp.role ? 'selected' : ''}>${role}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Department *</label>
+          <select id="editStaffDepartment" required>
+            <option value="">Select department...</option>
+            ${STAFF_DEPARTMENTS.map(dept => `<option value="${dept}" ${dept === emp.dept ? 'selected' : ''}>${dept}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Shift *</label>
+          <select id="editStaffShift" required>
+            <option value="">Select shift...</option>
+            ${SHIFT_TYPES.map(shift => `<option value="${shift.name}" ${shift.name === emp.shift ? 'selected' : ''}>${shift.name} (${shift.start} - ${shift.end})</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Join Date *</label>
+          <input id="editStaffJoinDate" type="date" value="${emp.join}" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Basic Salary (INR) *</label>
+          <input id="editStaffSalary" type="number" min="0" value="${emp.salary || 0}" placeholder="Enter basic salary" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Status *</label>
+          <select id="editStaffStatus" required>
+            <option value="Active" ${emp.status === 'Active' ? 'selected' : ''}>Active</option>
+            <option value="On Leave" ${emp.status === 'On Leave' ? 'selected' : ''}>On Leave</option>
+            <option value="Inactive" ${emp.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  openModal('Edit Staff Member', body, [
+    { label: 'Cancel', type: 'secondary', action: closeModal },
+    { label: 'Update Staff', type: 'primary', action: () => {
+      const name = document.getElementById('editStaffName').value.trim();
+      const role = document.getElementById('editStaffRole').value;
+      const department = document.getElementById('editStaffDepartment').value;
+      const shift = document.getElementById('editStaffShift').value;
+      const contact = document.getElementById('editStaffContact').value.trim();
+      const email = document.getElementById('editStaffEmail').value.trim();
+      const address = document.getElementById('editStaffAddress').value.trim();
+      const joinDate = document.getElementById('editStaffJoinDate').value;
+      const salary = parseInt(document.getElementById('editStaffSalary').value, 10);
+      const emergencyContact = document.getElementById('editStaffEmergencyContact').value.trim();
+      const status = document.getElementById('editStaffStatus').value;
+      
+      if (!name || !role || !department || !shift || !contact || !joinDate || isNaN(salary) || salary <= 0) {
+        showToast('Please fill all required fields correctly', 'error');
+        return;
+      }
+      
+      // Update staff member
+      const updatedStaff = {
+        ...emp,
+        name,
+        role,
+        dept: department,
+        shift,
+        contact,
+        email: email || 'N/A',
+        address: address || 'N/A',
+        join: joinDate,
+        salary,
+        emergencyContact: emergencyContact || 'N/A',
+        status,
+        updatedAt: new Date().toISOString()
+      };
+      
+      const staffIndex = staff.findIndex(s => s.id === empId);
+      if (staffIndex !== -1) {
+        staff[staffIndex] = updatedStaff;
+        saveStaff(staff);
+        closeModal();
+        renderStaff();
+        updateStaffStats();
+        showToast(`Staff member ${name} updated successfully`, 'success');
+      } else {
+        showToast('Staff member not found', 'error');
+      }
+    }}
+  ]);
+}
+
+/**
+ * Delete staff member
+ */
+function deleteStaff(empId, evt) {
+  if (evt) evt.stopPropagation();
+  
+  const staff = loadStaff();
+  const emp = staff.find(s => s.id === empId);
+  if (!emp) {
+    showToast('Staff member not found', 'error');
+    return;
+  }
+  
+  confirmAction('Are you sure you want to delete this staff member? This action cannot be undone.', () => {
+    try {
+      // Remove from staff list
+      const updatedStaff = staff.filter(s => s.id !== empId);
+      saveStaff(updatedStaff);
+      
+      // Remove attendance records
+      const attendance = loadAttendance();
+      delete attendance[empId];
+      saveAttendance(attendance);
+      
+      // Remove from shifts
+      const shifts = loadShifts();
+      delete shifts[empId];
+      saveShifts(shifts);
+      
+      // Re-render and update stats
+      renderStaff();
+      updateStaffStats();
+      
+      showToast(`Staff member ${emp.name} deleted successfully`, 'success');
+    } catch (error) {
+      console.error('Error deleting staff:', error);
+      showToast('Error deleting staff member', 'error');
+    }
+  });
+}
+
+/**
+ * Biometric check-in
+ */
+function biometricCheckIn(empId, evt) {
+  if (evt) evt.stopPropagation();
+  
+  const staff = loadStaff();
+  const emp = staff.find(s => s.id === empId);
+  if (!emp) {
+    showToast('Staff member not found', 'error');
+    return;
+  }
+  
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 8);
+  
+  const attendance = loadAttendance();
+  if (!attendance[empId]) {
+    attendance[empId] = {};
+  }
+  
+  // Check if already checked in today
+  if (attendance[empId][today] && attendance[empId][today].checkIn) {
+    showToast(`${emp.name} has already checked in today`, 'warning');
+    return;
+  }
+  
+  attendance[empId][today] = {
+    ...attendance[empId][today],
+    checkIn: time,
+    status: 'P'
+  };
+  
+  saveAttendance(attendance);
+  renderStaff();
+  updateStaffStats();
+  showToast(`${emp.name} checked in at ${time}`, 'success');
+}
+
+/**
+ * Biometric check-out
+ */
+function biometricCheckOut(empId, evt) {
+  if (evt) evt.stopPropagation();
+  
+  const staff = loadStaff();
+  const emp = staff.find(s => s.id === empId);
+  if (!emp) {
+    showToast('Staff member not found', 'error');
+    return;
+  }
+  
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 8);
+  
+  const attendance = loadAttendance();
+  if (!attendance[empId] || !attendance[empId][today] || !attendance[empId][today].checkIn) {
+    showToast(`${emp.name} must check in first`, 'warning');
+    return;
+  }
+  
+  // Check if already checked out today
+  if (attendance[empId][today].checkOut) {
+    showToast(`${emp.name} has already checked out today`, 'warning');
+    return;
+  }
+  
+  attendance[empId][today] = {
+    ...attendance[empId][today],
+    checkOut: time
+  };
+  
+  saveAttendance(attendance);
+  renderStaff();
+  updateStaffStats();
+  showToast(`${emp.name} checked out at ${time}`, 'success');
+}
+
+/**
+ * Close all dropdowns
+ */
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+    menu.classList.remove('show');
+  });
+}

@@ -1,63 +1,51 @@
 // Main Application JavaScript
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
-  // Set current year
-  const currentYearElement = document.getElementById("currentYear");
-  if (currentYearElement) {
-    currentYearElement.textContent = new Date().getFullYear();
-  }
-
-  // Login functionality
-  const loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", e => {
-      e.preventDefault();
-      
-      // Add loading animation (optional)
-      const submitBtn = e.target.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<i class="pi pi-spinner pi-spin"></i> Signing In...';
-      submitBtn.disabled = true;
-      
-      // Simulate login delay
-      setTimeout(() => {
-        document.getElementById("loginPage").classList.add("hidden");
-        document.getElementById("dashboardPage").classList.remove("hidden");
-        
-        // Reset button
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }, 1000);
-    });
-  }
-
-  // Add some interactive features
-  // Add hover effects to cards
-  const cards = document.querySelectorAll('.dashboard-card');
-  cards.forEach(card => {
-    card.addEventListener('mouseenter', () => {
-      card.style.transform = 'translateY(-2px)';
-      card.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-    });
-    
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'translateY(0)';
-      card.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-    });
-  });
-
-  // Add row hover effects to tables
-  const tables = document.querySelectorAll('table tbody tr');
-  tables.forEach(row => {
-    row.addEventListener('mouseenter', () => {
-      row.style.backgroundColor = 'var(--gray-50)';
-    });
-    
-    row.addEventListener('mouseleave', () => {
-      row.style.backgroundColor = 'transparent';
-    });
-  });
+  // Initialize login functionality
+  initializeLogin();
 });
+
+// =============================================================================
+// LOGIN FUNCTIONALITY
+// =============================================================================
+
+/**
+ * Initialize login form functionality
+ */
+function initializeLogin() {
+  const loginForm = document.getElementById("loginForm");
+  if (!loginForm) return;
+  
+  loginForm.addEventListener("submit", handleLogin);
+}
+
+/**
+ * Handle login form submission
+ */
+function handleLogin(e) {
+  e.preventDefault();
+  
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  
+  // Show loading state
+  submitBtn.innerHTML = '<i class="pi pi-spinner pi-spin"></i> Signing In...';
+  submitBtn.disabled = true;
+  
+  // Simulate login delay
+  setTimeout(() => {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("dashboardPage").classList.remove("hidden");
+    
+    // Reset button
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }, 1000);
+}
+
+// =============================================================================
+// LOGOUT FUNCTIONALITY
+// =============================================================================
 
 // Logout functionality
 function logout() {
@@ -154,4 +142,96 @@ function backToDashboard() {
   
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =============================================================================
+// STORAGE MANAGEMENT
+// =============================================================================
+
+/**
+ * Clear all local storage data
+ */
+function clearAllStorage() {
+  const storageKeys = [
+    'logosic_orders_v1',
+    'logosic_stock_v1', 
+    'logosic_staff_v1',
+    'logosic_attendance_v1',
+    'logistics_leave_requests',
+    'logistics_shifts',
+    'logosic_billing_v1',
+    'logosic_financial_v1',
+    'logosic_gst_v1'
+  ];
+  
+  storageKeys.forEach(key => localStorage.removeItem(key));
+  localStorage.clear();
+  
+  console.log('All local storage data cleared');
+  return true;
+}
+
+/**
+ * Clear storage and refresh the application
+ */
+function clearStorageAndRefresh() {
+  confirmAction('Are you sure you want to clear ALL data? This action cannot be undone.', () => {
+    clearAllStorage();
+    showToast('All data cleared successfully', 'success');
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  });
+}
+
+// Dropdown functionality
+function toggleDropdown(dropdownId) {
+  const dropdown = document.getElementById(dropdownId);
+  if (!dropdown) return;
+  
+  // Close all other dropdowns
+  document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+    if (menu.id !== dropdownId) {
+      menu.classList.remove('show');
+    }
+  });
+  
+  // Toggle current dropdown
+  dropdown.classList.toggle('show');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+      menu.classList.remove('show');
+    });
+  }
+});
+
+// Create dropdown HTML for table actions
+function createTableActionsDropdown(id, actions) {
+  const dropdownId = `dropdown-${id}`;
+  const actionsHtml = actions.map(action => {
+    const iconClass = action.icon || 'pi pi-circle';
+    const itemClass = action.class || '';
+    const onclick = action.onclick ? `onclick="${action.onclick}"` : '';
+    
+    return `<button class="dropdown-item ${itemClass}" ${onclick}>
+      <i class="${iconClass}"></i> ${action.label}
+    </button>`;
+  }).join('');
+  
+  return `
+    <div class="dropdown table-actions">
+      <button class="dropdown-toggle" onclick="toggleDropdown('${dropdownId}')">
+        <i class="pi pi-ellipsis-v"></i>
+        Actions
+      </button>
+      <div class="dropdown-menu" id="${dropdownId}">
+        ${actionsHtml}
+      </div>
+    </div>
+  `;
 }

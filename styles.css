@@ -153,6 +153,86 @@ h3 { font-size: 1.25rem; }
   font-size: 0.875rem;
 }
 
+/* =============================================================================
+   MODAL LAYOUT SYSTEM
+   ============================================================================= */
+
+/* Row container for form fields */
+.form-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1rem !important;
+  margin-bottom: 1rem !important;
+  width: 100% !important;
+}
+
+/* Form groups inside form rows */
+.form-row .form-group {
+  margin-bottom: 0;
+  display: block;
+}
+
+/* Single column form group */
+.form-group.col-12 {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+/* Half column form group */
+.form-group.col-6 {
+  grid-column: span 1 !important;
+  width: 100% !important;
+}
+
+/* Full width form group (for textareas, etc.) */
+.form-group.col-12 {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+/* Ensure proper grid item behavior */
+.form-row > .form-group {
+  display: block;
+  width: 100%;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .form-group.col-6 {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Modal content styling */
+.modal-content {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Form section styling */
+.form-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.form-section h4 {
+  margin: 0 0 1rem 0;
+  color: var(--gray-700);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 label { 
   display: block; 
   font-weight: 500; 
@@ -495,19 +575,39 @@ footer {
 }
 
 .modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: block;
 }
 
 .modal-form .form-group {
   margin-bottom: 1rem;
 }
 
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Override modal form for grid layouts */
+.modal-body .form-section {
+  display: block;
+}
+
+.modal-body .form-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Ensure form groups in modals work with grid */
+.modal-body .form-row .form-group {
+  display: block !important;
+  margin-bottom: 0 !important;
+}
+
+.modal-body .form-group.col-6 {
+  grid-column: span 1 !important;
+  width: 100% !important;
+}
+
+.modal-body .form-group.col-12 {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
 }
 
 .modal-form input,
@@ -697,5 +797,127 @@ footer {
   
   .pagination-size {
     justify-content: center;
+  }
+}
+
+/* Dropdown Menu Styles */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background: var(--brand-500);
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.dropdown-toggle:hover {
+  background: var(--brand-600);
+  transform: translateY(-1px);
+}
+
+.dropdown-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  min-width: 160px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  margin-top: 0.25rem;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--gray-700);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: var(--gray-50);
+  color: var(--brand-600);
+}
+
+.dropdown-item.danger:hover {
+  background: var(--error-500);
+  color: white;
+}
+
+.dropdown-item.success:hover {
+  background: var(--success-500);
+  color: white;
+}
+
+.dropdown-item.warning:hover {
+  background: var(--warning-500);
+  color: white;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 0.25rem 0;
+}
+
+/* Table Actions Dropdown */
+.table-actions {
+  position: relative;
+}
+
+.table-actions .dropdown-toggle {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.table-actions .dropdown-toggle:hover {
+  background: var(--gray-200);
+  color: var(--gray-800);
+}
+
+/* Responsive dropdown positioning */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    right: auto;
+    left: 0;
+    min-width: 140px;
   }
 }
