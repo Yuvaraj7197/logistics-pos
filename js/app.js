@@ -115,8 +115,23 @@ function showScreen(screenId) {
 
 function goTo(targetId, btn) {
   const allNav = document.querySelectorAll('.sidebar .nav-button');
+  const allNavItems = document.querySelectorAll('.sidebar .nav-dropdown-item');
+  
+  // Remove active class from all navigation buttons and dropdown items
   allNav.forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  allNavItems.forEach(item => item.classList.remove('active'));
+  
+  // Add active class to clicked button/item
+  if (btn) {
+    btn.classList.add('active');
+    
+    // If it's a dropdown item, also close the dropdown
+    const navDropdown = btn.closest('.nav-dropdown');
+    if (navDropdown) {
+      navDropdown.classList.remove('open');
+    }
+  }
+  
   if (targetId === 'dashboard') {
     backToDashboard();
   } else {
@@ -384,11 +399,34 @@ function toggleDropdown(dropdownId) {
   dropdown.classList.toggle('show');
 }
 
+// Navigation dropdown functionality
+function toggleNavDropdown(dropdownId) {
+  const dropdown = document.getElementById(dropdownId);
+  const navDropdown = dropdown.closest('.nav-dropdown');
+  if (!dropdown || !navDropdown) return;
+  
+  // Close all other navigation dropdowns
+  document.querySelectorAll('.nav-dropdown.open').forEach(menu => {
+    if (menu !== navDropdown) {
+      menu.classList.remove('open');
+    }
+  });
+  
+  // Toggle current navigation dropdown
+  navDropdown.classList.toggle('open');
+}
+
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(event) {
   if (!event.target.closest('.dropdown')) {
     document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
       menu.classList.remove('show');
+    });
+  }
+  
+  if (!event.target.closest('.nav-dropdown')) {
+    document.querySelectorAll('.nav-dropdown.open').forEach(menu => {
+      menu.classList.remove('open');
     });
   }
 });
