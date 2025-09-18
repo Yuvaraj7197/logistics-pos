@@ -92,7 +92,13 @@ function showScreen(screenId) {
   }
   
   // Trigger screen-specific renders
-  if (screenId === 'orders') renderOrders();
+  if (screenId === 'orders') {
+    if (typeof initializeOrderManagement === 'function') {
+      initializeOrderManagement();
+    } else {
+      renderOrders();
+    }
+  }
   if (screenId === 'stock') renderStock();
   if (screenId === 'billing') renderInvoices();
   if (screenId === 'financial') renderFinancialRecords();

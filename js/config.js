@@ -45,8 +45,12 @@ const APP_CONFIG = {
 const BUSINESS_CONFIG = {
   // Order Configuration
   order: {
-    statuses: ['Pending', 'Completed', 'Shipped', 'Cancelled'],
+    statuses: ['Pending', 'In Progress', 'Completed', 'Shipped', 'Delivered', 'Cancelled', 'On Hold'],
+    priorities: ['Low', 'Medium', 'High', 'Urgent'],
+    types: ['Sales', 'DC', 'Bulk'],
     defaultStatus: 'Pending',
+    defaultPriority: 'Medium',
+    defaultType: 'Sales',
     autoGenerateId: true,
     idPrefix: 'ORD'
   },
