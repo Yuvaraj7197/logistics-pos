@@ -1,12 +1,41 @@
 // Billing Management JavaScript
 const BILLING_STORAGE_KEY = 'logosic_billing_v1';
+const RECURRING_BILLING_STORAGE_KEY = 'logosic_recurring_billing_v1';
+const PAYMENT_TRACKING_STORAGE_KEY = 'logosic_payment_tracking_v1';
 
 // Sample billing data - cleared
 const BILLING_RECORDS = [];
 
 const BILLING_STATUS = getConfig('business.billing.statuses', ['Paid', 'Unpaid', 'Overdue', 'Partial', 'Cancelled']);
 const QUOTATION_STATUS = getConfig('business.billing.quotationStatuses', ['Draft', 'Sent', 'Accepted', 'Rejected', 'Expired']);
-window.PAYMENT_METHODS = getConfig('business.billing.paymentMethods', ['Bank Transfer', 'UPI', 'Cash', 'Cheque', 'Credit Card', 'Online Payment']);
+window.PAYMENT_METHODS = getConfig('business.billing.paymentMethods', ['Bank Transfer', 'UPI', 'Cash', 'Cheque', 'Credit Card', 'PayPal', 'Stripe', 'Razorpay', 'PayU']);
+
+// Invoice templates
+const INVOICE_TEMPLATES = {
+  modern: {
+    name: 'Modern',
+    colors: { primary: '#667eea', secondary: '#764ba2' },
+    layout: 'gradient'
+  },
+  classic: {
+    name: 'Classic',
+    colors: { primary: '#f093fb', secondary: '#f5576c' },
+    layout: 'traditional'
+  },
+  minimal: {
+    name: 'Minimal',
+    colors: { primary: '#4facfe', secondary: '#00f2fe' },
+    layout: 'clean'
+  }
+};
+
+// Payment gateways
+const PAYMENT_GATEWAYS = {
+  paypal: { name: 'PayPal', status: 'active', icon: 'pi-paypal' },
+  stripe: { name: 'Stripe', status: 'active', icon: 'pi-credit-card' },
+  razorpay: { name: 'Razorpay', status: 'setup_required', icon: 'pi-credit-card' },
+  payu: { name: 'PayU', status: 'setup_required', icon: 'pi-credit-card' }
+};
 
 // Storage functions
 function loadInvoices() {
@@ -123,11 +152,13 @@ function renderInvoices() {
   tbody.innerHTML = currentPageData.map(invoice => `
     <tr>
       <td><strong>${invoice.id}</strong></td>
+      <td><span class="badge badge-${invoice.type === 'Recurring' ? 'warning' : invoice.type === 'Template' ? 'info' : 'secondary'}">${invoice.type || 'Standard'}</span></td>
       <td>${invoice.customer}</td>
       <td>${formatINR(invoice.amount)}</td>
       <td>${formatDate(invoice.issueDate)}</td>
       <td>${formatDate(invoice.dueDate)}</td>
       <td><span class="${billingBadgeClass(invoice.status)}">${invoice.status}</span></td>
+      <td>${invoice.paymentMethod}</td>
       <td>
         ${createTableActionsDropdown(invoice.id, [
           { label: 'View Invoice', icon: 'pi pi-eye', onclick: `viewInvoice('${invoice.id}')` },
@@ -136,6 +167,7 @@ function renderInvoices() {
           { label: 'Send Email', icon: 'pi pi-send', onclick: `sendInvoiceEmail('${invoice.id}')` },
           { label: 'Mark Paid', icon: 'pi pi-check', onclick: `markInvoicePaid('${invoice.id}')`, class: 'success' },
           { label: 'Export PDF', icon: 'pi pi-download', onclick: `exportInvoicePDF('${invoice.id}')` },
+          { label: 'Payment Tracking', icon: 'pi pi-credit-card', onclick: `trackPayment('${invoice.id}')` },
           { label: 'Delete', icon: 'pi pi-trash', onclick: `deleteInvoice('${invoice.id}')`, class: 'danger' }
         ])}
       </td>
@@ -822,4 +854,556 @@ function convertQuotationToInvoice(quotationId) {
     renderInvoices();
     showToast(`Quotation converted to invoice ${newInvoice.id}`, 'success');
   });
+}
+
+// =============================================================================
+// ENHANCED BILLING FEATURES
+// =============================================================================
+
+/**
+ * Select invoice template
+ */
+function selectInvoiceTemplate(templateId) {
+  // Remove selected class from all templates
+  document.querySelectorAll('.template-card').forEach(card => {
+    card.classList.remove('selected');
+  });
+  
+  // Add selected class to clicked template
+  event.target.closest('.template-card').classList.add('selected');
+  
+  // Store selected template
+  localStorage.setItem('selected_invoice_template', templateId);
+  
+  showToast(`Template "${INVOICE_TEMPLATES[templateId].name}" selected`, 'success');
+}
+
+/**
+ * Open payment tracking modal
+ */
+function openPaymentTrackingModal() {
+  const invoices = loadInvoices();
+  const paymentTracking = loadPaymentTracking();
+  
+  const body = `
+    <div class="payment-tracking-card">
+      <h4><i class="pi pi-credit-card"></i> Payment Tracking Overview</h4>
+      <div class="stats-grid" style="margin-bottom: 1.5rem;">
+        <div class="stat-card">
+          <div class="stat-value">${invoices.filter(i => i.status === 'Paid').length}</div>
+          <div class="stat-label">Completed Payments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${invoices.filter(i => i.status === 'Unpaid').length}</div>
+          <div class="stat-label">Pending Payments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${invoices.filter(i => i.status === 'Overdue').length}</div>
+          <div class="stat-label">Overdue Payments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">₹${formatINR(invoices.reduce((sum, i) => sum + (i.amount || 0), 0))}</div>
+          <div class="stat-label">Total Processed</div>
+        </div>
+      </div>
+      
+      <div class="payment-timeline">
+        <h4 style="margin-bottom: 1rem;">Recent Payment Activity</h4>
+        ${paymentTracking.slice(0, 5).map(payment => `
+          <div class="timeline-item ${payment.status}">
+            <div class="timeline-content">
+              <div class="timeline-title">${payment.title}</div>
+              <div class="timeline-description">${payment.description}</div>
+              <div class="timeline-meta">
+                ${formatDate(payment.date)} • ${payment.method} • ${formatINR(payment.amount)}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+        
+        ${paymentTracking.length === 0 ? `
+          <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+            <i class="pi pi-credit-card" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+            No payment activity yet
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+  
+  openModal('Payment Tracking', body, [
+    { label: 'Close', type: 'secondary', action: closeModal },
+    { label: 'View All Payments', type: 'primary', action: () => {
+      closeModal();
+      showAllPayments();
+    }}
+  ], 'large');
+}
+
+/**
+ * Open recurring billing modal
+ */
+function openRecurringBillingModal() {
+  const recurringBills = loadRecurringBilling();
+  
+  const body = `
+    <div class="recurring-billing-card">
+      <h4><i class="pi pi-refresh"></i> Recurring Billing Management</h4>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <button class="btn btn-primary" onclick="openCreateRecurringBillModal()">
+          <i class="pi pi-plus"></i> Create Recurring Bill
+        </button>
+      </div>
+      
+      <div class="recurring-bills-list">
+        ${recurringBills.length === 0 ? `
+          <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+            <i class="pi pi-refresh" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+            No recurring bills set up yet
+          </div>
+        ` : recurringBills.map(bill => `
+          <div class="recurring-item">
+            <div class="recurring-info">
+              <div class="recurring-customer">${bill.customer}</div>
+              <div class="recurring-details">
+                ${formatINR(bill.amount)} • ${bill.frequency} • Next: ${formatDate(bill.nextDueDate)}
+              </div>
+            </div>
+            <div class="recurring-actions">
+              <button class="btn btn-sm btn-secondary" onclick="editRecurringBill('${bill.id}')">
+                <i class="pi pi-pencil"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-success" onclick="generateRecurringInvoice('${bill.id}')">
+                <i class="pi pi-plus"></i> Generate
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="deleteRecurringBill('${bill.id}')">
+                <i class="pi pi-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  
+  openModal('Recurring Billing', body, [
+    { label: 'Close', type: 'secondary', action: closeModal }
+  ], 'large');
+}
+
+/**
+ * Load payment tracking data
+ */
+function loadPaymentTracking() {
+  try {
+    const stored = localStorage.getItem(PAYMENT_TRACKING_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    console.error('Error loading payment tracking:', e);
+    return [];
+  }
+}
+
+/**
+ * Save payment tracking data
+ */
+function savePaymentTracking(tracking) {
+  try {
+    localStorage.setItem(PAYMENT_TRACKING_STORAGE_KEY, JSON.stringify(tracking));
+  } catch (e) {
+    console.error('Error saving payment tracking:', e);
+  }
+}
+
+/**
+ * Load recurring billing data
+ */
+function loadRecurringBilling() {
+  try {
+    const stored = localStorage.getItem(RECURRING_BILLING_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    console.error('Error loading recurring billing:', e);
+    return [];
+  }
+}
+
+/**
+ * Save recurring billing data
+ */
+function saveRecurringBilling(bills) {
+  try {
+    localStorage.setItem(RECURRING_BILLING_STORAGE_KEY, JSON.stringify(bills));
+  } catch (e) {
+    console.error('Error saving recurring billing:', e);
+  }
+}
+
+/**
+ * Create recurring bill modal
+ */
+function openCreateRecurringBillModal() {
+  const body = `
+    <div class="form-section">
+      <h4>Recurring Bill Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Customer Name *</label>
+          <input id="recurringCustomer" type="text" placeholder="Enter customer name" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Amount (INR) *</label>
+          <input id="recurringAmount" type="number" min="0" step="0.01" placeholder="Enter amount" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Frequency *</label>
+          <select id="recurringFrequency" required>
+            <option value="">Select frequency...</option>
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="Quarterly">Quarterly</option>
+            <option value="Yearly">Yearly</option>
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Next Due Date *</label>
+          <input id="recurringNextDue" type="date" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Description *</label>
+          <input id="recurringDescription" type="text" placeholder="Enter description" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Payment Method</label>
+          <select id="recurringPaymentMethod">
+            <option value="">Select method...</option>
+            ${PAYMENT_METHODS.map(method => `<option value="${method}">${method}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-group col-12">
+        <label>Notes</label>
+        <textarea id="recurringNotes" placeholder="Enter any notes" rows="3"></textarea>
+      </div>
+    </div>
+  `;
+  
+  openModal('Create Recurring Bill', body, [
+    { label: 'Cancel', type: 'secondary', action: closeModal },
+    { label: 'Create Recurring Bill', type: 'primary', action: () => {
+      const customer = document.getElementById('recurringCustomer').value.trim();
+      const amount = parseFloat(document.getElementById('recurringAmount').value);
+      const frequency = document.getElementById('recurringFrequency').value;
+      const nextDue = document.getElementById('recurringNextDue').value;
+      const description = document.getElementById('recurringDescription').value.trim();
+      const paymentMethod = document.getElementById('recurringPaymentMethod').value;
+      const notes = document.getElementById('recurringNotes').value.trim();
+      
+      if (!customer || isNaN(amount) || !frequency || !nextDue || !description || amount <= 0) {
+        showToast('Please fill all required fields correctly', 'error');
+        return;
+      }
+      
+      const recurringBills = loadRecurringBilling();
+      const newBill = {
+        id: `RB-${Date.now()}`,
+        customer,
+        amount,
+        frequency,
+        nextDueDate: nextDue,
+        description,
+        paymentMethod: paymentMethod || 'Bank Transfer',
+        notes: notes || 'N/A',
+        status: 'Active',
+        createdAt: new Date().toISOString()
+      };
+      
+      recurringBills.unshift(newBill);
+      saveRecurringBilling(recurringBills);
+      closeModal();
+      openRecurringBillingModal(); // Refresh the modal
+      showToast('Recurring bill created successfully', 'success');
+    }}
+  ]);
+  
+  // Set default next due date (30 days from now)
+  setTimeout(() => {
+    const nextDueInput = document.getElementById('recurringNextDue');
+    if (nextDueInput) {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 30);
+      nextDueInput.value = futureDate.toISOString().slice(0, 10);
+    }
+  }, 100);
+}
+
+/**
+ * Generate recurring invoice
+ */
+function generateRecurringInvoice(billId) {
+  const recurringBills = loadRecurringBilling();
+  const bill = recurringBills.find(b => b.id === billId);
+  if (!bill) return;
+  
+  const invoices = loadInvoices();
+  const newInvoice = {
+    id: generateInvoiceId(),
+    customer: bill.customer,
+    amount: bill.amount,
+    description: bill.description,
+    status: 'Unpaid',
+    issueDate: new Date().toISOString().slice(0, 10),
+    dueDate: bill.nextDueDate,
+    paymentMethod: bill.paymentMethod,
+    notes: `Recurring bill - ${bill.frequency} • ${bill.notes}`,
+    type: 'Recurring',
+    recurringBillId: billId,
+    createdAt: new Date().toISOString()
+  };
+  
+  invoices.unshift(newInvoice);
+  saveInvoices(invoices);
+  
+  // Update next due date
+  const nextDue = new Date(bill.nextDueDate);
+  switch (bill.frequency) {
+    case 'Daily':
+      nextDue.setDate(nextDue.getDate() + 1);
+      break;
+    case 'Weekly':
+      nextDue.setDate(nextDue.getDate() + 7);
+      break;
+    case 'Monthly':
+      nextDue.setMonth(nextDue.getMonth() + 1);
+      break;
+    case 'Quarterly':
+      nextDue.setMonth(nextDue.getMonth() + 3);
+      break;
+    case 'Yearly':
+      nextDue.setFullYear(nextDue.getFullYear() + 1);
+      break;
+  }
+  
+  bill.nextDueDate = nextDue.toISOString().slice(0, 10);
+  saveRecurringBilling(recurringBills);
+  
+  renderInvoices();
+  showToast(`Recurring invoice ${newInvoice.id} generated successfully`, 'success');
+}
+
+/**
+ * Apply billing filters
+ */
+function applyBillingFilters() {
+  const invoices = loadInvoices();
+  const statusFilter = document.getElementById('billingStatusFilter')?.value || '';
+  const typeFilter = document.getElementById('billingTypeFilter')?.value || '';
+  const dateStart = document.getElementById('billingDateStart')?.value || '';
+  const dateEnd = document.getElementById('billingDateEnd')?.value || '';
+  const searchTerm = document.getElementById('searchBillingInvoices')?.value.toLowerCase() || '';
+  const sortBy = document.getElementById('sortBillingInvoices')?.value || 'date-desc';
+  
+  let filtered = invoices.filter(invoice => {
+    const matchesStatus = !statusFilter || invoice.status === statusFilter;
+    const matchesType = !typeFilter || (invoice.type || 'Standard') === typeFilter;
+    const matchesDateStart = !dateStart || invoice.issueDate >= dateStart;
+    const matchesDateEnd = !dateEnd || invoice.issueDate <= dateEnd;
+    const matchesSearch = !searchTerm || 
+      invoice.id.toLowerCase().includes(searchTerm) ||
+      invoice.customer.toLowerCase().includes(searchTerm) ||
+      invoice.amount.toString().includes(searchTerm);
+    
+    return matchesStatus && matchesType && matchesDateStart && matchesDateEnd && matchesSearch;
+  });
+  
+  // Sort filtered results
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.issueDate) - new Date(a.issueDate);
+      case 'date-asc':
+        return new Date(a.issueDate) - new Date(b.issueDate);
+      case 'amount-desc':
+        return b.amount - a.amount;
+      case 'amount-asc':
+        return a.amount - b.amount;
+      case 'customer':
+        return a.customer.localeCompare(b.customer);
+      case 'status':
+        return a.status.localeCompare(b.status);
+      default:
+        return 0;
+    }
+  });
+  
+  // Update pagination with filtered data
+  if (window.paginationInstances && window.paginationInstances['billingContainer']) {
+    window.paginationInstances['billingContainer'].updateData(filtered);
+    renderInvoices();
+  }
+}
+
+/**
+ * Enhanced invoice creation with template support
+ */
+function openCreateInvoiceModal(type = 'standard') {
+  const selectedTemplate = localStorage.getItem('selected_invoice_template') || 'modern';
+  const template = INVOICE_TEMPLATES[selectedTemplate];
+  
+  const body = `
+    <div class="form-section">
+      <h4>Invoice Information</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Customer Name *</label>
+          <input id="invoiceCustomer" type="text" placeholder="Enter customer name" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Amount (INR) *</label>
+          <input id="invoiceAmount" type="number" min="0" step="0.01" placeholder="Enter amount" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Issue Date *</label>
+          <input id="invoiceIssueDate" type="date" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Due Date *</label>
+          <input id="invoiceDueDate" type="date" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Status *</label>
+          <select id="invoiceStatus" required>
+            <option value="">Select status...</option>
+            ${BILLING_STATUS.map(status => `<option value="${status}">${status}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Payment Method</label>
+          <select id="invoicePaymentMethod">
+            <option value="">Select method...</option>
+            ${PAYMENT_METHODS.map(method => `<option value="${method}">${method}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Invoice Type</label>
+          <select id="invoiceType">
+            <option value="Standard">Standard</option>
+            <option value="Recurring">Recurring</option>
+            <option value="Template">From Template</option>
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Template</label>
+          <select id="invoiceTemplate">
+            <option value="${selectedTemplate}">${template.name}</option>
+            ${Object.entries(INVOICE_TEMPLATES).map(([key, tpl]) => 
+              `<option value="${key}">${tpl.name}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Additional Information</h4>
+      <div class="form-group col-12">
+        <label>Description</label>
+        <textarea id="invoiceDescription" placeholder="Enter invoice description" rows="3"></textarea>
+      </div>
+      <div class="form-group col-12">
+        <label>Notes</label>
+        <textarea id="invoiceNotes" placeholder="Enter any notes" rows="2"></textarea>
+      </div>
+    </div>
+  `;
+  
+  openModal(`Create ${type.charAt(0).toUpperCase() + type.slice(1)} Invoice`, body, [
+    { label: 'Cancel', type: 'secondary', action: closeModal },
+    { label: 'Create Invoice', type: 'primary', action: () => {
+      const customer = document.getElementById('invoiceCustomer').value.trim();
+      const amount = parseFloat(document.getElementById('invoiceAmount').value);
+      const issueDate = document.getElementById('invoiceIssueDate').value;
+      const dueDate = document.getElementById('invoiceDueDate').value;
+      const status = document.getElementById('invoiceStatus').value;
+      const paymentMethod = document.getElementById('invoicePaymentMethod').value;
+      const invoiceType = document.getElementById('invoiceType').value;
+      const template = document.getElementById('invoiceTemplate').value;
+      const description = document.getElementById('invoiceDescription').value.trim();
+      const notes = document.getElementById('invoiceNotes').value.trim();
+      
+      if (!customer || isNaN(amount) || !issueDate || !dueDate || !status || amount <= 0) {
+        showToast('Please fill all required fields correctly', 'error');
+        return;
+      }
+      
+      if (new Date(dueDate) < new Date(issueDate)) {
+        showToast('Due date cannot be before issue date', 'error');
+        return;
+      }
+      
+      const invoices = loadInvoices();
+      const newInvoice = {
+        id: generateInvoiceId(),
+        customer,
+        amount,
+        issueDate,
+        dueDate,
+        status,
+        paymentMethod: paymentMethod || 'N/A',
+        description: description || 'N/A',
+        notes: notes || 'N/A',
+        type: invoiceType,
+        template: template,
+        createdAt: new Date().toISOString()
+      };
+      
+      invoices.unshift(newInvoice);
+      saveInvoices(invoices);
+      
+      // Add payment tracking entry
+      const paymentTracking = loadPaymentTracking();
+      paymentTracking.unshift({
+        id: `PT-${Date.now()}`,
+        invoiceId: newInvoice.id,
+        title: `Invoice ${newInvoice.id} Created`,
+        description: `New ${invoiceType.toLowerCase()} invoice created for ${customer}`,
+        amount: amount,
+        method: paymentMethod || 'N/A',
+        status: 'pending',
+        date: new Date().toISOString()
+      });
+      savePaymentTracking(paymentTracking);
+      
+      closeModal();
+      renderInvoices();
+      updateDashboardStats();
+      showToast('Invoice created successfully', 'success');
+    }}
+  ]);
+  
+  // Set default dates
+  setTimeout(() => {
+    const issueDateInput = document.getElementById('invoiceIssueDate');
+    const dueDateInput = document.getElementById('invoiceDueDate');
+    if (issueDateInput) {
+      issueDateInput.value = new Date().toISOString().slice(0, 10);
+    }
+    if (dueDateInput) {
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 15);
+      dueDateInput.value = dueDate.toISOString().slice(0, 10);
+    }
+  }, 100);
 }

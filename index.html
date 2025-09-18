@@ -555,20 +555,37 @@
             <!-- BILLING COMPONENT -->
             <section id="billing" class="p-4">
               <div class="content-header">
-                <div>
-                  <h2><i class="pi pi-credit-card"></i> Billing & Payments</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Manage invoices, payments, and financial records</p>
-                </div>
+               
                 <div class="actions">
-                  <button class="btn btn-primary" onclick="openCreateInvoiceModal()">
-                    <i class="pi pi-plus"></i> Create Invoice
-                  </button>
+                  <div class="btn-group">
+                    <button class="btn btn-primary" onclick="openCreateInvoiceModal()">
+                      <i class="pi pi-plus"></i> Create Invoice
+                    </button>
+                    <button class="btn btn-primary dropdown-toggle" onclick="toggleDropdown('invoiceTypeDropdown')">
+                      <i class="pi pi-caret-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="invoiceTypeDropdown">
+                      <button class="dropdown-item" onclick="openCreateInvoiceModal()">
+                        <i class="pi pi-file"></i> Standard Invoice
+                      </button>
+                      <button class="dropdown-item" onclick="openCreateInvoiceModal('recurring')">
+                        <i class="pi pi-refresh"></i> Recurring Invoice
+                      </button>
+                      <button class="dropdown-item" onclick="openCreateInvoiceModal('template')">
+                        <i class="pi pi-cog"></i> From Template
+                      </button>
+                    </div>
+                  </div>
                   <button class="btn btn-success" onclick="openCreateQuotationModal()">
                     <i class="pi pi-file-edit"></i> Create Quotation
                   </button>
-                  <button class="btn btn-secondary" onclick="backToDashboard()">
-                    <i class="pi pi-arrow-left"></i> Back
+                  <button class="btn btn-info" onclick="openPaymentTrackingModal()">
+                    <i class="pi pi-credit-card"></i> Payment Tracking
                   </button>
+                  <button class="btn btn-warning" onclick="openRecurringBillingModal()">
+                    <i class="pi pi-refresh"></i> Recurring Billing
+                  </button>
+                  
                 </div>
               </div>
 
@@ -589,26 +606,162 @@
                   <div class="stat-value" id="billingOverduePayments">0</div>
                   <div class="stat-label">Overdue Payments</div>
                 </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="billingRecurringCount">0</div>
+                  <div class="stat-label">Recurring Bills</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="billingQuotationsCount">0</div>
+                  <div class="stat-label">Active Quotations</div>
+                </div>
               </div>
+
+              <!-- Professional Invoice Templates Section -->
+              <div class="card" style="margin-bottom: 1.5rem;">
+                <h3><i class="pi pi-palette"></i> Professional Invoice Templates</h3>
+                <div class="grid" style="margin-top: 1rem;">
+                  <div class="col-12 md:col-4">
+                    <div class="template-card" onclick="selectInvoiceTemplate('modern')">
+                      <div class="template-preview modern-template">
+                        <div class="template-header">INVOICE</div>
+                        <div class="template-content">
+                          <div class="template-line"></div>
+                          <div class="template-line short"></div>
+                          <div class="template-line"></div>
+                        </div>
+                      </div>
+                      <div class="template-name">Modern</div>
+                    </div>
+                  </div>
+                  <div class="col-12 md:col-4">
+                    <div class="template-card" onclick="selectInvoiceTemplate('classic')">
+                      <div class="template-preview classic-template">
+                        <div class="template-header">INVOICE</div>
+                        <div class="template-content">
+                          <div class="template-line"></div>
+                          <div class="template-line short"></div>
+                          <div class="template-line"></div>
+                        </div>
+                      </div>
+                      <div class="template-name">Classic</div>
+                    </div>
+                  </div>
+                  <div class="col-12 md:col-4">
+                    <div class="template-card" onclick="selectInvoiceTemplate('minimal')">
+                      <div class="template-preview minimal-template">
+                        <div class="template-header">INVOICE</div>
+                        <div class="template-content">
+                          <div class="template-line"></div>
+                          <div class="template-line short"></div>
+                          <div class="template-line"></div>
+                        </div>
+                      </div>
+                      <div class="template-name">Minimal</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Methods & Gateway Integration -->
+              <!-- <div class="card" style="margin-bottom: 1.5rem;">
+                <h3><i class="pi pi-credit-card"></i> Payment Methods & Gateway Integration</h3>
+                <div class="grid" style="margin-top: 1rem;">
+                  <div class="col-12 md:col-6">
+                    <div class="payment-method-card">
+                      <h4><i class="pi pi-credit-card"></i> Online Payment Gateways</h4>
+                      <div class="payment-gateways">
+                        <div class="gateway-item">
+                          <i class="pi pi-paypal"></i>
+                          <span>PayPal</span>
+                          <span class="status-badge status-completed">Active</span>
+                        </div>
+                        <div class="gateway-item">
+                          <i class="pi pi-credit-card"></i>
+                          <span>Stripe</span>
+                          <span class="status-badge status-completed">Active</span>
+                        </div>
+                        <div class="gateway-item">
+                          <i class="pi pi-credit-card"></i>
+                          <span>Razorpay</span>
+                          <span class="status-badge status-pending">Setup Required</span>
+                        </div>
+                        <div class="gateway-item">
+                          <i class="pi pi-credit-card"></i>
+                          <span>PayU</span>
+                          <span class="status-badge status-pending">Setup Required</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 md:col-6">
+                    <div class="payment-method-card">
+                      <h4><i class="pi pi-money-bill"></i> Traditional Payment Methods</h4>
+                      <div class="payment-methods">
+                        <div class="method-item">
+                          <i class="pi pi-building"></i>
+                          <span>Bank Transfer</span>
+                        </div>
+                        <div class="method-item">
+                          <i class="pi pi-mobile"></i>
+                          <span>UPI</span>
+                        </div>
+                        <div class="method-item">
+                          <i class="pi pi-money-bill"></i>
+                          <span>Cash</span>
+                        </div>
+                        <div class="method-item">
+                          <i class="pi pi-file"></i>
+                          <span>Cheque</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
 
               <div class="filters">
                 <div class="filter-group">
                   <label>Payment Status</label>
-                  <select>
-                    <option>All Invoices</option>
-                    <option>Paid</option>
-                    <option>Unpaid</option>
-                    <option>Overdue</option>
-                    <option>Partial</option>
+                  <select id="billingStatusFilter" onchange="applyBillingFilters()">
+                    <option value="">All Invoices</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Overdue">Overdue</option>
+                    <option value="Partial">Partial</option>
+                    <option value="Cancelled">Cancelled</option>
                   </select>
                 </div>
                 <div class="filter-group">
-                  <label>Date Range</label>
-                  <input type="date" />
+                  <label>Invoice Type</label>
+                  <select id="billingTypeFilter" onchange="applyBillingFilters()">
+                    <option value="">All Types</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Recurring">Recurring</option>
+                    <option value="Template">From Template</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Date Range (From)</label>
+                  <input type="date" id="billingDateStart" onchange="applyBillingFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Date Range (To)</label>
+                  <input type="date" id="billingDateEnd" onchange="applyBillingFilters()" />
                 </div>
                 <div class="filter-group">
                   <label>Search Invoices</label>
-                  <input type="text" placeholder="Invoice # or customer..." />
+                  <input type="text" id="searchBillingInvoices" placeholder="Invoice #, customer, or amount..." oninput="applyBillingFilters()" />
+                </div>
+                <div class="filter-group">
+                  <label>Sort By</label>
+                  <select id="sortBillingInvoices" onchange="applyBillingFilters()">
+                    <option value="date-desc">Date (Newest First)</option>
+                    <option value="date-asc">Date (Oldest First)</option>
+                    <option value="amount-desc">Amount (Highest First)</option>
+                    <option value="amount-asc">Amount (Lowest First)</option>
+                    <option value="customer">Customer Name</option>
+                    <option value="status">Status</option>
+                  </select>
                 </div>
               </div>
 
@@ -617,11 +770,13 @@
                   <thead>
                     <tr>
                       <th>Invoice #</th>
+                      <th>Type</th>
                       <th>Customer</th>
                       <th>Amount</th>
                       <th>Issue Date</th>
                       <th>Due Date</th>
                       <th>Status</th>
+                      <th>Payment Method</th>
                       <th>Actions</th>
                     </tr>
                   </thead>

@@ -1018,3 +1018,326 @@ footer {
     min-width: 140px;
   }
 }
+
+/* =============================================================================
+   BILLING ENHANCEMENT STYLES
+   ============================================================================= */
+
+/* Invoice Template Cards */
+.template-card {
+  background: #fff;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.template-card:hover {
+  border-color: var(--brand-500);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.template-card.selected {
+  border-color: var(--brand-600);
+  background: var(--brand-50);
+}
+
+.template-preview {
+  width: 100%;
+  height: 120px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-template {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.classic-template {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.minimal-template {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.template-header {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.template-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.template-line {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 1px;
+}
+
+.template-line.short {
+  width: 60%;
+}
+
+.template-name {
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+}
+
+/* Payment Method Cards */
+.payment-method-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.payment-method-card h4 {
+  margin: 0 0 1rem 0;
+  color: var(--gray-700);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.payment-gateways,
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.gateway-item,
+.method-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.gateway-item:hover,
+.method-item:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-200);
+}
+
+.gateway-item i,
+.method-item i {
+  font-size: 1.25rem;
+  color: var(--brand-600);
+  width: 24px;
+  text-align: center;
+}
+
+.gateway-item span:first-of-type,
+.method-item span:first-of-type {
+  flex: 1;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.gateway-item .status-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Recurring Billing Styles */
+.recurring-billing-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.recurring-billing-card h4 {
+  margin: 0 0 1rem 0;
+  color: var(--gray-700);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recurring-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  margin-bottom: 0.75rem;
+}
+
+.recurring-item:last-child {
+  margin-bottom: 0;
+}
+
+.recurring-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recurring-customer {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.recurring-details {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.recurring-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Payment Tracking Styles */
+.payment-tracking-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.payment-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.payment-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gray-300);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -0.5rem;
+  top: 0.25rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--brand-500);
+}
+
+.timeline-item.completed::before {
+  background: var(--success-500);
+  box-shadow: 0 0 0 2px var(--success-500);
+}
+
+.timeline-item.pending::before {
+  background: var(--warning-500);
+  box-shadow: 0 0 0 2px var(--warning-500);
+}
+
+.timeline-content {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+}
+
+.timeline-title {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.25rem;
+}
+
+.timeline-description {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin-bottom: 0.5rem;
+}
+
+.timeline-meta {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Enhanced Button Styles */
+.btn-info {
+  background: #0ea5e9;
+  color: #fff;
+  border: 1px solid #0ea5e9;
+}
+
+.btn-info:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: #fff;
+  border: 1px solid #f59e0b;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+  border-color: #d97706;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design for Billing */
+@media (max-width: 768px) {
+  .template-card {
+    margin-bottom: 1rem;
+  }
+  
+  .payment-method-card {
+    margin-bottom: 1rem;
+  }
+  
+  .recurring-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .recurring-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
