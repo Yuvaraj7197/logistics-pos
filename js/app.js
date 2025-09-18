@@ -71,7 +71,6 @@ function showScreen(screenId) {
     'dashboardContainer',
     'ordersContainer', 
     'stockContainer',
-    'inventoryContainer',
     'staffContainer',
     'billingContainer',
     'financialContainer',
@@ -130,7 +129,6 @@ function backToDashboard() {
   const containers = [
     'ordersContainer',
     'stockContainer',
-    'inventoryContainer',
     'staffContainer',
     'billingContainer',
     'financialContainer',

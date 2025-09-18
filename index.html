@@ -78,10 +78,7 @@
           <i class="pi pi-shopping-cart"></i> Orders
         </button>
         <button class="nav-button" data-target="stock" onclick="goTo('stock', this)">
-          <i class="pi pi-box"></i> Stock
-        </button>
-        <button class="nav-button" data-target="inventory" onclick="goTo('inventory', this)">
-          <i class="pi pi-list"></i> Inventory
+          <i class="pi pi-box"></i> Stock & Inventory
         </button>
         <button class="nav-button" data-target="staff" onclick="goTo('staff', this)">
           <i class="pi pi-users"></i> Staff
@@ -147,23 +144,10 @@
                   <div class="card dashboard-card">
                     <div>
                       <div class="icon"><i class="pi pi-box"></i></div>
-                      <h3>Stock Management</h3>
-                      <p style="color: var(--gray-600); font-size: .875rem;">Monitor stock levels and inventory</p>
+                      <h3>Stock & Inventory</h3>
+                      <p style="color: var(--gray-600); font-size: .875rem;">Complete stock management, inventory tracking, and analytics</p>
                     </div>
                     <button class="btn btn-primary" onclick="showScreen('stock')">
-                      <i class="pi pi-arrow-right"></i> Open
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="col-12 md:col-6 lg:col-4">
-                  <div class="card dashboard-card">
-                    <div>
-                      <div class="icon"><i class="pi pi-list"></i></div>
-                      <h3>Inventory</h3>
-                      <p style="color: var(--gray-600); font-size: .875rem;">Complete inventory overview</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="showScreen('inventory')">
                       <i class="pi pi-arrow-right"></i> Open
                     </button>
                   </div>
@@ -323,16 +307,22 @@
             </section>
           </div>
           <div id="stockContainer" class="hidden">
-            <!-- STOCK MANAGEMENT COMPONENT -->
+            <!-- STOCK & INVENTORY MANAGEMENT COMPONENT -->
             <section id="stock" class="p-4">
               <div class="content-header">
                 <div>
-                  <h2><i class="pi pi-box"></i> Stock Management</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Monitor and manage inventory levels</p>
+                  <h2><i class="pi pi-box"></i> Stock & Inventory Management</h2>
+                  <p style="color: var(--gray-600); margin: 0;">Complete inventory management, stock tracking, and analytics</p>
                 </div>
                 <div class="actions">
                   <button class="btn btn-primary" onclick="addStockItem()">
-                    <i class="pi pi-plus"></i> Add Stock
+                    <i class="pi pi-plus"></i> Add Stock Item
+                  </button>
+                  <button class="btn btn-success" onclick="openStockMovementModal()">
+                    <i class="pi pi-arrows-h"></i> Stock Movement
+                  </button>
+                  <button class="btn btn-warning" onclick="exportStockReport()">
+                    <i class="pi pi-download"></i> Export Report
                   </button>
                   <button class="btn btn-secondary" onclick="backToDashboard()">
                     <i class="pi pi-arrow-left"></i> Back
@@ -356,6 +346,33 @@
                 <div class="stat-card">
                   <div class="stat-value" id="totalStockValue">₹0</div>
                   <div class="stat-label">Total Stock Value</div>
+                </div>
+              </div>
+
+              <!-- Inventory Analytics Section -->
+              <div class="grid" style="margin-bottom: 1.5rem;">
+                <div class="col-12 md:col-6">
+                  <div class="card">
+                    <h3><i class="pi pi-chart-pie"></i> Category Breakdown</h3>
+                    <div id="categoryBreakdown" style="margin: 1rem 0;">
+                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+                        <i class="pi pi-chart-pie" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Loading category data...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-12 md:col-6">
+                  <div class="card">
+                    <h3><i class="pi pi-history"></i> Recent Stock Movements</h3>
+                    <div id="recentMovements" style="margin: 1rem 0;">
+                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
+                        <i class="pi pi-history" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        No recent movements
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -422,70 +439,6 @@
                   <tbody id="stockTbody">
                   </tbody>
                 </table>
-              </div>
-            </section>
-          </div>
-          <div id="inventoryContainer" class="hidden">
-            <!-- INVENTORY COMPONENT -->
-            <section id="inventory" class="p-4">
-              <div class="content-header">
-                <div>
-                  <h2><i class="pi pi-list"></i> Inventory Overview</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Complete inventory management and tracking</p>
-                </div>
-                <div class="actions">
-                  <button class="btn btn-primary">
-                    <i class="pi pi-download"></i> Export Report
-                  </button>
-                  <button class="btn btn-secondary" onclick="backToDashboard()">
-                    <i class="pi pi-arrow-left"></i> Back
-                  </button>
-                </div>
-              </div>
-
-              <div class="stats-grid">
-                <div class="stat-card">
-                  <div class="stat-value" id="inventoryTotalItems">0</div>
-                  <div class="stat-label">Total Items</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="inventoryValue">₹0</div>
-                  <div class="stat-label">Inventory Value</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="inventoryLowStock">0</div>
-                  <div class="stat-label">Low Stock Items</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="inventoryOutOfStock">0</div>
-                  <div class="stat-label">Out of Stock</div>
-                </div>
-              </div>
-
-              <div class="grid">
-                <div class="col-12 md:col-6">
-                  <div class="card">
-                    <h3>Category Breakdown</h3>
-                    <div style="margin: 1rem 0;">
-                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
-                        <i class="pi pi-chart-pie" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                        No data available
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="col-12 md:col-6">
-                  <div class="card">
-                    <h3>Recent Movements</h3>
-                    <div style="margin: 1rem 0;">
-                      <div style="text-align: center; color: var(--gray-500); padding: 2rem;">
-                        <i class="pi pi-history" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                        No recent movements
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </section>
           </div>
