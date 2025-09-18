@@ -4,9 +4,9 @@ const FINANCIAL_STORAGE_KEY = 'logosic_financial_v1';
 // Sample financial data - cleared
 const FINANCIAL_RECORDS = [];
 
-const FINANCIAL_TYPES = ['Machine EMI', 'Electric Bill', 'Transport Cost', 'Commission', 'Rent', 'Insurance', 'Maintenance', 'Other'];
+const FINANCIAL_TYPES = getConfig('business.financial.types', ['Machine EMI', 'Electric Bill', 'Transport Cost', 'Commission', 'Rent', 'Insurance', 'Maintenance', 'Other']);
 // PAYMENT_METHODS is defined in billing.js
-const FINANCIAL_STATUS = ['Paid', 'Pending', 'Overdue', 'Cancelled'];
+const FINANCIAL_STATUS = getConfig('business.financial.statuses', ['Paid', 'Pending', 'Overdue', 'Cancelled']);
 
 // Storage functions
 function loadFinancialRecords() {
@@ -95,7 +95,7 @@ function renderFinancialRecords() {
   
   // Initialize or update pagination
   if (!window.paginationInstances['financialContainer']) {
-    createPagination('financialContainer', 10);
+    createPagination('financialContainer');
   }
   
   const pagination = window.paginationInstances['financialContainer'];
@@ -258,6 +258,7 @@ function addFinancialRecord() {
       saveFinancialRecords(records);
       closeModal();
       renderFinancialRecords();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Financial record added successfully', 'success');
     }}
   ]);
@@ -415,6 +416,7 @@ function editFinancialRecord(recordId) {
       saveFinancialRecords(records);
       closeModal();
       renderFinancialRecords();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Financial record updated successfully', 'success');
     }}
   ]);

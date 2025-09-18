@@ -1,7 +1,7 @@
 // Stock Management JavaScript
 const STOCK_STORAGE_KEY = 'logosic_stock_v1';
-const STOCK_CATEGORIES = ['Electronics', 'Furniture', 'Medical', 'Industrial', 'Automotive', 'Textiles', 'Food & Beverage', 'Other'];
-const STOCK_STATUS = ['In Stock', 'Low Stock', 'Out of Stock'];
+const STOCK_CATEGORIES = getConfig('business.stock.categories', ['Electronics', 'Furniture', 'Medical', 'Industrial', 'Automotive', 'Textiles', 'Food & Beverage', 'Other']);
+const STOCK_STATUS = getConfig('business.stock.statuses', ['In Stock', 'Low Stock', 'Out of Stock']);
 
 // Initialize storage manager
 const stockStorage = createStorageManager(STOCK_STORAGE_KEY, []);
@@ -82,7 +82,7 @@ function renderStock() {
   
   // Initialize or update pagination
   if (!window.paginationInstances['stockContainer']) {
-    createPagination('stockContainer', 10);
+    createPagination('stockContainer');
   }
   
   const pagination = window.paginationInstances['stockContainer'];
@@ -237,6 +237,7 @@ function addStockItem() {
       saveStockItems(items);
       closeModal();
       renderStock();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Stock item added successfully', 'success');
     }}
   ]);
@@ -374,6 +375,7 @@ function editStockItem(itemId) {
       saveStockItems(items);
       closeModal();
       renderStock();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Stock item updated successfully', 'success');
     }}
   ]);

@@ -242,7 +242,7 @@ function confirmAction(message, callback) {
 /**
  * Initialize pagination for a container
  */
-function initializePagination(containerId, pageSize = 10) {
+function initializePagination(containerId, pageSize = null) {
   if (typeof window.createPagination === 'function') {
     window.createPagination(containerId, pageSize);
   }

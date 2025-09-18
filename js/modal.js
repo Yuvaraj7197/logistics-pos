@@ -140,9 +140,9 @@ function formatDate(date) {
 
 // Pagination System
 class PaginationSystem {
-  constructor(containerId, itemsPerPage = 10) {
+  constructor(containerId, itemsPerPage = null) {
     this.containerId = containerId;
-    this.itemsPerPage = itemsPerPage;
+    this.itemsPerPage = itemsPerPage || getConfig('ui.pagination.defaultPageSize', 10);
     this.currentPage = 1;
     this.totalItems = 0;
     this.totalPages = 0;
@@ -244,11 +244,9 @@ class PaginationSystem {
         <div class="pagination-size">
           <label>Show:</label>
           <select onchange="window.paginationInstances['${this.containerId}'].changePageSize(this.value)">
-            <option value="5" ${this.itemsPerPage === 5 ? 'selected' : ''}>5</option>
-            <option value="10" ${this.itemsPerPage === 10 ? 'selected' : ''}>10</option>
-            <option value="25" ${this.itemsPerPage === 25 ? 'selected' : ''}>25</option>
-            <option value="50" ${this.itemsPerPage === 50 ? 'selected' : ''}>50</option>
-            <option value="100" ${this.itemsPerPage === 100 ? 'selected' : ''}>100</option>
+            ${getConfig('ui.pagination.pageSizeOptions', [5, 10, 25, 50, 100]).map(size => 
+              `<option value="${size}" ${this.itemsPerPage === size ? 'selected' : ''}>${size}</option>`
+            ).join('')}
           </select>
         </div>
       </div>
@@ -260,7 +258,7 @@ class PaginationSystem {
   // Generate page number buttons
   generatePageNumbers() {
     let pages = '';
-    const maxVisiblePages = 5;
+    const maxVisiblePages = getConfig('ui.pagination.maxVisiblePages', 5);
     let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
 
@@ -315,7 +313,7 @@ class PaginationSystem {
 window.paginationInstances = {};
 
 // Helper function to create pagination instance
-function createPagination(containerId, itemsPerPage = 10) {
+function createPagination(containerId, itemsPerPage = null) {
   const instance = new PaginationSystem(containerId, itemsPerPage);
   window.paginationInstances[containerId] = instance;
   return instance;

@@ -3,6 +3,9 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize login functionality
   initializeLogin();
+  
+  // Initialize dashboard stats
+  updateDashboardStats();
 });
 
 // =============================================================================
@@ -57,10 +60,6 @@ function logout() {
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
       loginForm.reset();
-      const usernameInput = loginForm.querySelector('input[type="text"]');
-      const passwordInput = loginForm.querySelector('input[type="password"]');
-      if (usernameInput) usernameInput.value = "admin";
-      if (passwordInput) passwordInput.value = "password";
     }
   });
 }
@@ -99,6 +98,11 @@ function showScreen(screenId) {
   if (screenId === 'financial') renderFinancialRecords();
   if (screenId === 'staff') renderStaff();
   if (screenId === 'gst') renderGstReturns();
+  
+  // Update dashboard stats when showing dashboard
+  if (screenId === 'dashboard') {
+    updateDashboardStats();
+  }
   
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -140,8 +144,183 @@ function backToDashboard() {
     dashboardContainer.classList.remove("hidden");
   }
   
+  // Update dashboard statistics
+  updateDashboardStats();
+  
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =============================================================================
+// DASHBOARD STATISTICS
+// =============================================================================
+
+/**
+ * Update dashboard statistics with dynamic values
+ */
+function updateDashboardStats() {
+  try {
+    // Load all data
+    const orders = loadOrders() || [];
+    const stockItems = loadStockItems() || [];
+    const staff = loadStaff() || [];
+    const invoices = loadInvoices() || [];
+    const financialRecords = loadFinancialRecords() || [];
+    
+    // Calculate order statistics
+    const totalOrders = orders.length;
+    const completedToday = orders.filter(order => 
+      order.status === 'Completed' && 
+      order.date === new Date().toISOString().slice(0, 10)
+    ).length;
+    const totalOrderValue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    
+    // Calculate stock statistics
+    const totalStockItems = stockItems.length;
+    const lowStockItems = stockItems.filter(item => 
+      getStockStatus(item.currentStock, item.minRequired) === 'Low Stock'
+    ).length;
+    const outOfStockItems = stockItems.filter(item => 
+      getStockStatus(item.currentStock, item.minRequired) === 'Out of Stock'
+    ).length;
+    const totalStockValue = stockItems.reduce((sum, item) => 
+      sum + (item.currentStock * item.unitPrice), 0
+    );
+    
+    // Calculate staff statistics
+    const activeStaff = staff.filter(emp => emp.status === 'Active').length;
+    const attendance = loadAttendance() || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const presentToday = staff.filter(emp => {
+      const todayAttendance = attendance[emp.id]?.[today];
+      return todayAttendance && todayAttendance.status === 'P';
+    }).length;
+    
+    // Calculate billing statistics
+    const totalRevenue = invoices.reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
+    const pendingPayments = invoices.filter(invoice => 
+      invoice.status === 'Unpaid' || invoice.status === 'Partial'
+    ).reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
+    const invoicesGenerated = invoices.length;
+    const overduePayments = invoices.filter(invoice => 
+      invoice.status === 'Overdue'
+    ).length;
+    
+    // Calculate monthly revenue (current month)
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const monthlyRevenue = invoices.filter(invoice => 
+      invoice.issueDate && invoice.issueDate.startsWith(currentMonth)
+    ).reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
+    
+    // Update dashboard elements
+    updateElement('totalOrdersCount', totalOrders);
+    updateElement('totalStockItemsCount', totalStockItems);
+    updateElement('activeStaffCount', activeStaff);
+    updateElement('monthlyRevenueCount', formatINR(monthlyRevenue));
+    
+    // Update billing elements
+    updateElement('totalRevenueCount', formatINR(totalRevenue));
+    updateElement('pendingPaymentsCount', formatINR(pendingPayments));
+    updateElement('invoicesGeneratedCount', invoicesGenerated);
+    updateElement('overduePaymentsCount', overduePayments);
+    
+    // Update order elements
+    updateElement('pendingOrdersCount', orders.filter(o => o.status === 'Pending').length);
+    updateElement('completedOrdersCount', completedToday);
+    updateElement('totalOrdersValue', formatINR(totalOrderValue));
+    updateElement('avgOrderValue', formatINR(totalOrders > 0 ? totalOrderValue / totalOrders : 0));
+    
+    // Update stock elements
+    updateElement('totalItemsCount', totalStockItems);
+    updateElement('lowStockCount', lowStockItems);
+    updateElement('outOfStockCount', outOfStockItems);
+    updateElement('totalStockValue', formatINR(totalStockValue));
+    
+    // Update staff elements
+    updateElement('totalStaffCount', staff.length);
+    updateElement('presentTodayCount', presentToday);
+    updateElement('onLeaveCount', staff.filter(emp => emp.status === 'On Leave').length);
+    updateElement('pendingLeaveCount', loadLeaveRequests().filter(req => req.status === 'Pending').length);
+    
+  } catch (error) {
+    console.error('Error updating dashboard stats:', error);
+  }
+}
+
+/**
+ * Helper function to update element text content
+ */
+function updateElement(id, value) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = value;
+  }
+}
+
+/**
+ * Load data from different modules
+ */
+function loadOrders() {
+  try {
+    const stored = localStorage.getItem('logosic_orders_v1');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function loadStockItems() {
+  try {
+    const stored = localStorage.getItem('logosic_stock_v1');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function loadStaff() {
+  try {
+    const stored = localStorage.getItem('logosic_staff_v1');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function loadInvoices() {
+  try {
+    const stored = localStorage.getItem('logosic_billing_v1');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function loadFinancialRecords() {
+  try {
+    const stored = localStorage.getItem('logosic_financial_v1');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function loadAttendance() {
+  try {
+    const stored = localStorage.getItem('logosic_attendance_v1');
+    return stored ? JSON.parse(stored) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function loadLeaveRequests() {
+  try {
+    const stored = localStorage.getItem('logistics_leave_requests');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 // =============================================================================

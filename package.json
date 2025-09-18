@@ -1,0 +1,43 @@
+{
+  "name": "logistics-pos",
+  "version": "1.0.0",
+  "description": "Logistics Point of Sale System - Dynamic Dashboard with Real-time Statistics",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "start": "npx http-server . -p 8080 -o",
+    "serve": "npx http-server . -p 8080",
+    "dev": "npx http-server . -p 3000 -o",
+    "clean": "rimraf dist",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "logistics",
+    "pos",
+    "inventory",
+    "management",
+    "dashboard",
+    "dynamic",
+    "real-time",
+    "statistics"
+  ],
+  "author": "Logosic Logistics",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/logistics-pos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/logistics-pos/issues"
+  },
+  "homepage": "https://github.com/your-username/logistics-pos#readme"
+}

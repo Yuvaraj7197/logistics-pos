@@ -4,9 +4,9 @@ const BILLING_STORAGE_KEY = 'logosic_billing_v1';
 // Sample billing data - cleared
 const BILLING_RECORDS = [];
 
-const BILLING_STATUS = ['Paid', 'Unpaid', 'Overdue', 'Partial', 'Cancelled'];
-const QUOTATION_STATUS = ['Draft', 'Sent', 'Accepted', 'Rejected', 'Expired'];
-window.PAYMENT_METHODS = ['Bank Transfer', 'UPI', 'Cash', 'Cheque', 'Credit Card', 'Online Payment'];
+const BILLING_STATUS = getConfig('business.billing.statuses', ['Paid', 'Unpaid', 'Overdue', 'Partial', 'Cancelled']);
+const QUOTATION_STATUS = getConfig('business.billing.quotationStatuses', ['Draft', 'Sent', 'Accepted', 'Rejected', 'Expired']);
+window.PAYMENT_METHODS = getConfig('business.billing.paymentMethods', ['Bank Transfer', 'UPI', 'Cash', 'Cheque', 'Credit Card', 'Online Payment']);
 
 // Storage functions
 function loadInvoices() {
@@ -98,7 +98,7 @@ function renderInvoices() {
   
   // Initialize or update pagination
   if (!window.paginationInstances['billingContainer']) {
-    createPagination('billingContainer', 10);
+    createPagination('billingContainer');
   }
   
   const pagination = window.paginationInstances['billingContainer'];
@@ -239,6 +239,7 @@ function openCreateInvoiceModal() {
       saveInvoices(invoices);
       closeModal();
       renderInvoices();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Invoice created successfully', 'success');
     }}
   ]);
@@ -396,6 +397,7 @@ function editInvoice(invoiceId) {
       saveInvoices(invoices);
       closeModal();
       renderInvoices();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Invoice updated successfully', 'success');
     }}
   ]);

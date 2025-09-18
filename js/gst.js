@@ -4,8 +4,8 @@ const GST_STORAGE_KEY = 'logosic_gst_v1';
 // Sample GST data - cleared
 const GST_RECORDS = [];
 
-const GST_RETURN_TYPES = ['GSTR-1', 'GSTR-3B', 'GSTR-2A', 'GSTR-2B', 'GSTR-9'];
-const GST_STATUS = ['Draft', 'Filed', 'Approved', 'Rejected'];
+const GST_RETURN_TYPES = getConfig('business.gst.returnTypes', ['GSTR-1', 'GSTR-3B', 'GSTR-2A', 'GSTR-2B', 'GSTR-9']);
+const GST_STATUS = getConfig('business.gst.statuses', ['Draft', 'Filed', 'Approved', 'Rejected']);
 
 // Storage functions
 function loadGstReturns() {
@@ -56,7 +56,7 @@ function renderGstReturns() {
   
   // Initialize or update pagination
   if (!window.paginationInstances['gstContainer']) {
-    createPagination('gstContainer', 10);
+    createPagination('gstContainer');
   }
   
   const pagination = window.paginationInstances['gstContainer'];
@@ -217,6 +217,7 @@ function openGstReturnModal() {
       saveGstReturns(returns);
       closeModal();
       renderGstReturns();
+      updateDashboardStats(); // Update dashboard stats
       showToast('GST return filed successfully', 'success');
     }}
   ]);
@@ -382,6 +383,7 @@ function editGstReturn(returnId) {
       saveGstReturns(returns);
       closeModal();
       renderGstReturns();
+      updateDashboardStats(); // Update dashboard stats
       showToast('GST return updated successfully', 'success');
     }}
   ]);

@@ -4,15 +4,15 @@ const ATTENDANCE_STORAGE_KEY = 'logosic_attendance_v1';
 const LEAVE_STORAGE_KEY = 'logistics_leave_requests';
 const SHIFTS_STORAGE_KEY = 'logistics_shifts';
 
-const STAFF_DEPARTMENTS = ['Production', 'Quality', 'Maintenance', 'Admin', 'HR', 'Finance'];
-const STAFF_ROLES = ['Manager', 'Supervisor', 'Operator', 'Technician', 'Assistant', 'Clerk', 'Driver'];
-const SHIFT_TYPES = [
+const STAFF_DEPARTMENTS = getConfig('business.staff.departments', ['Production', 'Quality', 'Maintenance', 'Admin', 'HR', 'Finance']);
+const STAFF_ROLES = getConfig('business.staff.roles', ['Manager', 'Supervisor', 'Operator', 'Technician', 'Assistant', 'Clerk', 'Driver']);
+const SHIFT_TYPES = getConfig('business.staff.shifts', [
   { name: 'Morning', start: '09:00', end: '18:00', duration: 9 },
   { name: 'Evening', start: '14:00', end: '23:00', duration: 9 },
   { name: 'Night', start: '22:00', end: '07:00', duration: 9 }
-];
-const LEAVE_TYPES = ['Sick Leave', 'Personal Leave', 'Vacation', 'Emergency', 'Maternity/Paternity'];
-const LEAVE_STATUS = ['Pending', 'Approved', 'Rejected'];
+]);
+const LEAVE_TYPES = getConfig('business.staff.leaveTypes', ['Sick Leave', 'Personal Leave', 'Vacation', 'Emergency', 'Maternity/Paternity']);
+const LEAVE_STATUS = getConfig('business.staff.leaveStatuses', ['Pending', 'Approved', 'Rejected']);
 
 // Storage functions
 function loadStaff() {
@@ -124,7 +124,7 @@ function renderStaff(){
   
   // Initialize or update pagination
   if (!window.paginationInstances['staffContainer']) {
-    createPagination('staffContainer', 10);
+    createPagination('staffContainer');
   }
   
   const pagination = window.paginationInstances['staffContainer'];
@@ -410,6 +410,7 @@ function addStaff() {
       closeModal();
       renderStaff();
       updateStaffStats();
+      updateDashboardStats(); // Update dashboard stats
       showToast(`Staff member ${name} added successfully`, 'success');
     }}
   ]);
@@ -586,6 +587,7 @@ function editStaff(empId, evt) {
         closeModal();
         renderStaff();
         updateStaffStats();
+        updateDashboardStats(); // Update dashboard stats
         showToast(`Staff member ${name} updated successfully`, 'success');
       } else {
         showToast('Staff member not found', 'error');

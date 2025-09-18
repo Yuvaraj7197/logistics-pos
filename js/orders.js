@@ -1,6 +1,6 @@
 // Orders Management JavaScript
 const ORDERS_STORAGE_KEY = 'logosic_orders_v1';
-const ORDER_STATUS = ['Pending', 'Completed', 'Shipped', 'Cancelled'];
+const ORDER_STATUS = getConfig('business.order.statuses', ['Pending', 'Completed', 'Shipped', 'Cancelled']);
 
 // Initialize storage manager
 const orderStorage = createStorageManager(ORDERS_STORAGE_KEY, []);
@@ -70,7 +70,7 @@ function renderOrders() {
   
   // Initialize or update pagination
   if (!window.paginationInstances['ordersContainer']) {
-    createPagination('ordersContainer', 10);
+    createPagination('ordersContainer');
   }
   
   const pagination = window.paginationInstances['ordersContainer'];
@@ -231,6 +231,7 @@ function receiveOrder() {
       saveOrders(orders);
       closeModal();
       renderOrders();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Order created successfully', 'success');
     }}
   ]);
@@ -405,6 +406,7 @@ function editOrder(orderId) {
       saveOrders(orders);
       closeModal();
       renderOrders();
+      updateDashboardStats(); // Update dashboard stats
       showToast('Order updated successfully', 'success');
     }}
   ]);
@@ -546,6 +548,7 @@ function receiveDCOrder() {
       saveOrders(orders);
       closeModal();
       renderOrders();
+      updateDashboardStats(); // Update dashboard stats
       showToast('DC Order created successfully', 'success');
     }}
   ]);
