@@ -100,7 +100,13 @@ function showScreen(screenId) {
   }
   if (screenId === 'stock') renderStock();
   if (screenId === 'billing') renderInvoices();
-  if (screenId === 'financial') renderFinancialRecords();
+  if (screenId === 'financial') {
+    if (typeof initializeFinancialManagement === 'function') {
+      initializeFinancialManagement();
+    } else {
+      renderFinancialRecords();
+    }
+  }
   if (screenId === 'staff') renderStaff();
   if (screenId === 'gst') renderGstReturns();
   
@@ -225,17 +231,24 @@ function updateDashboardStats() {
       invoice.status === 'Overdue'
     ).length;
     
-    // Calculate monthly revenue (current month)
+    // Calculate monthly revenue (current month) - include financial records
     const currentMonth = new Date().toISOString().slice(0, 7);
     const monthlyRevenue = invoices.filter(invoice => 
       invoice.issueDate && invoice.issueDate.startsWith(currentMonth)
     ).reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
     
+    // Add financial income for current month
+    const financialIncome = financialRecords.filter(record => 
+      record.type === 'Income' && record.date && record.date.startsWith(currentMonth)
+    ).reduce((sum, record) => sum + (record.amount || 0), 0);
+    
+    const totalMonthlyRevenue = monthlyRevenue + financialIncome;
+    
     // Update dashboard elements
     updateElement('totalOrdersCount', totalOrders);
     updateElement('totalStockItemsCount', totalStockItems);
     updateElement('activeStaffCount', activeStaff);
-    updateElement('monthlyRevenueCount', formatINR(monthlyRevenue));
+    updateElement('monthlyRevenueCount', formatINR(totalMonthlyRevenue));
     
     // Update billing elements
     updateElement('totalRevenueCount', formatINR(totalRevenue));

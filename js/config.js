@@ -103,10 +103,87 @@ const BUSINESS_CONFIG = {
   
   // Financial Configuration
   financial: {
-    types: ['Machine EMI', 'Electric Bill', 'Transport Cost', 'Commission', 'Rent', 'Insurance', 'Maintenance', 'Other'],
-    statuses: ['Paid', 'Pending', 'Overdue', 'Cancelled'],
+    // Expense Categories
+    expenseCategories: {
+      'Operating Expenses': [
+        'Electric Bill', 'Water Bill', 'Internet', 'Phone', 'Office Supplies', 'Stationery', 'Cleaning'
+      ],
+      'Transport & Logistics': [
+        'Fuel', 'Vehicle Maintenance', 'Transport Cost', 'Shipping', 'Freight', 'Delivery Charges', 'Toll Charges'
+      ],
+      'Equipment & Machinery': [
+        'Machine EMI', 'Equipment Purchase', 'Maintenance', 'Repairs', 'Software License', 'Hardware'
+      ],
+      'Staff & HR': [
+        'Salary', 'Commission', 'Bonus', 'PF Contribution', 'ESI Contribution', 'Training', 'Recruitment'
+      ],
+      'Property & Rent': [
+        'Rent', 'Property Tax', 'Maintenance Charges', 'Security Deposit', 'Utilities'
+      ],
+      'Insurance & Legal': [
+        'Insurance', 'Legal Fees', 'Compliance', 'Audit Fees', 'Professional Services'
+      ],
+      'Marketing & Sales': [
+        'Advertising', 'Marketing', 'Promotional Activities', 'Website Development', 'Social Media'
+      ],
+      'Financial Services': [
+        'Bank Charges', 'Interest', 'Loan EMI', 'Credit Card Fees', 'Transaction Fees'
+      ],
+      'Other Expenses': [
+        'Miscellaneous', 'Contingency', 'Donations', 'Entertainment', 'Travel'
+      ]
+    },
+    
+    // Income Categories
+    incomeCategories: {
+      'Sales Revenue': [
+        'Product Sales', 'Service Revenue', 'Consulting Fees', 'Commission Income'
+      ],
+      'Other Income': [
+        'Interest Income', 'Rental Income', 'Dividend Income', 'Miscellaneous Income'
+      ]
+    },
+    
+    // Account Types for Double Entry
+    accountTypes: {
+      'Assets': [
+        'Current Assets', 'Fixed Assets', 'Bank Accounts', 'Cash', 'Accounts Receivable', 'Inventory'
+      ],
+      'Liabilities': [
+        'Current Liabilities', 'Long-term Liabilities', 'Accounts Payable', 'Loans', 'Creditors'
+      ],
+      'Equity': [
+        'Owner Equity', 'Retained Earnings', 'Capital'
+      ],
+      'Revenue': [
+        'Sales Revenue', 'Service Revenue', 'Other Income'
+      ],
+      'Expenses': [
+        'Operating Expenses', 'Administrative Expenses', 'Financial Expenses'
+      ]
+    },
+    
+    // Payment Methods
+    paymentMethods: [
+      'Cash', 'Bank Transfer', 'UPI', 'Credit Card', 'Debit Card', 'Cheque', 
+      'Online Payment', 'NEFT', 'RTGS', 'IMPS', 'Wallet Payment'
+    ],
+    
+    // Transaction Types
+    transactionTypes: [
+      'Expense', 'Income', 'Transfer', 'Adjustment', 'Refund', 'Payment', 'Receipt'
+    ],
+    
+    // Statuses
+    statuses: ['Paid', 'Pending', 'Overdue', 'Cancelled', 'Partially Paid'],
+    
+    // Bank Reconciliation
+    reconciliationStatuses: ['Matched', 'Unmatched', 'Reconciled', 'Disputed'],
+    
     defaultStatus: 'Pending',
-    idPrefix: 'FIN'
+    idPrefix: 'FIN',
+    expenseIdPrefix: 'EXP',
+    incomeIdPrefix: 'INC'
   },
   
   // GST Configuration

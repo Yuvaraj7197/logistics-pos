@@ -786,38 +786,63 @@
             </section>
           </div>
           <div id="financialContainer" class="hidden">
-            <!-- FINANCIAL MANAGEMENT COMPONENT -->
+            <!-- COMPREHENSIVE FINANCIAL MANAGEMENT COMPONENT -->
             <section id="financial" class="p-4">
               <div class="content-header">
                 <div>
                   <h2><i class="pi pi-calculator"></i> Financial Management</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Manage Machine EMI, Electric Bills, Transport Costs, and Commission</p>
+                  <p style="color: var(--gray-600); margin: 0;">Comprehensive expense tracking, income management, accounting, and bank reconciliation</p>
                 </div>
                 <div class="actions">
-                  <button class="btn btn-primary" onclick="addFinancialRecord()">
-                    <i class="pi pi-plus"></i> Add Record
-                  </button>
-                  <button class="btn btn-secondary" onclick="backToDashboard()">
-                    <i class="pi pi-arrow-left"></i> Back
-                  </button>
+                  <div class="btn-group">
+                    <button class="btn btn-success" onclick="addIncome()">
+                      <i class="pi pi-plus"></i> Add Income
+                    </button>
+                    <button class="btn btn-danger" onclick="addExpense()">
+                      <i class="pi pi-minus"></i> Add Expense
+                    </button>
+                    <button class="btn btn-primary" onclick="addFinancialRecord()">
+                      <i class="pi pi-plus"></i> Add Record
+                    </button>
+                    <button class="btn btn-info" onclick="showReports()">
+                      <i class="pi pi-chart-bar"></i> Reports
+                    </button>
+                    <button class="btn btn-warning" onclick="showBankReconciliation()">
+                      <i class="pi pi-refresh"></i> Bank Reconciliation
+                    </button>
+                    <button class="btn btn-info" onclick="resetToSampleData()" title="Load sample data for testing">
+                      <i class="pi pi-database"></i> Load Sample Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="backToDashboard()">
+                      <i class="pi pi-arrow-left"></i> Back
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-value" id="totalFinancialAmount">₹0</div>
-                  <div class="stat-label">Total Amount</div>
+                  <div class="stat-value" id="totalIncomeAmount">₹0</div>
+                  <div class="stat-label">Total Income</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value" id="paidFinancialAmount">₹0</div>
-                  <div class="stat-label">Paid Amount</div>
+                  <div class="stat-value" id="totalExpenseAmount">₹0</div>
+                  <div class="stat-label">Total Expenses</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value" id="pendingFinancialAmount">₹0</div>
+                  <div class="stat-value" id="netProfitAmount">₹0</div>
+                  <div class="stat-label">Net Profit/Loss</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="pendingAmount">₹0</div>
                   <div class="stat-label">Pending Amount</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value" id="overdueFinancialAmount">₹0</div>
+                  <div class="stat-value" id="paidAmount">₹0</div>
+                  <div class="stat-label">Paid Amount</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="overdueAmount">₹0</div>
                   <div class="stat-label">Overdue Amount</div>
                 </div>
               </div>
@@ -827,14 +852,8 @@
                   <label>Type</label>
                   <select id="financialTypeFilter" onchange="applyFinancialFilters()">
                     <option value="">All Types</option>
-                    <option value="Machine EMI">Machine EMI</option>
-                    <option value="Electric Bill">Electric Bill</option>
-                    <option value="Transport Cost">Transport Cost</option>
-                    <option value="Commission">Commission</option>
-                    <option value="Rent">Rent</option>
-                    <option value="Insurance">Insurance</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Other">Other</option>
+                    <option value="Expense">Expense</option>
+                    <option value="Income">Income</option>
                   </select>
                 </div>
                 <div class="filter-group">
@@ -844,6 +863,7 @@
                     <option value="Paid">Paid</option>
                     <option value="Pending">Pending</option>
                     <option value="Overdue">Overdue</option>
+                    <option value="Partially Paid">Partially Paid</option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
                 </div>
@@ -877,6 +897,7 @@
                     <tr>
                       <th>Date</th>
                       <th>Type</th>
+                      <th>Category</th>
                       <th>Description</th>
                       <th>Amount</th>
                       <th>Status</th>
@@ -1007,6 +1028,7 @@
   <script src="js/staff.js"></script>
   <script src="js/billing.js"></script>
   <script src="js/financial.js"></script>
+  <script src="js/sampleData.js"></script>
   <script src="js/gst.js"></script>
 
 </body>

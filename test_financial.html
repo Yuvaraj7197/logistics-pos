@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Management Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .test-button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Financial Management Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Configuration Loading</h2>
+        <button class="test-button" onclick="testConfig()">Test Configuration</button>
+        <div id="configResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Storage Functions</h2>
+        <button class="test-button" onclick="testStorage()">Test Storage</button>
+        <div id="storageResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: ID Generation</h2>
+        <button class="test-button" onclick="testIdGeneration()">Test ID Generation</button>
+        <div id="idResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Financial Record Creation</h2>
+        <button class="test-button" onclick="testFinancialRecord()">Test Financial Record</button>
+        <div id="recordResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 5: Statistics Calculation</h2>
+        <button class="test-button" onclick="testStatistics()">Test Statistics</button>
+        <div id="statsResult" class="result"></div>
+    </div>
+
+    <!-- Load the required scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/financial.js"></script>
+
+    <script>
+        function testConfig() {
+            try {
+                const expenseCategories = getConfig('business.financial.expenseCategories', {});
+                const incomeCategories = getConfig('business.financial.incomeCategories', {});
+                const paymentMethods = getConfig('business.financial.paymentMethods', []);
+                
+                const result = document.getElementById('configResult');
+                result.innerHTML = `
+                    <div class="success">
+                        <strong>Configuration Test Passed!</strong><br>
+                        Expense Categories: ${Object.keys(expenseCategories).length} groups<br>
+                        Income Categories: ${Object.keys(incomeCategories).length} groups<br>
+                        Payment Methods: ${paymentMethods.length} methods
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('configResult').innerHTML = `<div class="error">Configuration Test Failed: ${error.message}</div>`;
+            }
+        }
+        
+        function testStorage() {
+            try {
+                // Test expense storage
+                const expenses = financialStorage.expenses.load();
+                const testExpense = {
+                    id: 'TEST-001',
+                    category: 'Test',
+                    amount: 100,
+                    description: 'Test expense',
+                    paymentMethod: 'Cash',
+                    status: 'Paid',
+                    date: new Date().toISOString().split('T')[0],
+                    vendor: 'Test Vendor',
+                    reference: 'TEST-REF',
+                    notes: 'Test notes',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'test'
+                };
+                
+                expenses.push(testExpense);
+                financialStorage.expenses.save(expenses);
+                
+                const loadedExpenses = financialStorage.expenses.load();
+                const found = loadedExpenses.find(exp => exp.id === 'TEST-001');
+                
+                const result = document.getElementById('storageResult');
+                if (found) {
+                    result.innerHTML = '<div class="success"><strong>Storage Test Passed!</strong><br>Expense record saved and loaded successfully.</div>';
+                } else {
+                    result.innerHTML = '<div class="error">Storage Test Failed: Record not found after save.</div>';
+                }
+            } catch (error) {
+                document.getElementById('storageResult').innerHTML = `<div class="error">Storage Test Failed: ${error.message}</div>`;
+            }
+        }
+        
+        function testIdGeneration() {
+            try {
+                const expenseId = generateFinancialId('EXP');
+                const incomeId = generateFinancialId('INC');
+                const transactionId = generateTransactionId();
+                
+                const result = document.getElementById('idResult');
+                result.innerHTML = `
+                    <div class="success">
+                        <strong>ID Generation Test Passed!</strong><br>
+                        Expense ID: ${expenseId}<br>
+                        Income ID: ${incomeId}<br>
+                        Transaction ID: ${transactionId}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('idResult').innerHTML = `<div class="error">ID Generation Test Failed: ${error.message}</div>`;
+            }
+        }
+        
+        function testFinancialRecord() {
+            try {
+                // Create a test expense
+                const expenses = financialStorage.expenses.load();
+                const testExpense = {
+                    id: generateFinancialId('EXP'),
+                    category: 'Operating Expenses',
+                    subcategory: 'Office Supplies',
+                    amount: 500,
+                    description: 'Test office supplies',
+                    paymentMethod: 'Bank Transfer',
+                    status: 'Paid',
+                    date: new Date().toISOString().split('T')[0],
+                    vendor: 'Test Office Store',
+                    reference: 'INV-001',
+                    notes: 'Test purchase',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'test'
+                };
+                
+                expenses.push(testExpense);
+                financialStorage.expenses.save(expenses);
+                
+                // Create a test income
+                const income = financialStorage.income.load();
+                const testIncome = {
+                    id: generateFinancialId('INC'),
+                    category: 'Sales Revenue',
+                    amount: 1000,
+                    description: 'Test sale',
+                    paymentMethod: 'Bank Transfer',
+                    status: 'Paid',
+                    customer: 'Test Customer',
+                    date: new Date().toISOString().split('T')[0],
+                    invoice: 'INV-002',
+                    reference: 'INV-002',
+                    notes: 'Test sale',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'test'
+                };
+                
+                income.push(testIncome);
+                financialStorage.income.save(income);
+                
+                const result = document.getElementById('recordResult');
+                result.innerHTML = `
+                    <div class="success">
+                        <strong>Financial Record Test Passed!</strong><br>
+                        Created expense: ${testExpense.id}<br>
+                        Created income: ${testIncome.id}<br>
+                        Total expenses: ${expenses.length}<br>
+                        Total income: ${income.length}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('recordResult').innerHTML = `<div class="error">Financial Record Test Failed: ${error.message}</div>`;
+            }
+        }
+        
+        function testStatistics() {
+            try {
+                const expenses = financialStorage.expenses.load();
+                const income = financialStorage.income.load();
+                
+                const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+                const totalIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
+                const netProfit = totalIncome - totalExpenses;
+                
+                const paidExpenses = expenses.filter(exp => exp.status === 'Paid').reduce((sum, exp) => sum + exp.amount, 0);
+                const pendingExpenses = expenses.filter(exp => exp.status === 'Pending').reduce((sum, exp) => sum + exp.amount, 0);
+                
+                const result = document.getElementById('statsResult');
+                result.innerHTML = `
+                    <div class="success">
+                        <strong>Statistics Test Passed!</strong><br>
+                        Total Expenses: ₹${totalExpenses.toFixed(2)}<br>
+                        Total Income: ₹${totalIncome.toFixed(2)}<br>
+                        Net Profit: ₹${netProfit.toFixed(2)}<br>
+                        Paid Expenses: ₹${paidExpenses.toFixed(2)}<br>
+                        Pending Expenses: ₹${pendingExpenses.toFixed(2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('statsResult').innerHTML = `<div class="error">Statistics Test Failed: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
