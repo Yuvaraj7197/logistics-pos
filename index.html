@@ -4,6 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Logosic Logistics • Admin Suite</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="assets/logos/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/logos/favicon-16x16.png">
 
   <!-- External Dependencies -->
   <link rel="stylesheet" href="https://unpkg.com/primeflex@3.3.1/primeflex.min.css" />
@@ -24,7 +30,10 @@
     <section id="loginPage" class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <i class="pi pi-truck"></i>
+          <!-- Company Logo for Login Page -->
+          <img src="assets/logos/company-logo.jpg" alt="Company Logo" class="company-logo-large" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <!-- Fallback icon if logo fails to load -->
+          <i class="pi pi-truck" style="display: none;"></i>
           <h2>Admin Login</h2>
           <p style="color: var(--gray-600); margin: 0;">Access your logistics dashboard</p>
         </div>
@@ -52,9 +61,14 @@
   <!-- MAIN DASHBOARD CONTAINER -->
   <div id="dashboardPage" class="hidden">
     <header>
-      <div class="logo">
-        <i class="pi pi-truck"></i>
-        Logosic Logistics
+      <div class="logo logo-with-text">
+        <!-- Company Logo -->
+        <img src="assets/logos/company-logo.jpg" alt="Company Logo" class="company-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <!-- Fallback text logo if image fails to load -->
+        <div class="logo" style="display: none;">
+          <i class="pi pi-truck"></i>
+          Logosic Logistics
+        </div>
       </div>
       <div style="display: flex; align-items: center; gap: 1rem;">
         <span style="color: var(--gray-600); font-size: .875rem;">Welcome, Admin</span>
