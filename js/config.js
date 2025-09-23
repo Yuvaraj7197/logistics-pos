@@ -188,11 +188,73 @@ const BUSINESS_CONFIG = {
   
   // GST Configuration
   gst: {
-    returnTypes: ['GSTR-1', 'GSTR-3B', 'GSTR-2A', 'GSTR-2B', 'GSTR-9'],
-    statuses: ['Draft', 'Filed', 'Approved', 'Rejected'],
+    returnTypes: ['GSTR-1', 'GSTR-3B', 'GSTR-2A', 'GSTR-2B', 'GSTR-9', 'GSTR-9C'],
+    statuses: ['Draft', 'Filed', 'Approved', 'Rejected', 'Under Review'],
     defaultStatus: 'Draft',
     idPrefix: 'GST',
-    gstinLength: 15
+    gstinLength: 15,
+    
+    // Global Tax Rates Configuration
+    taxRates: {
+      // India GST Rates
+      'IN': {
+        name: 'India GST',
+        currency: 'INR',
+        rates: [
+          { rate: 0, name: '0% (Exempt)', description: 'Essential goods and services' },
+          { rate: 0.05, name: '5%', description: 'Essential commodities' },
+          { rate: 0.12, name: '12%', description: 'Processed foods, medicines' },
+          { rate: 0.18, name: '18%', description: 'Most goods and services' },
+          { rate: 0.28, name: '28%', description: 'Luxury items, automobiles' }
+        ],
+        components: ['CGST', 'SGST', 'IGST'],
+        filingFrequency: 'monthly'
+      },
+      // US Sales Tax (example)
+      'US': {
+        name: 'US Sales Tax',
+        currency: 'USD',
+        rates: [
+          { rate: 0, name: '0% (Exempt)', description: 'Essential goods' },
+          { rate: 0.04, name: '4%', description: 'Basic rate' },
+          { rate: 0.08, name: '8%', description: 'Standard rate' },
+          { rate: 0.10, name: '10%', description: 'Higher rate' }
+        ],
+        components: ['State Tax', 'Local Tax'],
+        filingFrequency: 'quarterly'
+      },
+      // UK VAT (example)
+      'UK': {
+        name: 'UK VAT',
+        currency: 'GBP',
+        rates: [
+          { rate: 0, name: '0% (Zero-rated)', description: 'Essential goods' },
+          { rate: 0.05, name: '5% (Reduced)', description: 'Energy, children\'s items' },
+          { rate: 0.20, name: '20% (Standard)', description: 'Most goods and services' }
+        ],
+        components: ['VAT'],
+        filingFrequency: 'quarterly'
+      }
+    },
+    
+    // Compliance Settings
+    compliance: {
+      autoCalculate: true,
+      validateGSTIN: true,
+      generateReturns: true,
+      sendReminders: true,
+      reminderDays: [7, 3, 1], // Days before due date
+      lateFilingPenalty: 0.02, // 2% per day
+      maxPenaltyDays: 30
+    },
+    
+    // Return Filing Schedule
+    filingSchedule: {
+      'GSTR-1': { dueDay: 11, frequency: 'monthly' },
+      'GSTR-3B': { dueDay: 20, frequency: 'monthly' },
+      'GSTR-9': { dueDay: 31, frequency: 'yearly' },
+      'GSTR-9C': { dueDay: 31, frequency: 'yearly' }
+    }
   }
 };
 

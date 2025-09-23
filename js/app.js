@@ -108,7 +108,12 @@ function showScreen(screenId) {
     }
   }
   if (screenId === 'staff') renderStaff();
-  if (screenId === 'gst') renderGstReturns();
+  if (screenId === 'gst') {
+    renderGstReturns();
+    if (typeof initializeGstManagement === 'function') {
+      initializeGstManagement();
+    }
+  }
   
   // Update dashboard stats when showing dashboard
   if (screenId === 'dashboard') {
@@ -191,6 +196,7 @@ function updateDashboardStats() {
     const staff = loadStaff() || [];
     const invoices = loadInvoices() || [];
     const financialRecords = loadFinancialRecords() || [];
+    const gstReturns = loadGstReturns() || [];
     
     // Calculate order statistics
     const totalOrders = orders.length;
@@ -349,6 +355,15 @@ function loadAttendance() {
 function loadLeaveRequests() {
   try {
     const stored = localStorage.getItem('logistics_leave_requests');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function loadGstReturns() {
+  try {
+    const stored = localStorage.getItem('logosic_gst_v1');
     return stored ? JSON.parse(stored) : [];
   } catch (e) {
     return [];

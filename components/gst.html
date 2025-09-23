@@ -3,88 +3,158 @@
   <div class="content-header">
     <div>
       <h2><i class="pi pi-percentage"></i> GST Management</h2>
-      <p style="color: var(--gray-600); margin: 0;">Handle GST compliance, returns, and tax calculations</p>
+      <p style="color: var(--gray-600); margin: 0;">Comprehensive tax compliance, automated calculations, and return filing</p>
     </div>
     <div class="actions">
-      <button class="btn btn-primary" onclick="openGstReturnModal()">
-        <i class="pi pi-plus"></i> File Return
-      </button>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="openGstReturnModal()">
+          <i class="pi pi-plus"></i> File Return
+        </button>
+        <button class="btn btn-secondary" onclick="openGstCalculatorModal()">
+          <i class="pi pi-calculator"></i> Tax Calculator
+        </button>
+        <button class="btn btn-info" onclick="openGstReportsModal()">
+          <i class="pi pi-chart-bar"></i> Reports
+        </button>
+        <button class="btn btn-warning" onclick="openGstSettingsModal()">
+          <i class="pi pi-cog"></i> Settings
+        </button>
+      </div>
       <button class="btn btn-secondary" onclick="backToDashboard()">
         <i class="pi pi-arrow-left"></i> Back
       </button>
     </div>
   </div>
 
+  <!-- Compliance Alerts -->
+  <div id="gstAlerts" class="alerts-container" style="margin-bottom: 1.5rem;"></div>
+
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-value">₹4.32L</div>
+      <div class="stat-value" id="totalGstCollected">₹0</div>
       <div class="stat-label">Total GST Collected</div>
+      <div class="stat-trend" id="gstCollectedTrend">
+        <i class="pi pi-arrow-up"></i> +12.5%
+      </div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">₹1.85L</div>
+      <div class="stat-value" id="totalGstPaid">₹0</div>
       <div class="stat-label">GST Paid</div>
+      <div class="stat-trend" id="gstPaidTrend">
+        <i class="pi pi-arrow-up"></i> +8.2%
+      </div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">₹2.47L</div>
+      <div class="stat-value" id="totalGstPayable">₹0</div>
       <div class="stat-label">GST Payable</div>
+      <div class="stat-trend" id="gstPayableTrend">
+        <i class="pi pi-arrow-down"></i> -5.1%
+      </div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">8</div>
+      <div class="stat-value" id="returnsFiledCount">0</div>
       <div class="stat-label">Returns Filed</div>
+      <div class="stat-trend" id="returnsTrend">
+        <i class="pi pi-arrow-up"></i> +2 this month
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="pendingReturnsCount">0</div>
+      <div class="stat-label">Pending Returns</div>
+      <div class="stat-trend" id="pendingTrend">
+        <i class="pi pi-exclamation-triangle"></i> Due Soon
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="complianceScore">0%</div>
+      <div class="stat-label">Compliance Score</div>
+      <div class="stat-trend" id="complianceTrend">
+        <i class="pi pi-check-circle"></i> Excellent
+      </div>
     </div>
   </div>
 
-  <div class="grid">
-    <div class="col-12 md:col-6">
+  <!-- Quick Actions -->
+  <div class="quick-actions-grid" style="margin-bottom: 1.5rem;">
+    <div class="quick-action-card" onclick="openGstCalculatorModal()">
+      <i class="pi pi-calculator"></i>
+      <h4>Tax Calculator</h4>
+      <p>Calculate GST for any amount</p>
+    </div>
+    <div class="quick-action-card" onclick="openGstReturnModal()">
+      <i class="pi pi-file-edit"></i>
+      <h4>File Return</h4>
+      <p>Submit GST returns online</p>
+    </div>
+    <div class="quick-action-card" onclick="openGstReportsModal()">
+      <i class="pi pi-chart-line"></i>
+      <h4>Tax Reports</h4>
+      <p>Generate comprehensive reports</p>
+    </div>
+    <div class="quick-action-card" onclick="openGstSettingsModal()">
+      <i class="pi pi-cog"></i>
+      <h4>Settings</h4>
+      <p>Configure tax rates & compliance</p>
+    </div>
+  </div>
+
+  <div class="dashboard-cards">
+    <div class="dashboard-card-half">
       <div class="card">
-        <h3>Monthly GST Summary</h3>
-        <div style="margin: 1rem 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
-            <div>
-              <strong>August 2025</strong>
-              <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
-            </div>
-            <span class="status-badge status-filed">Filed</span>
+        <div class="card-header">
+          <h3>Return Filing Status</h3>
+          <button class="btn btn-sm btn-outline" onclick="refreshGstStatus()">
+            <i class="pi pi-refresh"></i> Refresh
+          </button>
+        </div>
+        <div id="gstReturnStatus" style="margin: 1rem 0;">
+          <!-- Dynamic content will be loaded here -->
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card-half">
+      <div class="card">
+        <div class="card-header">
+          <h3>Tax Rate Breakdown</h3>
+          <button class="btn btn-sm btn-outline" onclick="openGstSettingsModal()">
+            <i class="pi pi-cog"></i> Configure
+          </button>
+        </div>
+        <div id="gstRateBreakdown" style="margin: 1rem 0;">
+          <!-- Dynamic content will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Analytics -->
+  <div class="analytics-section" style="margin-top: 1.5rem;">
+    <div class="analytics-main">
+      <div class="card">
+        <div class="card-header">
+          <h3>GST Analytics Dashboard</h3>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline active" onclick="switchGstChart('monthly')">Monthly</button>
+            <button class="btn btn-sm btn-outline" onclick="switchGstChart('quarterly')">Quarterly</button>
+            <button class="btn btn-sm btn-outline" onclick="switchGstChart('yearly')">Yearly</button>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; padding: .75rem; background: var(--gray-50); border-radius: 8px;">
-            <div>
-              <strong>July 2025</strong>
-              <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 & GSTR-3B</div>
-            </div>
-            <span class="status-badge status-filed">Filed</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: .75rem; background: var(--warning-500); background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
-            <div>
-              <strong>September 2025</strong>
-              <div style="font-size: .8rem; color: var(--gray-500);">GSTR-1 Due: Sept 11</div>
-            </div>
-            <span class="status-badge status-draft">Draft</span>
+        </div>
+        <div id="gstAnalyticsChart" style="height: 300px; padding: 1rem;">
+          <!-- Chart will be rendered here -->
+          <div class="chart-placeholder">
+            <i class="pi pi-chart-bar" style="font-size: 3rem; color: var(--gray-400);"></i>
+            <p>GST Analytics Chart</p>
           </div>
         </div>
       </div>
     </div>
     
-    <div class="col-12 md:col-6">
+    <div class="analytics-sidebar">
       <div class="card">
-        <h3>GST Rate Breakdown</h3>
-        <div style="margin: 1rem 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
-            <span>CGST (9%)</span>
-            <span style="font-weight: 600;">₹1,94,400</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
-            <span>SGST (9%)</span>
-            <span style="font-weight: 600;">₹1,94,400</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;">
-            <span>IGST (18%)</span>
-            <span style="font-weight: 600;">₹43,200</span>
-          </div>
-          <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--gray-200);">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1rem;">
-            <span>Total GST</span>
-            <span style="color: var(--brand-600);">₹4,32,000</span>
-          </div>
+        <h3>Compliance Alerts</h3>
+        <div id="gstComplianceAlerts">
+          <!-- Dynamic alerts will be loaded here -->
         </div>
       </div>
     </div>
