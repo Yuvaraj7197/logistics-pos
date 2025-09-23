@@ -957,9 +957,11 @@ function editOrder(orderId) {
   const order = orders.find(o => o.id === orderId);
   if (!order) return;
   
+  const isDCOrder = order.orderType === 'DC';
+  
   const body = `
     <div class="form-section">
-      <h4>Order Information</h4>
+      <h4>${isDCOrder ? 'DC Order Information' : 'Order Information'}</h4>
       <div class="form-row">
         <div class="form-group col-6">
           <label>Customer Name *</label>
@@ -972,7 +974,7 @@ function editOrder(orderId) {
       </div>
       <div class="form-row">
         <div class="form-group col-6">
-          <label>Order Date *</label>
+          <label>${isDCOrder ? 'DC Date' : 'Order Date'} *</label>
           <input id="editOrderDate" type="date" value="${order.date}" required />
         </div>
         <div class="form-group col-6">
@@ -983,6 +985,38 @@ function editOrder(orderId) {
           </select>
         </div>
       </div>
+      ${isDCOrder ? `
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>DC Number *</label>
+          <input id="editDCOrderNumber" type="text" value="${order.dcNumber || ''}" required />
+        </div>
+        <div class="form-group col-6">
+          <label>Received Date *</label>
+          <input id="editDCOrderReceivedDate" type="date" value="${order.receivedDate || ''}" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Material Status *</label>
+          <select id="editDCOrderMaterialStatus" required>
+            <option value="">Select material status...</option>
+            <option value="Received" ${order.materialStatus === 'Received' ? 'selected' : ''}>Material Received</option>
+            <option value="Partial" ${order.materialStatus === 'Partial' ? 'selected' : ''}>Partial Material</option>
+            <option value="Pending" ${order.materialStatus === 'Pending' ? 'selected' : ''}>Material Pending</option>
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Quality Check Status</label>
+          <select id="editDCOrderQualityStatus">
+            <option value="Pending" ${order.qualityStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Passed" ${order.qualityStatus === 'Passed' ? 'selected' : ''}>Passed</option>
+            <option value="Failed" ${order.qualityStatus === 'Failed' ? 'selected' : ''}>Failed</option>
+            <option value="Under Review" ${order.qualityStatus === 'Under Review' ? 'selected' : ''}>Under Review</option>
+          </select>
+        </div>
+      </div>
+      ` : ''}
     </div>
 
     <div class="form-section">
@@ -1029,12 +1063,27 @@ function editOrder(orderId) {
       const contact = document.getElementById('editOrderContact').value.trim();
       const notes = document.getElementById('editOrderNotes').value.trim();
       
+      // Get DC order specific fields if applicable
+      let dcNumber, receivedDate, materialStatus, qualityStatus;
+      if (isDCOrder) {
+        dcNumber = document.getElementById('editDCOrderNumber').value.trim();
+        receivedDate = document.getElementById('editDCOrderReceivedDate').value;
+        materialStatus = document.getElementById('editDCOrderMaterialStatus').value;
+        qualityStatus = document.getElementById('editDCOrderQualityStatus').value;
+      }
+      
       // Get order items
       const orderItems = getEditOrderItems();
       const totalAmount = calculateEditOrderTotal();
       
       if (!customer || orderItems.length === 0 || !status || !date || totalAmount <= 0) {
         showToast('Please fill all required fields correctly and add at least one item', 'error');
+        return;
+      }
+      
+      // Additional validation for DC orders
+      if (isDCOrder && (!dcNumber || !receivedDate || !materialStatus)) {
+        showToast('Please fill all DC order required fields', 'error');
         return;
       }
       
@@ -1046,7 +1095,7 @@ function editOrder(orderId) {
       const orderIndex = orders.findIndex(o => o.id === orderId);
       if (orderIndex === -1) return;
       
-      orders[orderIndex] = {
+      const updatedOrder = {
         ...orders[orderIndex],
         customer,
         items: itemsText,
@@ -1059,6 +1108,16 @@ function editOrder(orderId) {
         notes: notes || 'N/A',
         updatedAt: new Date().toISOString()
       };
+      
+      // Add DC order specific fields
+      if (isDCOrder) {
+        updatedOrder.dcNumber = dcNumber;
+        updatedOrder.receivedDate = receivedDate;
+        updatedOrder.materialStatus = materialStatus;
+        updatedOrder.qualityStatus = qualityStatus;
+      }
+      
+      orders[orderIndex] = updatedOrder;
       
       saveOrders(orders);
       closeModal();
@@ -1160,13 +1219,26 @@ function receiveDCOrder() {
           </select>
         </div>
       </div>
+    </div>
+
+    <div class="form-section">
+      <h4>DC Order Items</h4>
       <div class="form-group col-12">
-        <label>Material Description *</label>
-        <textarea id="dcOrderMaterial" placeholder="Enter material details and quantities" rows="3" required></textarea>
-      </div>
-      <div class="form-group col-12">
-        <label>Total Amount (INR) *</label>
-        <input id="dcOrderAmount" type="number" min="0" step="0.01" placeholder="Enter total amount" required />
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <label>Items *</label>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addDCOrderItem()">
+            <i class="pi pi-plus"></i> Add Item
+          </button>
+        </div>
+        <div id="dcOrderItemsList" class="order-items-container">
+          <!-- Items will be added here dynamically -->
+        </div>
+        <div class="order-summary">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>Total Amount:</strong>
+            <span id="dcOrderTotalAmount">₹0.00</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1194,9 +1266,7 @@ function receiveDCOrder() {
     { label: 'Create DC Order', type: 'primary', action: () => {
       const customer = document.getElementById('dcOrderCustomer').value.trim();
       const dcNumber = document.getElementById('dcOrderNumber').value.trim();
-      const material = document.getElementById('dcOrderMaterial').value.trim();
       const materialStatus = document.getElementById('dcOrderMaterialStatus').value;
-      const amount = parseFloat(document.getElementById('dcOrderAmount').value);
       const dcDate = document.getElementById('dcOrderDate').value;
       const receivedDate = document.getElementById('dcReceivedDate').value;
       const address = document.getElementById('dcOrderAddress').value.trim();
@@ -1204,8 +1274,12 @@ function receiveDCOrder() {
       const notes = document.getElementById('dcOrderNotes').value.trim();
       const qualityStatus = document.getElementById('dcQualityStatus').value;
       
-      if (!customer || !dcNumber || !material || !materialStatus || isNaN(amount) || !dcDate || !receivedDate || amount <= 0) {
-        showToast('Please fill all required fields correctly', 'error');
+      // Get DC order items
+      const dcOrderItems = getDCOrderItems();
+      const totalAmount = calculateDCOrderTotal();
+      
+      if (!customer || !dcNumber || !materialStatus || !dcDate || !receivedDate || dcOrderItems.length === 0 || totalAmount <= 0) {
+        showToast('Please fill all required fields correctly and add at least one item', 'error');
         return;
       }
       
@@ -1215,10 +1289,16 @@ function receiveDCOrder() {
         return;
       }
       
+      // Format items for display
+      const itemsText = dcOrderItems.map(item => 
+        `${item.itemName} - ${item.materialType} - ${item.description} (Qty: ${item.quantity}, Rate: ₹${item.rate.toFixed(2)}, Total: ₹${(item.quantity * item.rate).toFixed(2)})`
+      ).join('; ');
+      
       const newOrder = createOrderWithCustomerManagement({
         customer,
-        items: material,
-        totalAmount: amount,
+        items: itemsText,
+        orderItems: dcOrderItems, // Store structured items data
+        totalAmount: totalAmount,
         status: 'Completed', // DC orders are typically completed when received
         date: dcDate,
         address: address || 'N/A',
@@ -1244,7 +1324,154 @@ function receiveDCOrder() {
     const receivedDateInput = document.getElementById('dcReceivedDate');
     if (dcDateInput) dcDateInput.value = today;
     if (receivedDateInput) receivedDateInput.value = today;
+    // Add initial item
+    addDCOrderItem();
   }, 100);
+}
+
+// DC Order Items Management Functions
+let dcOrderItemCounter = 0;
+
+function addDCOrderItem() {
+  dcOrderItemCounter++;
+  const itemsContainer = document.getElementById('dcOrderItemsList');
+  if (!itemsContainer) return;
+  
+  const itemHtml = `
+    <div class="order-item" data-item-id="${dcOrderItemCounter}">
+      <div style="width: 180px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Item Name</label>
+        <select class="dc-order-item-name" onchange="onDCOrderItemNameChange(${dcOrderItemCounter})">
+          <option value="">Select item...</option>
+          ${PREDEFINED_ITEMS.map(item => `<option value="${item.name}" data-material="${item.materialType}" data-description="${item.description}" data-rate="${item.defaultRate}">${item.name}</option>`).join('')}
+          <option value="custom">Custom Item</option>
+        </select>
+      </div>
+      <div style="width: 150px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Material Type *</label>
+        <select class="dc-order-item-material-type" required>
+          <option value="">Select type...</option>
+          ${MATERIAL_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex: 1;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Description *</label>
+        <input type="text" class="dc-order-item-description" placeholder="Enter item description" required />
+      </div>
+      <div style="width: 100px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Quantity *</label>
+        <input type="number" class="dc-order-item-quantity" placeholder="Qty" min="1" step="1" required onchange="updateDCOrderTotal()" />
+      </div>
+      <div style="width: 120px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Rate (₹) *</label>
+        <input type="number" class="dc-order-item-rate" placeholder="0.00" min="0" step="0.01" required onchange="updateDCOrderTotal()" />
+      </div>
+      <div style="width: 120px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Total (₹)</label>
+        <input type="text" class="dc-order-item-total" readonly />
+      </div>
+      <div style="width: 40px;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeDCOrderItem(${dcOrderItemCounter})">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+  
+  itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+  updateDCOrderTotal();
+}
+
+function removeDCOrderItem(itemId) {
+  const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (itemElement) {
+    itemElement.remove();
+    updateDCOrderTotal();
+  }
+}
+
+function getDCOrderItems() {
+  const items = [];
+  const itemElements = document.querySelectorAll('#dcOrderItemsList .order-item');
+  
+  itemElements.forEach(element => {
+    const itemName = element.querySelector('.dc-order-item-name').value;
+    const materialType = element.querySelector('.dc-order-item-material-type').value;
+    const description = element.querySelector('.dc-order-item-description').value.trim();
+    const quantity = parseFloat(element.querySelector('.dc-order-item-quantity').value);
+    const rate = parseFloat(element.querySelector('.dc-order-item-rate').value);
+    
+    if (materialType && description && quantity > 0 && rate >= 0) {
+      items.push({
+        itemName: itemName || 'Custom Item',
+        materialType,
+        description,
+        quantity,
+        rate,
+        total: quantity * rate
+      });
+    }
+  });
+  
+  return items;
+}
+
+function calculateDCOrderTotal() {
+  const items = getDCOrderItems();
+  return items.reduce((total, item) => total + item.total, 0);
+}
+
+function updateDCOrderTotal() {
+  const items = getDCOrderItems();
+  const total = items.reduce((sum, item) => sum + item.total, 0);
+  
+  // Update individual item totals
+  const itemElements = document.querySelectorAll('#dcOrderItemsList .order-item');
+  itemElements.forEach(element => {
+    const quantity = parseFloat(element.querySelector('.dc-order-item-quantity').value) || 0;
+    const rate = parseFloat(element.querySelector('.dc-order-item-rate').value) || 0;
+    const totalInput = element.querySelector('.dc-order-item-total');
+    if (totalInput) {
+      totalInput.value = (quantity * rate).toFixed(2);
+    }
+  });
+  
+  // Update overall total
+  const totalElement = document.getElementById('dcOrderTotalAmount');
+  if (totalElement) {
+    totalElement.textContent = formatINR(total);
+  }
+}
+
+function onDCOrderItemNameChange(itemId) {
+  const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (!itemElement) return;
+  
+  const nameSelect = itemElement.querySelector('.dc-order-item-name');
+  const materialSelect = itemElement.querySelector('.dc-order-item-material-type');
+  const descriptionInput = itemElement.querySelector('.dc-order-item-description');
+  const rateInput = itemElement.querySelector('.dc-order-item-rate');
+  
+  const selectedOption = nameSelect.options[nameSelect.selectedIndex];
+  
+  if (selectedOption.value && selectedOption.value !== 'custom') {
+    // Auto-populate fields from selected item
+    const materialType = selectedOption.getAttribute('data-material');
+    const description = selectedOption.getAttribute('data-description');
+    const rate = selectedOption.getAttribute('data-rate');
+    
+    materialSelect.value = materialType;
+    descriptionInput.value = description;
+    rateInput.value = rate;
+    
+    // Update total
+    updateDCOrderTotal();
+  } else if (selectedOption.value === 'custom') {
+    // Clear fields for custom item
+    materialSelect.value = '';
+    descriptionInput.value = '';
+    rateInput.value = '';
+  }
 }
 
 // Additional order actions for dropdown
