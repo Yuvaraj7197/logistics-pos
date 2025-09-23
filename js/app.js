@@ -126,9 +126,9 @@ function showScreen(screenId) {
 
 function goTo(targetId, btn) {
   const allNav = document.querySelectorAll('.sidebar .nav-button');
-  const allNavItems = document.querySelectorAll('.sidebar .nav-dropdown-item');
+  const allNavItems = document.querySelectorAll('.sidebar .nav-collapse-item');
   
-  // Remove active class from all navigation buttons and dropdown items
+  // Remove active class from all navigation buttons and collapse items
   allNav.forEach(b => b.classList.remove('active'));
   allNavItems.forEach(item => item.classList.remove('active'));
   
@@ -136,10 +136,10 @@ function goTo(targetId, btn) {
   if (btn) {
     btn.classList.add('active');
     
-    // If it's a dropdown item, also close the dropdown
-    const navDropdown = btn.closest('.nav-dropdown');
-    if (navDropdown) {
-      navDropdown.classList.remove('open');
+    // If it's a collapse item, also close the collapse
+    const navCollapse = btn.closest('.nav-collapse');
+    if (navCollapse) {
+      navCollapse.classList.remove('open');
     }
   }
   
@@ -438,21 +438,21 @@ function toggleDropdown(dropdownId) {
   dropdown.classList.toggle('show');
 }
 
-// Navigation dropdown functionality
-function toggleNavDropdown(dropdownId) {
-  const dropdown = document.getElementById(dropdownId);
-  const navDropdown = dropdown.closest('.nav-dropdown');
-  if (!dropdown || !navDropdown) return;
+// Navigation collapse functionality
+function toggleNavCollapse(collapseId) {
+  const collapse = document.getElementById(collapseId);
+  const navCollapse = collapse.closest('.nav-collapse');
+  if (!collapse || !navCollapse) return;
   
-  // Close all other navigation dropdowns
-  document.querySelectorAll('.nav-dropdown.open').forEach(menu => {
-    if (menu !== navDropdown) {
+  // Close all other navigation collapses
+  document.querySelectorAll('.nav-collapse.open').forEach(menu => {
+    if (menu !== navCollapse) {
       menu.classList.remove('open');
     }
   });
   
-  // Toggle current navigation dropdown
-  navDropdown.classList.toggle('open');
+  // Toggle current navigation collapse
+  navCollapse.classList.toggle('open');
 }
 
 // Close dropdowns when clicking outside
@@ -463,8 +463,8 @@ document.addEventListener('click', function(event) {
     });
   }
   
-  if (!event.target.closest('.nav-dropdown')) {
-    document.querySelectorAll('.nav-dropdown.open').forEach(menu => {
+  if (!event.target.closest('.nav-collapse')) {
+    document.querySelectorAll('.nav-collapse.open').forEach(menu => {
       menu.classList.remove('open');
     });
   }

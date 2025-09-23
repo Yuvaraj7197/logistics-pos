@@ -242,7 +242,7 @@ function addStockItem() {
       updateDashboardStats(); // Update dashboard stats
       showToast('Stock item added successfully', 'success');
     }}
-  ]);
+  ], 'modal-lg');
 }
 
 function viewStockItem(itemId) {
@@ -380,7 +380,7 @@ function editStockItem(itemId) {
       updateDashboardStats(); // Update dashboard stats
       showToast('Stock item updated successfully', 'success');
     }}
-  ]);
+  ], 'modal-lg');
 }
 
 function deleteStockItem(itemId) {

@@ -397,7 +397,7 @@ function openGstReturnModal() {
       updateDashboardStats(); // Update dashboard stats
       showToast('GST return filed successfully', 'success');
     }}
-  ]);
+  ], 'modal-lg');
   
   // Set default period to current month
   setTimeout(() => {
@@ -563,7 +563,7 @@ function editGstReturn(returnId) {
       updateDashboardStats(); // Update dashboard stats
       showToast('GST return updated successfully', 'success');
     }}
-  ]);
+  ], 'modal-lg');
 }
 
 function printGstReturn(returnId) {

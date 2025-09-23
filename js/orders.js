@@ -611,7 +611,7 @@ function editOrder(orderId) {
       updateDashboardStats(); // Update dashboard stats
       showToast('Order updated successfully', 'success');
     }}
-  ]);
+  ], 'modal-lg');
 }
 
 function deleteOrder(orderId) {
@@ -926,7 +926,7 @@ function updateOrderStatus(orderId) {
       updateDashboardStats();
       showToast('Order status updated successfully', 'success');
     }}
-  ]);
+  ], 'modal-md');
 }
 
 // Import orders function

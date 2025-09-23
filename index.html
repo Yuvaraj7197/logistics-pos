@@ -97,19 +97,19 @@
         <button class="nav-button" data-target="staff" onclick="goTo('staff', this)">
           <i class="pi pi-users"></i> Staff
         </button>
-        <div class="nav-dropdown">
-          <button class="nav-button nav-dropdown-toggle" onclick="toggleNavDropdown('accountingDropdown')">
+        <div class="nav-collapse">
+          <button class="nav-button nav-collapse-toggle" onclick="toggleNavCollapse('accountingCollapse')">
             <i class="pi pi-calculator"></i> Accounting
-            <i class="pi pi-chevron-down nav-dropdown-icon"></i>
+            <i class="pi pi-chevron-right nav-collapse-icon"></i>
           </button>
-          <div class="nav-dropdown-menu" id="accountingDropdown">
-            <button class="nav-dropdown-item" data-target="billing" onclick="goTo('billing', this)">
+          <div class="nav-collapse-content" id="accountingCollapse">
+            <button class="nav-collapse-item" data-target="billing" onclick="goTo('billing', this)">
               <i class="pi pi-credit-card"></i> Billing
             </button>
-            <button class="nav-dropdown-item" data-target="financial" onclick="goTo('financial', this)">
+            <button class="nav-collapse-item" data-target="financial" onclick="goTo('financial', this)">
               <i class="pi pi-calculator"></i> Financial
             </button>
-            <button class="nav-dropdown-item" data-target="gst" onclick="goTo('gst', this)">
+            <button class="nav-collapse-item" data-target="gst" onclick="goTo('gst', this)">
               <i class="pi pi-percentage"></i> GST
             </button>
           </div>

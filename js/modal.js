@@ -14,6 +14,14 @@ function checkModalElements() {
   console.log('Footer:', footer);
 }
 
+// Available modal sizes:
+// '' (default) - 800px max-width
+// 'modal-sm' - 400px max-width
+// 'modal-md' - 600px max-width  
+// 'modal-lg' - 1000px max-width
+// 'modal-large' - 1200px max-width
+// 'modal-xl' - 1400px max-width
+// 'modal-fullscreen' - 95vw x 95vh
 function openModal(title, body, buttons = [], size = '') {
   console.log('Opening modal:', title);
   

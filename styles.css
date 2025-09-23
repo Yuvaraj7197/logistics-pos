@@ -569,56 +569,48 @@ footer {
   font-weight: 600;
 }
 
-/* Navigation Dropdown Styles */
-.nav-dropdown {
+/* Navigation Collapse Styles */
+.nav-collapse {
   position: relative;
 }
 
-.nav-dropdown-toggle {
+.nav-collapse-toggle {
   justify-content: space-between;
   width: 100%;
 }
 
-.nav-dropdown-icon {
-  transition: transform 0.2s ease;
+.nav-collapse-icon {
+  transition: transform 0.3s ease;
   font-size: 0.75rem;
 }
 
-.nav-dropdown.open .nav-dropdown-icon {
-  transform: rotate(180deg);
+.nav-collapse.open .nav-collapse-icon {
+  transform: rotate(90deg);
 }
 
-.nav-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
+.nav-collapse-content {
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 8px;
-  box-shadow: var(--shadow-lg);
-  z-index: 1000;
-  margin-top: 0.25rem;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
-  max-height: 0;
+  margin-top: 0.5rem;
   overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+  transform: translateY(-10px);
 }
 
-.nav-dropdown.open .nav-dropdown-menu {
+.nav-collapse.open .nav-collapse-content {
+  max-height: 200px;
   opacity: 1;
-  visibility: visible;
   transform: translateY(0);
-  max-height: 300px;
 }
 
-.nav-dropdown-item {
+.nav-collapse-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   color: var(--gray-700);
   text-decoration: none;
   font-size: 0.9rem;
@@ -630,25 +622,28 @@ footer {
   cursor: pointer;
   border-radius: 0;
   margin: 0;
+  border-left: 3px solid transparent;
 }
 
-.nav-dropdown-item:hover {
-  background: var(--gray-50);
+.nav-collapse-item:hover {
+  background: var(--brand-50);
   color: var(--brand-600);
+  border-left-color: var(--brand-500);
 }
 
-.nav-dropdown-item.active {
+.nav-collapse-item.active {
   background: var(--brand-100);
   color: var(--brand-700);
   font-weight: 600;
+  border-left-color: var(--brand-600);
 }
 
-.nav-dropdown-item:first-child {
+.nav-collapse-item:first-child {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
-.nav-dropdown-item:last-child {
+.nav-collapse-item:last-child {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
@@ -679,7 +674,7 @@ footer {
   background: #fff; 
   border-radius: 12px; 
   width: 100%; 
-  max-width: 520px; 
+  max-width: 800px; 
   max-height: 90vh;
   box-shadow: var(--shadow-xl); 
   overflow: hidden; 
@@ -773,15 +768,37 @@ footer {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* Large modal for detailed views */
+/* Modal size variants */
+.modal-sm {
+  max-width: 400px;
+  max-height: 80vh;
+}
+
+.modal-md {
+  max-width: 600px;
+  max-height: 85vh;
+}
+
+.modal-lg {
+  max-width: 1000px;
+  max-height: 95vh;
+}
+
 .modal-large {
-  max-width: 800px;
+  max-width: 1200px;
   max-height: 95vh;
 }
 
 .modal-xl {
-  max-width: 1200px;
+  max-width: 1400px;
   max-height: 95vh;
+}
+
+.modal-fullscreen {
+  max-width: 95vw;
+  max-height: 95vh;
+  width: 95vw;
+  height: 95vh;
 }
 
 /* Toast */
@@ -816,6 +833,30 @@ footer {
     top: 0; 
     width: 100%;
     height: auto;
+  }
+  
+  /* Responsive modal sizes for mobile */
+  .modal {
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+  
+  .modal-sm,
+  .modal-md,
+  .modal-lg,
+  .modal-large,
+  .modal-xl {
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+  
+  .modal-fullscreen {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
   }
 }
 
