@@ -3,6 +3,99 @@ const ORDERS_STORAGE_KEY = 'logosic_orders_v1';
 const ORDER_STATUS = getConfig('business.order.statuses', ['Pending', 'In Progress', 'Completed', 'Shipped', 'Delivered', 'Cancelled', 'On Hold']);
 const ORDER_TYPES = ['Sales', 'DC', 'Bulk'];
 const ORDER_PRIORITIES = ['Low', 'Medium', 'High', 'Urgent'];
+const MATERIAL_TYPES = [
+  'Electronics',
+  'Furniture',
+  'Medical Equipment',
+  'Industrial Parts',
+  'Automotive Parts',
+  'Textiles',
+  'Food & Beverage',
+  'Construction Materials',
+  'Office Supplies',
+  'Machinery',
+  'Chemicals',
+  'Other'
+];
+
+const PREDEFINED_ITEMS = [
+  // Electronics
+  { name: 'Laptop Computer', materialType: 'Electronics', description: 'High-performance laptop with 16GB RAM, 512GB SSD', defaultRate: 75000 },
+  { name: 'Desktop Monitor', materialType: 'Electronics', description: '27-inch 4K LED monitor with HDMI and USB ports', defaultRate: 25000 },
+  { name: 'Wireless Keyboard', materialType: 'Electronics', description: 'Mechanical wireless keyboard with RGB lighting', defaultRate: 3500 },
+  { name: 'Computer Mouse', materialType: 'Electronics', description: 'Wireless optical mouse with ergonomic design', defaultRate: 1500 },
+  { name: 'USB Cable', materialType: 'Electronics', description: 'High-speed USB-C to USB-A cable 2m length', defaultRate: 299 },
+  
+  // Furniture
+  { name: 'Office Chair', materialType: 'Furniture', description: 'Ergonomic office chair with lumbar support', defaultRate: 12000 },
+  { name: 'Office Desk', materialType: 'Furniture', description: 'Adjustable height office desk with drawers', defaultRate: 18000 },
+  { name: 'Bookshelf', materialType: 'Furniture', description: '5-tier wooden bookshelf with adjustable shelves', defaultRate: 8500 },
+  { name: 'Filing Cabinet', materialType: 'Furniture', description: '2-drawer metal filing cabinet with lock', defaultRate: 6500 },
+  { name: 'Meeting Table', materialType: 'Furniture', description: 'Large conference table for 8 people', defaultRate: 35000 },
+  
+  // Medical Equipment
+  { name: 'Blood Pressure Monitor', materialType: 'Medical Equipment', description: 'Digital automatic blood pressure monitor', defaultRate: 4500 },
+  { name: 'Stethoscope', materialType: 'Medical Equipment', description: 'Professional grade stethoscope with dual head', defaultRate: 3500 },
+  { name: 'Thermometer', materialType: 'Medical Equipment', description: 'Digital infrared thermometer for body temperature', defaultRate: 1200 },
+  { name: 'First Aid Kit', materialType: 'Medical Equipment', description: 'Complete first aid kit with bandages and medicines', defaultRate: 2500 },
+  { name: 'Medical Scale', materialType: 'Medical Equipment', description: 'Digital weighing scale with BMI calculation', defaultRate: 5500 },
+  
+  // Industrial Parts
+  { name: 'Steel Bolts Set', materialType: 'Industrial Parts', description: 'Set of 100 stainless steel bolts M8x20mm', defaultRate: 850 },
+  { name: 'Hydraulic Pump', materialType: 'Industrial Parts', description: 'High-pressure hydraulic pump 10HP motor', defaultRate: 45000 },
+  { name: 'Conveyor Belt', materialType: 'Industrial Parts', description: 'Industrial conveyor belt 2m x 50cm rubber', defaultRate: 15000 },
+  { name: 'Safety Helmet', materialType: 'Industrial Parts', description: 'ANSI certified hard hat with chin strap', defaultRate: 1200 },
+  { name: 'Work Gloves', materialType: 'Industrial Parts', description: 'Cut-resistant work gloves pair', defaultRate: 450 },
+  
+  // Automotive Parts
+  { name: 'Car Battery', materialType: 'Automotive Parts', description: '12V 60Ah car battery with 3-year warranty', defaultRate: 8500 },
+  { name: 'Engine Oil', materialType: 'Automotive Parts', description: 'Synthetic engine oil 5W-30 grade 4L', defaultRate: 2500 },
+  { name: 'Brake Pads', materialType: 'Automotive Parts', description: 'Ceramic brake pads front set', defaultRate: 3500 },
+  { name: 'Air Filter', materialType: 'Automotive Parts', description: 'High-flow air filter for engine', defaultRate: 1200 },
+  { name: 'Spark Plugs Set', materialType: 'Automotive Parts', description: 'Set of 4 iridium spark plugs', defaultRate: 1800 },
+  
+  // Textiles
+  { name: 'Cotton T-Shirt', materialType: 'Textiles', description: '100% cotton t-shirt various sizes available', defaultRate: 450 },
+  { name: 'Denim Jeans', materialType: 'Textiles', description: 'Premium denim jeans with stretch', defaultRate: 1800 },
+  { name: 'Winter Jacket', materialType: 'Textiles', description: 'Insulated winter jacket with hood', defaultRate: 3500 },
+  { name: 'Cotton Sheets Set', materialType: 'Textiles', description: 'King size cotton bedsheet set', defaultRate: 2200 },
+  { name: 'Towels Set', materialType: 'Textiles', description: 'Set of 4 cotton bath towels', defaultRate: 1200 },
+  
+  // Food & Beverage
+  { name: 'Rice Bag', materialType: 'Food & Beverage', description: 'Premium basmati rice 5kg bag', defaultRate: 850 },
+  { name: 'Cooking Oil', materialType: 'Food & Beverage', description: 'Pure sunflower oil 1L bottle', defaultRate: 180 },
+  { name: 'Spice Set', materialType: 'Food & Beverage', description: 'Complete Indian spice set 12 varieties', defaultRate: 1200 },
+  { name: 'Tea Powder', materialType: 'Food & Beverage', description: 'Premium tea powder 500g packet', defaultRate: 450 },
+  { name: 'Coffee Beans', materialType: 'Food & Beverage', description: 'Arabica coffee beans 1kg packet', defaultRate: 850 },
+  
+  // Construction Materials
+  { name: 'Cement Bag', materialType: 'Construction Materials', description: 'Portland cement 50kg bag', defaultRate: 350 },
+  { name: 'Steel Rods', materialType: 'Construction Materials', description: 'TMT steel rods 12mm diameter 40ft', defaultRate: 850 },
+  { name: 'Bricks', materialType: 'Construction Materials', description: 'Red clay bricks 1000 pieces', defaultRate: 4500 },
+  { name: 'Sand', materialType: 'Construction Materials', description: 'River sand 1 truck load', defaultRate: 12000 },
+  { name: 'Paint Can', materialType: 'Construction Materials', description: 'Emulsion paint 20L can', defaultRate: 3500 },
+  
+  // Office Supplies
+  { name: 'A4 Paper Ream', materialType: 'Office Supplies', description: '500 sheets A4 white paper 80gsm', defaultRate: 280 },
+  { name: 'Pen Set', materialType: 'Office Supplies', description: 'Set of 12 ballpoint pens blue ink', defaultRate: 180 },
+  { name: 'Stapler', materialType: 'Office Supplies', description: 'Heavy-duty stapler with staples', defaultRate: 450 },
+  { name: 'File Folder', materialType: 'Office Supplies', description: 'Manila file folders pack of 100', defaultRate: 350 },
+  { name: 'Calculator', materialType: 'Office Supplies', description: 'Scientific calculator with display', defaultRate: 850 },
+  
+  // Machinery
+  { name: 'Drill Machine', materialType: 'Machinery', description: 'Electric drill machine with bits set', defaultRate: 4500 },
+  { name: 'Angle Grinder', materialType: 'Machinery', description: 'Power angle grinder with safety guard', defaultRate: 3500 },
+  { name: 'Welding Machine', materialType: 'Machinery', description: 'Arc welding machine 200A capacity', defaultRate: 25000 },
+  { name: 'Compressor', materialType: 'Machinery', description: 'Air compressor 50L tank capacity', defaultRate: 18000 },
+  { name: 'Generator', materialType: 'Machinery', description: 'Portable generator 5KVA diesel', defaultRate: 45000 },
+  
+  // Chemicals
+  { name: 'Cleaning Solution', materialType: 'Chemicals', description: 'Multi-purpose cleaning solution 5L', defaultRate: 850 },
+  { name: 'Lubricating Oil', materialType: 'Chemicals', description: 'Industrial lubricating oil 1L', defaultRate: 1200 },
+  { name: 'Paint Thinner', materialType: 'Chemicals', description: 'Paint thinner solvent 1L bottle', defaultRate: 450 },
+  { name: 'Adhesive Glue', materialType: 'Chemicals', description: 'Strong adhesive glue 250ml tube', defaultRate: 280 },
+  { name: 'Detergent Powder', materialType: 'Chemicals', description: 'Laundry detergent powder 5kg', defaultRate: 650 }
+];
 
 // Initialize storage manager
 const orderStorage = createStorageManager(ORDERS_STORAGE_KEY, []);
@@ -256,13 +349,26 @@ function receiveOrder() {
           <input id="expectedDelivery" type="date" />
         </div>
       </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Order Items</h4>
       <div class="form-group col-12">
-        <label>Items/Description *</label>
-        <textarea id="orderItems" placeholder="Enter items and quantities" rows="3" required></textarea>
-      </div>
-      <div class="form-group col-12">
-        <label>Total Amount (INR) *</label>
-        <input id="orderAmount" type="number" min="0" step="0.01" placeholder="Enter total amount" required />
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <label>Items *</label>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addOrderItem()">
+            <i class="pi pi-plus"></i> Add Item
+          </button>
+        </div>
+        <div id="orderItemsList" class="order-items-container">
+          <!-- Items will be added here dynamically -->
+        </div>
+        <div class="order-summary">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>Total Amount:</strong>
+            <span id="orderTotalAmount">₹0.00</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -283,8 +389,6 @@ function receiveOrder() {
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Create Order', type: 'primary', action: () => {
       const customer = document.getElementById('orderCustomer').value.trim();
-      const items = document.getElementById('orderItems').value.trim();
-      const amount = parseFloat(document.getElementById('orderAmount').value);
       const status = document.getElementById('orderStatus').value;
       const priority = document.getElementById('orderPriority').value;
       const date = document.getElementById('orderDate').value;
@@ -293,15 +397,25 @@ function receiveOrder() {
       const contact = document.getElementById('orderContact').value.trim();
       const notes = document.getElementById('orderNotes').value.trim();
       
-      if (!customer || !items || isNaN(amount) || !status || !priority || !date || amount <= 0) {
-        showToast('Please fill all required fields correctly', 'error');
+      // Get order items
+      const orderItems = getOrderItems();
+      const totalAmount = calculateOrderTotal();
+      
+      if (!customer || orderItems.length === 0 || !status || !priority || !date || totalAmount <= 0) {
+        showToast('Please fill all required fields correctly and add at least one item', 'error');
         return;
       }
       
+      // Format items for display
+      const itemsText = orderItems.map(item => 
+        `${item.itemName} - ${item.materialType} - ${item.description} (Qty: ${item.quantity}, Rate: ₹${item.rate.toFixed(2)}, Total: ₹${(item.quantity * item.rate).toFixed(2)})`
+      ).join('; ');
+      
       const newOrder = createOrderWithCustomerManagement({
         customer,
-        items,
-        totalAmount: amount,
+        items: itemsText,
+        orderItems: orderItems, // Store structured items data
+        totalAmount: totalAmount,
         status,
         priority,
         date,
@@ -324,7 +438,299 @@ function receiveOrder() {
     if (dateInput) {
       dateInput.value = new Date().toISOString().slice(0, 10);
     }
+    // Add initial item
+    addOrderItem();
   }, 100);
+}
+
+// Order Items Management Functions
+let orderItemCounter = 0;
+
+function addOrderItem() {
+  orderItemCounter++;
+  const itemsContainer = document.getElementById('orderItemsList');
+  if (!itemsContainer) return;
+  
+  const itemHtml = `
+    <div class="order-item" data-item-id="${orderItemCounter}">
+      <div style="width: 180px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Item Name</label>
+        <select class="order-item-name" onchange="onItemNameChange(${orderItemCounter})">
+          <option value="">Select item...</option>
+          ${PREDEFINED_ITEMS.map(item => `<option value="${item.name}" data-material="${item.materialType}" data-description="${item.description}" data-rate="${item.defaultRate}">${item.name}</option>`).join('')}
+          <option value="custom">Custom Item</option>
+        </select>
+      </div>
+      <div style="width: 150px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Material Type *</label>
+        <select class="order-item-material-type" required>
+          <option value="">Select type...</option>
+          ${MATERIAL_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex: 1;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Description *</label>
+        <input type="text" class="order-item-description" placeholder="Enter item description" required />
+      </div>
+      <div style="width: 100px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Quantity *</label>
+        <input type="number" class="order-item-quantity" placeholder="Qty" min="1" step="1" required onchange="updateOrderTotal()" />
+      </div>
+      <div style="width: 120px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Rate (₹) *</label>
+        <input type="number" class="order-item-rate" placeholder="0.00" min="0" step="0.01" required onchange="updateOrderTotal()" />
+      </div>
+      <div style="width: 120px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Total (₹)</label>
+        <input type="text" class="order-item-total" readonly />
+      </div>
+      <div style="width: 40px;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeOrderItem(${orderItemCounter})">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+  
+  itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+  updateOrderTotal();
+}
+
+function removeOrderItem(itemId) {
+  const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (itemElement) {
+    itemElement.remove();
+    updateOrderTotal();
+  }
+}
+
+function getOrderItems() {
+  const items = [];
+  const itemElements = document.querySelectorAll('.order-item');
+  
+  itemElements.forEach(element => {
+    const itemName = element.querySelector('.order-item-name').value;
+    const materialType = element.querySelector('.order-item-material-type').value;
+    const description = element.querySelector('.order-item-description').value.trim();
+    const quantity = parseFloat(element.querySelector('.order-item-quantity').value);
+    const rate = parseFloat(element.querySelector('.order-item-rate').value);
+    
+    if (materialType && description && quantity > 0 && rate >= 0) {
+      items.push({
+        itemName: itemName || 'Custom Item',
+        materialType,
+        description,
+        quantity,
+        rate,
+        total: quantity * rate
+      });
+    }
+  });
+  
+  return items;
+}
+
+function calculateOrderTotal() {
+  const items = getOrderItems();
+  return items.reduce((total, item) => total + item.total, 0);
+}
+
+function updateOrderTotal() {
+  const items = getOrderItems();
+  const total = items.reduce((sum, item) => sum + item.total, 0);
+  
+  // Update individual item totals
+  const itemElements = document.querySelectorAll('.order-item');
+  itemElements.forEach(element => {
+    const quantity = parseFloat(element.querySelector('.order-item-quantity').value) || 0;
+    const rate = parseFloat(element.querySelector('.order-item-rate').value) || 0;
+    const totalInput = element.querySelector('.order-item-total');
+    if (totalInput) {
+      totalInput.value = (quantity * rate).toFixed(2);
+    }
+  });
+  
+  // Update overall total
+  const totalElement = document.getElementById('orderTotalAmount');
+  if (totalElement) {
+    totalElement.textContent = formatINR(total);
+  }
+}
+
+function onItemNameChange(itemId) {
+  const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (!itemElement) return;
+  
+  const nameSelect = itemElement.querySelector('.order-item-name');
+  const materialSelect = itemElement.querySelector('.order-item-material-type');
+  const descriptionInput = itemElement.querySelector('.order-item-description');
+  const rateInput = itemElement.querySelector('.order-item-rate');
+  
+  const selectedOption = nameSelect.options[nameSelect.selectedIndex];
+  
+  if (selectedOption.value && selectedOption.value !== 'custom') {
+    // Auto-populate fields from selected item
+    const materialType = selectedOption.getAttribute('data-material');
+    const description = selectedOption.getAttribute('data-description');
+    const rate = selectedOption.getAttribute('data-rate');
+    
+    materialSelect.value = materialType;
+    descriptionInput.value = description;
+    rateInput.value = rate;
+    
+    // Update total
+    updateOrderTotal();
+  } else if (selectedOption.value === 'custom') {
+    // Clear fields for custom item
+    materialSelect.value = '';
+    descriptionInput.value = '';
+    rateInput.value = '';
+  }
+}
+
+// Edit Order Items Management Functions
+let editOrderItemCounter = 0;
+
+function addEditOrderItem() {
+  editOrderItemCounter++;
+  const itemsContainer = document.getElementById('editOrderItemsList');
+  if (!itemsContainer) return;
+  
+  const itemHtml = `
+    <div class="order-item" data-item-id="${editOrderItemCounter}">
+      <div style="width: 180px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Item Name</label>
+        <select class="edit-order-item-name" onchange="onEditItemNameChange(${editOrderItemCounter})">
+          <option value="">Select item...</option>
+          ${PREDEFINED_ITEMS.map(item => `<option value="${item.name}" data-material="${item.materialType}" data-description="${item.description}" data-rate="${item.defaultRate}">${item.name}</option>`).join('')}
+          <option value="custom">Custom Item</option>
+        </select>
+      </div>
+      <div style="width: 150px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Material Type *</label>
+        <select class="edit-order-item-material-type" required>
+          <option value="">Select type...</option>
+          ${MATERIAL_TYPES.map(type => `<option value="${type}">${type}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex: 1;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Description *</label>
+        <input type="text" class="edit-order-item-description" placeholder="Enter item description" required />
+      </div>
+      <div style="width: 100px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Quantity *</label>
+        <input type="number" class="edit-order-item-quantity" placeholder="Qty" min="1" step="1" required onchange="updateEditOrderTotal()" />
+      </div>
+      <div style="width: 120px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Rate (₹) *</label>
+        <input type="number" class="edit-order-item-rate" placeholder="0.00" min="0" step="0.01" required onchange="updateEditOrderTotal()" />
+      </div>
+      <div style="width: 120px;">
+        <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Total (₹)</label>
+        <input type="text" class="edit-order-item-total" readonly />
+      </div>
+      <div style="width: 40px;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeEditOrderItem(${editOrderItemCounter})">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+  
+  itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+  updateEditOrderTotal();
+}
+
+function removeEditOrderItem(itemId) {
+  const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (itemElement) {
+    itemElement.remove();
+    updateEditOrderTotal();
+  }
+}
+
+function getEditOrderItems() {
+  const items = [];
+  const itemElements = document.querySelectorAll('#editOrderItemsList .order-item');
+  
+  itemElements.forEach(element => {
+    const itemName = element.querySelector('.edit-order-item-name').value;
+    const materialType = element.querySelector('.edit-order-item-material-type').value;
+    const description = element.querySelector('.edit-order-item-description').value.trim();
+    const quantity = parseFloat(element.querySelector('.edit-order-item-quantity').value);
+    const rate = parseFloat(element.querySelector('.edit-order-item-rate').value);
+    
+    if (materialType && description && quantity > 0 && rate >= 0) {
+      items.push({
+        itemName: itemName || 'Custom Item',
+        materialType,
+        description,
+        quantity,
+        rate,
+        total: quantity * rate
+      });
+    }
+  });
+  
+  return items;
+}
+
+function calculateEditOrderTotal() {
+  const items = getEditOrderItems();
+  return items.reduce((total, item) => total + item.total, 0);
+}
+
+function updateEditOrderTotal() {
+  const items = getEditOrderItems();
+  const total = items.reduce((sum, item) => sum + item.total, 0);
+  
+  // Update individual item totals
+  const itemElements = document.querySelectorAll('#editOrderItemsList .order-item');
+  itemElements.forEach(element => {
+    const quantity = parseFloat(element.querySelector('.edit-order-item-quantity').value) || 0;
+    const rate = parseFloat(element.querySelector('.edit-order-item-rate').value) || 0;
+    const totalInput = element.querySelector('.edit-order-item-total');
+    if (totalInput) {
+      totalInput.value = (quantity * rate).toFixed(2);
+    }
+  });
+  
+  // Update overall total
+  const totalElement = document.getElementById('editOrderTotalAmount');
+  if (totalElement) {
+    totalElement.textContent = formatINR(total);
+  }
+}
+
+function onEditItemNameChange(itemId) {
+  const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (!itemElement) return;
+  
+  const nameSelect = itemElement.querySelector('.edit-order-item-name');
+  const materialSelect = itemElement.querySelector('.edit-order-item-material-type');
+  const descriptionInput = itemElement.querySelector('.edit-order-item-description');
+  const rateInput = itemElement.querySelector('.edit-order-item-rate');
+  
+  const selectedOption = nameSelect.options[nameSelect.selectedIndex];
+  
+  if (selectedOption.value && selectedOption.value !== 'custom') {
+    // Auto-populate fields from selected item
+    const materialType = selectedOption.getAttribute('data-material');
+    const description = selectedOption.getAttribute('data-description');
+    const rate = selectedOption.getAttribute('data-rate');
+    
+    materialSelect.value = materialType;
+    descriptionInput.value = description;
+    rateInput.value = rate;
+    
+    // Update total
+    updateEditOrderTotal();
+  } else if (selectedOption.value === 'custom') {
+    // Clear fields for custom item
+    materialSelect.value = '';
+    descriptionInput.value = '';
+    rateInput.value = '';
+  }
 }
 
 // Bulk Order management function
@@ -494,6 +900,34 @@ function viewOrder(orderId) {
     
     <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
       <div style="font-weight: 600; color: var(--gray-700); margin-bottom: 0.5rem;">${isDCOrder ? 'Material Description' : 'Items'}</div>
+      ${order.orderItems && order.orderItems.length > 0 ? `
+        <div style="margin-bottom: 1rem;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+              <tr style="background: var(--gray-100);">
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid var(--gray-200);">Item Name</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid var(--gray-200);">Material Type</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid var(--gray-200);">Description</th>
+                <th style="padding: 0.5rem; text-align: center; border: 1px solid var(--gray-200);">Qty</th>
+                <th style="padding: 0.5rem; text-align: right; border: 1px solid var(--gray-200);">Rate</th>
+                <th style="padding: 0.5rem; text-align: right; border: 1px solid var(--gray-200);">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${order.orderItems.map(item => `
+                <tr>
+                  <td style="padding: 0.5rem; border: 1px solid var(--gray-200); font-weight: 600; color: var(--brand-600);">${item.itemName || 'Custom Item'}</td>
+                  <td style="padding: 0.5rem; border: 1px solid var(--gray-200); font-weight: 500; color: var(--success-600);">${item.materialType || 'N/A'}</td>
+                  <td style="padding: 0.5rem; border: 1px solid var(--gray-200);">${item.description}</td>
+                  <td style="padding: 0.5rem; text-align: center; border: 1px solid var(--gray-200);">${item.quantity}</td>
+                  <td style="padding: 0.5rem; text-align: right; border: 1px solid var(--gray-200);">${formatINR(item.rate)}</td>
+                  <td style="padding: 0.5rem; text-align: right; border: 1px solid var(--gray-200); font-weight: 600;">${formatINR(item.total)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : ''}
       <div style="font-size: 0.9rem;">${order.items}</div>
     </div>
     
@@ -549,13 +983,26 @@ function editOrder(orderId) {
           </select>
         </div>
       </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Order Items</h4>
       <div class="form-group col-12">
-        <label>Items/Description *</label>
-        <textarea id="editOrderItems" rows="3" required>${order.items}</textarea>
-      </div>
-      <div class="form-group col-12">
-        <label>Total Amount (INR) *</label>
-        <input id="editOrderAmount" type="number" min="0" step="0.01" value="${order.totalAmount}" required />
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <label>Items *</label>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addEditOrderItem()">
+            <i class="pi pi-plus"></i> Add Item
+          </button>
+        </div>
+        <div id="editOrderItemsList" class="order-items-container">
+          <!-- Items will be added here dynamically -->
+        </div>
+        <div class="order-summary">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>Total Amount:</strong>
+            <span id="editOrderTotalAmount">₹0.00</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -576,18 +1023,25 @@ function editOrder(orderId) {
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Update Order', type: 'primary', action: () => {
       const customer = document.getElementById('editOrderCustomer').value.trim();
-      const items = document.getElementById('editOrderItems').value.trim();
-      const amount = parseFloat(document.getElementById('editOrderAmount').value);
       const status = document.getElementById('editOrderStatus').value;
       const date = document.getElementById('editOrderDate').value;
       const address = document.getElementById('editOrderAddress').value.trim();
       const contact = document.getElementById('editOrderContact').value.trim();
       const notes = document.getElementById('editOrderNotes').value.trim();
       
-      if (!customer || !items || isNaN(amount) || !status || !date || amount <= 0) {
-        showToast('Please fill all required fields correctly', 'error');
+      // Get order items
+      const orderItems = getEditOrderItems();
+      const totalAmount = calculateEditOrderTotal();
+      
+      if (!customer || orderItems.length === 0 || !status || !date || totalAmount <= 0) {
+        showToast('Please fill all required fields correctly and add at least one item', 'error');
         return;
       }
+      
+      // Format items for display
+      const itemsText = orderItems.map(item => 
+        `${item.itemName} - ${item.materialType} - ${item.description} (Qty: ${item.quantity}, Rate: ₹${item.rate.toFixed(2)}, Total: ₹${(item.quantity * item.rate).toFixed(2)})`
+      ).join('; ');
       
       const orderIndex = orders.findIndex(o => o.id === orderId);
       if (orderIndex === -1) return;
@@ -595,8 +1049,9 @@ function editOrder(orderId) {
       orders[orderIndex] = {
         ...orders[orderIndex],
         customer,
-        items,
-        totalAmount: amount,
+        items: itemsText,
+        orderItems: orderItems, // Store structured items data
+        totalAmount: totalAmount,
         status,
         date,
         address: address || 'N/A',
@@ -612,6 +1067,39 @@ function editOrder(orderId) {
       showToast('Order updated successfully', 'success');
     }}
   ], 'modal-lg');
+  
+  // Populate existing items if they exist
+  setTimeout(() => {
+    if (order.orderItems && order.orderItems.length > 0) {
+      order.orderItems.forEach(item => {
+        addEditOrderItem();
+        const itemsContainer = document.getElementById('editOrderItemsList');
+        const lastItem = itemsContainer.lastElementChild;
+        if (lastItem) {
+          // Try to find matching predefined item
+          const matchingItem = PREDEFINED_ITEMS.find(predefined => 
+            predefined.name === item.itemName || 
+            (predefined.description === item.description && predefined.materialType === item.materialType)
+          );
+          
+          if (matchingItem) {
+            lastItem.querySelector('.edit-order-item-name').value = matchingItem.name;
+          } else {
+            lastItem.querySelector('.edit-order-item-name').value = 'custom';
+          }
+          
+          lastItem.querySelector('.edit-order-item-material-type').value = item.materialType || '';
+          lastItem.querySelector('.edit-order-item-description').value = item.description;
+          lastItem.querySelector('.edit-order-item-quantity').value = item.quantity;
+          lastItem.querySelector('.edit-order-item-rate').value = item.rate;
+        }
+      });
+      updateEditOrderTotal();
+    } else {
+      // Add one empty item if no existing items
+      addEditOrderItem();
+    }
+  }, 100);
 }
 
 function deleteOrder(orderId) {
