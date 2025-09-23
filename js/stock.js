@@ -291,7 +291,7 @@ function viewStockItem(itemId) {
   openModal('Stock Item Details', html, [
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Edit', type: 'primary', action: () => { closeModal(); editStockItem(itemId); } }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function editStockItem(itemId) {
@@ -744,7 +744,7 @@ function openStockMovementModal() {
   openModal('Stock Movement', body, [
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Record Movement', type: 'primary', action: processStockMovement }
-  ]);
+  ], 'modal-large');
 }
 
 /**

@@ -219,7 +219,7 @@ function addExpense() {
   openModal('Add Expense', body, [
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Add Expense', type: 'primary', action: saveExpense }
-  ], 'large');
+  ], 'modal-large');
 
   // Set default date to today
   setTimeout(() => {
@@ -395,7 +395,7 @@ function addIncome() {
   openModal('Add Income', body, [
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Add Income', type: 'primary', action: saveIncome }
-  ], 'large');
+  ], 'modal-large');
 
   // Set default date to today
   setTimeout(() => {
@@ -788,7 +788,7 @@ function viewFinancialRecord(recordId, recordType) {
   openModal('Financial Record Details', html, [
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Edit', type: 'primary', action: () => { closeModal(); editFinancialRecord(recordId, recordType); } }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function editFinancialRecord(recordId, recordType) {
@@ -908,7 +908,7 @@ function showReports() {
     </div>
   `, [
     { label: 'Close', type: 'secondary', action: closeModal }
-  ], 'xlarge');
+  ], 'modal-xl');
 }
 
 function generateReport(reportId) {
@@ -1169,7 +1169,7 @@ function displayReport(title, data) {
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Export PDF', type: 'primary', action: () => exportReportToPDF(title, data) },
     { label: 'Print', type: 'info', action: () => printReport(title, data) }
-  ], 'xlarge');
+  ], 'modal-xl');
 }
 
 function exportReportToPDF(title, data) {
@@ -1220,7 +1220,7 @@ function showBankReconciliation() {
   openModal('Bank Reconciliation', body, [
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'View Details', type: 'primary', action: viewReconciliationDetails }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function importBankStatement() {
@@ -1323,7 +1323,7 @@ function addFinancialRecord() {
   openModal('Add Financial Record', body, [
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Add Record', type: 'primary', action: saveFinancialRecord }
-  ], 'large');
+  ], 'modal-large');
 
   // Set default date to today
   setTimeout(() => {

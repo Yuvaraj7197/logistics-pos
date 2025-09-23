@@ -658,7 +658,7 @@ function openCreateInvoiceModal() {
       updateDashboardStats();
       showToast(`Invoice ${invoiceNumber} created successfully`, 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Initialize form
   setTimeout(() => {
@@ -741,7 +741,7 @@ function openCompanySettingsModal() {
       closeModal();
       showToast('Company settings saved successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
 }
 
 function previewCompanyLogo(input) {
@@ -1677,7 +1677,7 @@ function viewInvoice(invoiceId) {
     { label: 'Print Invoice', type: 'primary', action: () => printInvoice(invoiceId) },
     { label: 'Export PDF', type: 'success', action: () => exportInvoiceToPDF(invoiceId) },
     { label: 'Edit', type: 'info', action: () => { closeModal(); editInvoice(invoiceId); } }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function generateDetailedInvoiceHTML(invoice) {
@@ -1895,7 +1895,7 @@ function editInvoice(invoiceId) {
       updateDashboardStats(); // Update dashboard stats
       showToast('Invoice updated successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
 }
 
 function printInvoice(invoiceId) {
@@ -2102,7 +2102,7 @@ function openCreateQuotationModal() {
       renderInvoices(); // Refresh the billing table
       showToast(`Quotation ${newQuotation.id} created successfully`, 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default valid until date (30 days from now)
   setTimeout(() => {
@@ -2203,7 +2203,7 @@ function viewQuotation(quotationId) {
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Print Quotation', type: 'primary', action: () => printQuotation(quotationId) },
     { label: 'Convert to Invoice', type: 'success', action: () => convertQuotationToInvoice(quotationId) }
-  ]);
+  ], 'modal-large');
 }
 
 /**
@@ -2400,7 +2400,7 @@ function openPaymentTrackingModal() {
       closeModal();
       showAllPayments();
     }}
-  ], 'large');
+  ], 'modal-large');
 }
 
 /**
@@ -2452,7 +2452,7 @@ function openRecurringBillingModal() {
   
   openModal('Recurring Billing', body, [
     { label: 'Close', type: 'secondary', action: closeModal }
-  ], 'large');
+  ], 'modal-large');
 }
 
 /**
@@ -2593,7 +2593,7 @@ function openCreateRecurringBillModal() {
       openRecurringBillingModal(); // Refresh the modal
       showToast('Recurring bill created successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default next due date (30 days from now)
   setTimeout(() => {
@@ -2854,7 +2854,7 @@ function openCreateInvoiceModal(type = 'standard') {
       updateDashboardStats();
       showToast('Invoice created successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default dates
   setTimeout(() => {

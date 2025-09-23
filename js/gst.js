@@ -455,7 +455,7 @@ function viewGstReturn(returnId) {
   openModal('GST Return Details', html, [
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Edit', type: 'primary', action: () => { closeModal(); editGstReturn(returnId); } }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function editGstReturn(returnId) {
@@ -958,7 +958,7 @@ function openGstCalculatorModal() {
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Calculate', type: 'primary', action: calculateGstTax },
     { label: 'Save Calculation', type: 'info', action: saveGstCalculation }
-  ], 'large');
+  ], 'modal-large');
   
   // Add event listeners for real-time calculation
   setTimeout(() => {
@@ -1087,7 +1087,7 @@ function openGstReportsModal() {
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Generate Report', type: 'primary', action: generateGstReport },
     { label: 'Download', type: 'info', action: downloadGstReport }
-  ], 'xlarge');
+  ], 'modal-xl');
   
   // Set default period to current month
   setTimeout(() => {
@@ -1200,7 +1200,7 @@ function openGstSettingsModal() {
   openModal('GST Settings', body, [
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Save Settings', type: 'primary', action: saveGstSettingsModal }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function saveGstSettingsModal() {

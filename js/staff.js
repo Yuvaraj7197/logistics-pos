@@ -413,7 +413,7 @@ function addStaff() {
       updateDashboardStats(); // Update dashboard stats
       showToast(`Staff member ${name} added successfully`, 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default join date to today
   setTimeout(() => {
@@ -593,7 +593,7 @@ function editStaff(empId, evt) {
         showToast('Staff member not found', 'error');
       }
     }}
-  ]);
+  ], 'modal-large');
 }
 
 /**

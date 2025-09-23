@@ -316,7 +316,7 @@ function receiveOrder() {
       updateDashboardStats(); // Update dashboard stats
       showToast('Order created successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default date to today
   setTimeout(() => {
@@ -436,7 +436,7 @@ function receiveBulkOrder() {
       updateDashboardStats(); // Update dashboard stats
       showToast('Bulk Order created successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default date to today
   setTimeout(() => {
@@ -515,7 +515,7 @@ function viewOrder(orderId) {
   openModal(isDCOrder ? 'DC Order Details' : 'Order Details', html, [
     { label: 'Close', type: 'secondary', action: closeModal },
     { label: 'Edit', type: 'primary', action: () => { closeModal(); editOrder(orderId); } }
-  ], 'large');
+  ], 'modal-large');
 }
 
 function editOrder(orderId) {
@@ -747,7 +747,7 @@ function receiveDCOrder() {
       updateDashboardStats(); // Update dashboard stats
       showToast('DC Order created successfully', 'success');
     }}
-  ]);
+  ], 'modal-large');
   
   // Set default dates
   setTimeout(() => {
