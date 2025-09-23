@@ -636,6 +636,34 @@ function getFinancialBadgeClass(status) {
   return 'status-badge status-pending';
 }
 
+// GST calculation functions for financial records
+function calculateFinancialGST(amount, gstRate, isInterstate = false) {
+  const rate = parseFloat(gstRate) / 100;
+  const gstAmount = amount * rate;
+  
+  if (isInterstate) {
+    return {
+      total: amount + gstAmount,
+      gstAmount: gstAmount,
+      cgst: 0,
+      sgst: 0,
+      igst: gstAmount,
+      breakdown: `IGST @ ${gstRate}%`
+    };
+  } else {
+    const cgst = gstAmount / 2;
+    const sgst = gstAmount / 2;
+    return {
+      total: amount + gstAmount,
+      gstAmount: gstAmount,
+      cgst: cgst,
+      sgst: sgst,
+      igst: 0,
+      breakdown: `CGST @ ${gstRate/2}% + SGST @ ${gstRate/2}%`
+    };
+  }
+}
+
 function getFinancialActions(record) {
   const actions = [
     { label: 'View Details', icon: 'pi pi-eye', onclick: `viewFinancialRecord('${record.id}', '${record.recordType}')` },

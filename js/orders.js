@@ -44,6 +44,34 @@ function generateOrderId() {
   return generateId('ORD', loadOrders());
 }
 
+// GST calculation functions for orders
+function calculateOrderGST(amount, gstRate, isInterstate = false) {
+  const rate = parseFloat(gstRate) / 100;
+  const gstAmount = amount * rate;
+  
+  if (isInterstate) {
+    return {
+      total: amount + gstAmount,
+      gstAmount: gstAmount,
+      cgst: 0,
+      sgst: 0,
+      igst: gstAmount,
+      breakdown: `IGST @ ${gstRate}%`
+    };
+  } else {
+    const cgst = gstAmount / 2;
+    const sgst = gstAmount / 2;
+    return {
+      total: amount + gstAmount,
+      gstAmount: gstAmount,
+      cgst: cgst,
+      sgst: sgst,
+      igst: 0,
+      breakdown: `CGST @ ${gstRate/2}% + SGST @ ${gstRate/2}%`
+    };
+  }
+}
+
 // Main render function
 function renderOrders() {
   const tbody = document.getElementById('ordersTbody');

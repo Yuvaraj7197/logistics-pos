@@ -67,6 +67,42 @@ function billingBadgeClass(status) {
   return 'status-badge status-pending';
 }
 
+// GST calculation functions
+function calculateGST(amount, gstRate, isInterstate = false) {
+  const rate = parseFloat(gstRate) / 100;
+  const gstAmount = amount * rate;
+  
+  if (isInterstate) {
+    return {
+      total: amount + gstAmount,
+      gstAmount: gstAmount,
+      cgst: 0,
+      sgst: 0,
+      igst: gstAmount,
+      breakdown: `IGST @ ${gstRate}%`
+    };
+  } else {
+    const cgst = gstAmount / 2;
+    const sgst = gstAmount / 2;
+    return {
+      total: amount + gstAmount,
+      gstAmount: gstAmount,
+      cgst: cgst,
+      sgst: sgst,
+      igst: 0,
+      breakdown: `CGST @ ${gstRate/2}% + SGST @ ${gstRate/2}%`
+    };
+  }
+}
+
+function formatGSTBreakdown(gstData) {
+  if (gstData.igst > 0) {
+    return `IGST: ${formatINR(gstData.igst)}`;
+  } else {
+    return `CGST: ${formatINR(gstData.cgst)}, SGST: ${formatINR(gstData.sgst)}`;
+  }
+}
+
 function generateInvoiceId() {
   const invoices = loadInvoices();
   let max = 0;
@@ -149,12 +185,20 @@ function renderInvoices() {
     return;
   }
   
-  tbody.innerHTML = currentPageData.map(invoice => `
+  tbody.innerHTML = currentPageData.map(invoice => {
+    const totalAmount = invoice.totalAmount || invoice.amount;
+    const gstInfo = invoice.gstData ? `GST: ${invoice.gstRate}%` : '';
+    
+    return `
     <tr>
       <td><strong>${invoice.id}</strong></td>
       <td><span class="badge badge-${invoice.type === 'Recurring' ? 'warning' : invoice.type === 'Template' ? 'info' : 'secondary'}">${invoice.type || 'Standard'}</span></td>
       <td>${invoice.customer}</td>
-      <td>${formatINR(invoice.amount)}</td>
+      <td>
+        <div>${formatINR(invoice.amount)}</div>
+        ${gstInfo ? `<small class="text-muted">${gstInfo}</small>` : ''}
+      </td>
+      <td>${formatINR(totalAmount)}</td>
       <td>${formatDate(invoice.issueDate)}</td>
       <td>${formatDate(invoice.dueDate)}</td>
       <td><span class="${billingBadgeClass(invoice.status)}">${invoice.status}</span></td>
@@ -172,7 +216,8 @@ function renderInvoices() {
         ])}
       </td>
     </tr>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Invoice management functions
@@ -186,8 +231,37 @@ function openCreateInvoiceModal() {
           <input id="invoiceCustomer" type="text" placeholder="Enter customer name" required />
         </div>
         <div class="form-group col-6">
+          <label>Customer GSTIN</label>
+          <input id="invoiceCustomerGSTIN" type="text" placeholder="Enter customer GSTIN (optional)" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
           <label>Amount (INR) *</label>
           <input id="invoiceAmount" type="number" min="0" step="0.01" placeholder="Enter amount" required />
+        </div>
+        <div class="form-group col-6">
+          <label>GST Rate *</label>
+          <select id="invoiceGSTRate" required>
+            <option value="0">0% (Exempt)</option>
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18" selected>18%</option>
+            <option value="28">28%</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label>Transaction Type *</label>
+          <select id="invoiceTransactionType" required>
+            <option value="intrastate">Intrastate</option>
+            <option value="interstate">Interstate</option>
+          </select>
+        </div>
+        <div class="form-group col-6">
+          <label>Total Amount (with GST)</label>
+          <input id="invoiceTotalAmount" type="number" readonly />
         </div>
       </div>
       <div class="form-row">
@@ -235,7 +309,10 @@ function openCreateInvoiceModal() {
     { label: 'Cancel', type: 'secondary', action: closeModal },
     { label: 'Create Invoice', type: 'primary', action: () => {
       const customer = document.getElementById('invoiceCustomer').value.trim();
+      const customerGSTIN = document.getElementById('invoiceCustomerGSTIN').value.trim();
       const amount = parseFloat(document.getElementById('invoiceAmount').value);
+      const gstRate = parseFloat(document.getElementById('invoiceGSTRate').value);
+      const transactionType = document.getElementById('invoiceTransactionType').value;
       const issueDate = document.getElementById('invoiceIssueDate').value;
       const dueDate = document.getElementById('invoiceDueDate').value;
       const status = document.getElementById('invoiceStatus').value;
@@ -248,6 +325,10 @@ function openCreateInvoiceModal() {
         return;
       }
       
+      // Calculate GST
+      const isInterstate = transactionType === 'interstate';
+      const gstData = calculateGST(amount, gstRate, isInterstate);
+      
       if (new Date(dueDate) < new Date(issueDate)) {
         showToast('Due date cannot be before issue date', 'error');
         return;
@@ -257,7 +338,12 @@ function openCreateInvoiceModal() {
       const newInvoice = {
         id: generateInvoiceId(),
         customer,
+        customerGSTIN: customerGSTIN || '',
         amount,
+        gstRate,
+        transactionType,
+        gstData,
+        totalAmount: gstData.total,
         issueDate,
         dueDate,
         status,
@@ -275,6 +361,31 @@ function openCreateInvoiceModal() {
       showToast('Invoice created successfully', 'success');
     }}
   ]);
+  
+  // Add GST calculation event listeners
+  setTimeout(() => {
+    const amountInput = document.getElementById('invoiceAmount');
+    const gstRateSelect = document.getElementById('invoiceGSTRate');
+    const transactionTypeSelect = document.getElementById('invoiceTransactionType');
+    const totalAmountInput = document.getElementById('invoiceTotalAmount');
+    
+    function calculateTotal() {
+      const amount = parseFloat(amountInput.value) || 0;
+      const gstRate = parseFloat(gstRateSelect.value) || 0;
+      const isInterstate = transactionTypeSelect.value === 'interstate';
+      
+      if (amount > 0) {
+        const gstData = calculateGST(amount, gstRate, isInterstate);
+        totalAmountInput.value = gstData.total.toFixed(2);
+      } else {
+        totalAmountInput.value = '';
+      }
+    }
+    
+    if (amountInput) amountInput.addEventListener('input', calculateTotal);
+    if (gstRateSelect) gstRateSelect.addEventListener('change', calculateTotal);
+    if (transactionTypeSelect) transactionTypeSelect.addEventListener('change', calculateTotal);
+  }, 100);
   
   // Set default dates
   setTimeout(() => {

@@ -280,6 +280,17 @@ function updateDashboardStats() {
     updateElement('onLeaveCount', staff.filter(emp => emp.status === 'On Leave').length);
     updateElement('pendingLeaveCount', loadLeaveRequests().filter(req => req.status === 'Pending').length);
     
+    // Update GST elements
+    const totalGSTReturns = gstReturns.length;
+    const pendingGSTReturns = gstReturns.filter(return_item => return_item.status === 'Draft').length;
+    const filedGSTReturns = gstReturns.filter(return_item => return_item.status === 'Filed').length;
+    const totalGSTAmount = gstReturns.reduce((sum, return_item) => sum + (return_item.totalTaxAmount || 0), 0);
+    
+    updateElement('totalGSTReturnsCount', totalGSTReturns);
+    updateElement('pendingGSTReturnsCount', pendingGSTReturns);
+    updateElement('filedGSTReturnsCount', filedGSTReturns);
+    updateElement('totalGSTAmountCount', formatINR(totalGSTAmount));
+    
   } catch (error) {
     console.error('Error updating dashboard stats:', error);
   }
