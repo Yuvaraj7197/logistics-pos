@@ -122,12 +122,7 @@
           <div id="dashboardContainer">
             <!-- DASHBOARD GRID COMPONENT -->
             <section id="dashboardGrid" class="p-4">
-              <div class="content-header">
-                <div>
-                  <h2><i class="pi pi-home"></i> Admin Dashboard</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Manage your logistics operations</p>
-                </div>
-              </div>
+              
 
               <div class="stats-grid">
                 <div class="stat-card">
@@ -575,9 +570,7 @@
                     <button class="btn btn-primary" onclick="openCreateInvoiceModal()">
                       <i class="pi pi-plus"></i> Create Invoice
                     </button>
-                    <button class="btn btn-primary dropdown-toggle" onclick="toggleDropdown('invoiceTypeDropdown')">
-                      <i class="pi pi-caret-down"></i>
-                    </button>
+                    
                     <div class="dropdown-menu" id="invoiceTypeDropdown">
                       <button class="dropdown-item" onclick="openCreateInvoiceModal()">
                         <i class="pi pi-file"></i> Standard Invoice
@@ -630,108 +623,7 @@
                 </div>
               </div>
 
-              <!-- Professional Invoice Templates Section -->
-              <!-- <div class="card" style="margin-bottom: 1.5rem;">
-                <h3><i class="pi pi-palette"></i> Professional Invoice Templates</h3>
-                <div class="grid" style="margin-top: 1rem;">
-                  <div class="col-12 md:col-4">
-                    <div class="template-card" onclick="selectInvoiceTemplate('modern')">
-                      <div class="template-preview modern-template">
-                        <div class="template-header">INVOICE</div>
-                        <div class="template-content">
-                          <div class="template-line"></div>
-                          <div class="template-line short"></div>
-                          <div class="template-line"></div>
-                        </div>
-                      </div>
-                      <div class="template-name">Modern</div>
-                    </div>
-                  </div>
-                  <div class="col-12 md:col-4">
-                    <div class="template-card" onclick="selectInvoiceTemplate('classic')">
-                      <div class="template-preview classic-template">
-                        <div class="template-header">INVOICE</div>
-                        <div class="template-content">
-                          <div class="template-line"></div>
-                          <div class="template-line short"></div>
-                          <div class="template-line"></div>
-                        </div>
-                      </div>
-                      <div class="template-name">Classic</div>
-                    </div>
-                  </div>
-                  <div class="col-12 md:col-4">
-                    <div class="template-card" onclick="selectInvoiceTemplate('minimal')">
-                      <div class="template-preview minimal-template">
-                        <div class="template-header">INVOICE</div>
-                        <div class="template-content">
-                          <div class="template-line"></div>
-                          <div class="template-line short"></div>
-                          <div class="template-line"></div>
-                        </div>
-                      </div>
-                      <div class="template-name">Minimal</div>
-                    </div>
-                  </div>
-                </div>
-              </div> -->
-
-              <!-- Payment Methods & Gateway Integration -->
-              <!-- <div class="card" style="margin-bottom: 1.5rem;">
-                <h3><i class="pi pi-credit-card"></i> Payment Methods & Gateway Integration</h3>
-                <div class="grid" style="margin-top: 1rem;">
-                  <div class="col-12 md:col-6">
-                    <div class="payment-method-card">
-                      <h4><i class="pi pi-credit-card"></i> Online Payment Gateways</h4>
-                      <div class="payment-gateways">
-                        <div class="gateway-item">
-                          <i class="pi pi-paypal"></i>
-                          <span>PayPal</span>
-                          <span class="status-badge status-completed">Active</span>
-                        </div>
-                        <div class="gateway-item">
-                          <i class="pi pi-credit-card"></i>
-                          <span>Stripe</span>
-                          <span class="status-badge status-completed">Active</span>
-                        </div>
-                        <div class="gateway-item">
-                          <i class="pi pi-credit-card"></i>
-                          <span>Razorpay</span>
-                          <span class="status-badge status-pending">Setup Required</span>
-                        </div>
-                        <div class="gateway-item">
-                          <i class="pi pi-credit-card"></i>
-                          <span>PayU</span>
-                          <span class="status-badge status-pending">Setup Required</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 md:col-6">
-                    <div class="payment-method-card">
-                      <h4><i class="pi pi-money-bill"></i> Traditional Payment Methods</h4>
-                      <div class="payment-methods">
-                        <div class="method-item">
-                          <i class="pi pi-building"></i>
-                          <span>Bank Transfer</span>
-                        </div>
-                        <div class="method-item">
-                          <i class="pi pi-mobile"></i>
-                          <span>UPI</span>
-                        </div>
-                        <div class="method-item">
-                          <i class="pi pi-money-bill"></i>
-                          <span>Cash</span>
-                        </div>
-                        <div class="method-item">
-                          <i class="pi pi-file"></i>
-                          <span>Cheque</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div> -->
+              
 
               <div class="filters">
                 <div class="filter-group">
@@ -803,10 +695,7 @@
             <!-- COMPREHENSIVE FINANCIAL MANAGEMENT COMPONENT -->
             <section id="financial" class="p-4">
               <div class="content-header">
-                <div>
-                  <h2><i class="pi pi-calculator"></i> Financial Management</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Comprehensive expense tracking, income management, accounting, and bank reconciliation</p>
-                </div>
+               
                 <div class="actions">
                   <div class="btn-group">
                     <button class="btn btn-success" onclick="addIncome()">
@@ -930,10 +819,7 @@
             <!-- GST MANAGEMENT COMPONENT -->
             <section id="gst" class="p-4">
               <div class="content-header">
-                <div>
-                  <h2><i class="pi pi-percentage"></i> GST Management</h2>
-                  <p style="color: var(--gray-600); margin: 0;">Handle GST compliance, returns, and tax calculations</p>
-                </div>
+                
                 <div class="actions">
                   <button class="btn btn-primary" onclick="openGstReturnModal()">
                     <i class="pi pi-plus"></i> File Return
