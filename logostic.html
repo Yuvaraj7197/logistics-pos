@@ -714,6 +714,10 @@
                     <i class="pi pi-user"></i>
                     <span>CRM</span>
                 </div>
+                <div class="nav-item" onclick="showSection('suppliers', event)">
+                    <i class="pi pi-building"></i>
+                    <span>Suppliers</span>
+                </div>
                 <div class="nav-item" onclick="showSection('production', event)">
                     <i class="pi pi-cog"></i>
                     <span>Production</span>
@@ -1545,35 +1549,340 @@
                 </div>
             </div>
 
-            <div id="production" class="content-section hidden">
+            <div id="suppliers" class="content-section hidden">
                 <div class="content-header">
-                    <h1>Production Management</h1>
-                    <p>Manage production orders, BOM, and work order tracking</p>
+                    <h1>Supplier & Vendor Management</h1>
+                    <p>Comprehensive supplier management with purchase orders, settlements, and vendor relationships</p>
+                </div>
+
+                <!-- Supplier Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Supplier Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="supplierCategoryFilter" onchange="filterSuppliers()" style="width: 150px;">
+                            <option value="">All Categories</option>
+                            <option value="Raw Materials">Raw Materials</option>
+                            <option value="Packaging">Packaging</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Services">Services</option>
+                        </select>
+                        <select class="form-input" id="supplierStatusFilter" onchange="filterSuppliers()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Preferred">Preferred</option>
+                            <option value="Blacklisted">Blacklisted</option>
+                        </select>
+                        <select class="form-input" id="supplierRatingFilter" onchange="filterSuppliers()" style="width: 150px;">
+                            <option value="">All Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showModal('addSupplierModal')">Add Supplier</button>
+                        <button class="btn btn-success" onclick="showModal('createPurchaseOrderModal')">Create PO</button>
+                        <button class="btn btn-primary" onclick="showModal('supplierSettlementModal')">Settlement</button>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">45</div>
-                        <div class="stat-label">Active Work Orders</div>
-                    </div>
                     <div class="stat-card green">
-                        <div class="stat-number">28</div>
-                        <div class="stat-label">Completed Today</div>
+                        <div class="stat-number" id="totalSuppliersCount">125</div>
+                        <div class="stat-label">Total Suppliers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeSuppliersCount">98</div>
+                        <div class="stat-label">Active Suppliers</div>
                     </div>
                     <div class="stat-card orange">
-                        <div class="stat-number">12</div>
-                        <div class="stat-label">Pending Orders</div>
+                        <div class="stat-number" id="pendingPOsCount">23</div>
+                        <div class="stat-label">Pending POs</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">85%</div>
-                        <div class="stat-label">Production Efficiency</div>
+                        <div class="stat-number" id="totalPurchaseValue">₹45,67,890</div>
+                        <div class="stat-label">Total Purchase Value</div>
+                    </div>
+                </div>
+
+                <!-- Supplier Performance Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Supplier Performance Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('supplierPerformanceModal')">Performance Report</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">4.2</div>
+                            <div class="stat-label">Avg. Rating</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">On-Time Delivery</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Quality Score</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">₹12,34,567</div>
+                            <div class="stat-label">Savings This Month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purchase Orders Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Purchase Orders Overview</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">45</div>
+                            <div class="stat-label">Total POs</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">32</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-number">8</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">Overdue</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Production Orders</h3>
-                        <button class="btn btn-primary" onclick="showModal('addProductionOrderModal')">New Production Order</button>
+                        <h3 class="card-title">Supplier Overview</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('addSupplierModal')">Add Supplier</button>
+                            <button class="btn btn-success" onclick="exportSuppliers()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('supplierAnalyticsModal')">Analytics</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier ID</th>
+                                <th>Company Name</th>
+                                <th>Contact Person</th>
+                                <th>Category</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Last Order</th>
+                                <th>Total Value</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplierTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Purchase Orders -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Purchase Orders</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('createPurchaseOrderModal')">Create PO</button>
+                            <button class="btn btn-success" onclick="exportPurchaseOrders()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('poAnalyticsModal')">Analytics</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>PO Number</th>
+                                <th>Supplier</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Expected Delivery</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseOrderTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Supplier Settlements -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Supplier Settlements</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier</th>
+                                <th>Invoice Number</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Payment Method</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="settlementTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Supplier Contracts -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Supplier Contracts</h3>
+                        <button class="btn btn-primary" onclick="showModal('addContractModal')">Add Contract</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Contract ID</th>
+                                <th>Supplier</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contractTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="production" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Production Management</h1>
+                    <p>Comprehensive production management with BOM, scheduling, work order tracking, and detailed production flow</p>
+                </div>
+
+                <!-- Production Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="productionStatusFilter" onchange="filterProduction()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        <select class="form-input" id="productionPriorityFilter" onchange="filterProduction()" style="width: 150px;">
+                            <option value="">All Priorities</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                        <select class="form-input" id="productionLineFilter" onchange="filterProduction()" style="width: 150px;">
+                            <option value="">All Lines</option>
+                            <option value="Line A">Line A</option>
+                            <option value="Line B">Line B</option>
+                            <option value="Line C">Line C</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showModal('addProductionOrderModal')">Add Order</button>
+                        <button class="btn btn-success" onclick="showModal('createBOMModal')">Create BOM</button>
+                        <button class="btn btn-primary" onclick="showModal('productionScheduleModal')">Schedule</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card green">
+                        <div class="stat-number" id="activeOrdersCount">45</div>
+                        <div class="stat-label">Active Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="productionEfficiency">78%</div>
+                        <div class="stat-label">Efficiency</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number" id="pendingOrdersCount">12</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="productionValue">₹2,45,678</div>
+                        <div class="stat-label">Production Value</div>
+                    </div>
+                </div>
+
+                <!-- Production Lines Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production Lines Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('productionLineModal')">Manage Lines</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">85%</div>
+                            <div class="stat-label">Line A Utilization</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">92%</div>
+                            <div class="stat-label">Line B Utilization</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">78%</div>
+                            <div class="stat-label">Line C Utilization</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">85%</div>
+                            <div class="stat-label">Overall Efficiency</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOM Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Bill of Materials (BOM)</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('createBOMModal')">Create BOM</button>
+                            <button class="btn btn-success" onclick="exportBOM()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('bomAnalyticsModal')">Analytics</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>BOM ID</th>
+                                <th>Product</th>
+                                <th>Version</th>
+                                <th>Components</th>
+                                <th>Total Cost</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bomTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Work Orders -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Work Orders</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('addWorkOrderModal')">Add Work Order</button>
+                            <button class="btn btn-success" onclick="exportWorkOrders()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('workOrderAnalyticsModal')">Analytics</button>
+                        </div>
                     </div>
                     <table class="data-table">
                         <thead>
@@ -1581,15 +1890,95 @@
                                 <th>Work Order ID</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
+                                <th>Production Line</th>
                                 <th>Status</th>
-                                <th>Started Date</th>
+                                <th>Priority</th>
+                                <th>Start Date</th>
                                 <th>Expected Completion</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="productionTableBody">
+                        <tbody id="workOrderTableBody">
                             </tbody>
                     </table>
+                </div>
+
+                <!-- Production Schedule -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production Schedule</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('productionScheduleModal')">Schedule</button>
+                            <button class="btn btn-success" onclick="exportSchedule()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('scheduleOptimizationModal')">Optimize</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Production Line</th>
+                                <th>Work Order</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Quality Control -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Quality Control</h3>
+                        <button class="btn btn-primary" onclick="showModal('qualityCheckModal')">Quality Check</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>QC ID</th>
+                                <th>Work Order</th>
+                                <th>Product</th>
+                                <th>Batch</th>
+                                <th>Inspector</th>
+                                <th>Result</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="qualityTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Production Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production Analytics</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">Quality Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">2.5%</div>
+                            <div class="stat-label">Defect Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹1,25,000</div>
+                            <div class="stat-label">Cost Savings</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">On-Time Delivery</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2555,6 +2944,311 @@
         </div>
     </div>
 
+    <!-- Add Supplier Modal -->
+    <div id="addSupplierModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Add New Supplier</h3>
+                <button class="close-modal" onclick="hideModal('addSupplierModal')">&times;</button>
+            </div>
+            <form onsubmit="addSupplier(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" class="form-input" id="supplierCompanyName" placeholder="Enter company name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Supplier ID</label>
+                        <input type="text" class="form-input" id="supplierId" placeholder="Auto-generated" readonly>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Contact Person</label>
+                        <input type="text" class="form-input" id="supplierContactPerson" placeholder="Enter contact person" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-input" id="supplierDesignation" placeholder="Enter designation">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="supplierEmail" placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-input" id="supplierPhone" placeholder="Enter phone number" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-input" id="supplierCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="Raw Materials">Raw Materials</option>
+                            <option value="Packaging">Packaging</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Services">Services</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-input" id="supplierStatus" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Preferred">Preferred</option>
+                            <option value="Blacklisted">Blacklisted</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-input" id="supplierAddress" placeholder="Enter complete address" rows="3" required></textarea>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">GST Number</label>
+                        <input type="text" class="form-input" id="supplierGST" placeholder="Enter GST number">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PAN Number</label>
+                        <input type="text" class="form-input" id="supplierPAN" placeholder="Enter PAN number">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('addSupplierModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Supplier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Purchase Order Modal -->
+    <div id="createPurchaseOrderModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Create Purchase Order</h3>
+                <button class="close-modal" onclick="hideModal('createPurchaseOrderModal')">&times;</button>
+            </div>
+            <form onsubmit="createPurchaseOrder(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">PO Number</label>
+                        <input type="text" class="form-input" id="poNumber" placeholder="Auto-generated" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PO Date</label>
+                        <input type="date" class="form-input" id="poDate" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Supplier</label>
+                        <select class="form-input" id="poSupplier" required onchange="loadSupplierDetails()">
+                            <option value="">Select Supplier</option>
+                            <option value="ABC Materials Ltd">ABC Materials Ltd</option>
+                            <option value="XYZ Packaging Co">XYZ Packaging Co</option>
+                            <option value="DEF Equipment Inc">DEF Equipment Inc</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expected Delivery</label>
+                        <input type="date" class="form-input" id="poExpectedDelivery" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Supplier Details</label>
+                    <div id="supplierDetails" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <p>Select a supplier to view details</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Items</label>
+                    <div id="poItems">
+                        <div class="po-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: center; margin-bottom: 10px;">
+                            <input type="text" class="form-input" placeholder="Item Description">
+                            <input type="number" class="form-input" placeholder="Qty" onchange="calculatePOItemTotal(this)">
+                            <input type="number" step="0.01" class="form-input" placeholder="Rate">
+                            <input type="number" step="0.01" class="form-input" placeholder="Total" readonly>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removePOItem(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addPOItem()">Add Item</button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Payment Terms</label>
+                        <select class="form-input" id="poPaymentTerms" required>
+                            <option value="Net30">Net 30 Days</option>
+                            <option value="Net15">Net 15 Days</option>
+                            <option value="COD">Cash on Delivery</option>
+                            <option value="Advance">Advance Payment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-input" id="poPriority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Special Instructions</label>
+                    <textarea class="form-input" id="poInstructions" placeholder="Enter special instructions" rows="3"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('createPurchaseOrderModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="previewPurchaseOrder()">Preview</button>
+                    <button type="submit" class="btn btn-success">Create PO</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supplier Settlement Modal -->
+    <div id="supplierSettlementModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Supplier Settlement</h3>
+                <button class="close-modal" onclick="hideModal('supplierSettlementModal')">&times;</button>
+            </div>
+            <form onsubmit="processSupplierSettlement(event)">
+                <div class="form-group">
+                    <label class="form-label">Supplier</label>
+                    <select class="form-input" id="settlementSupplier" required>
+                        <option value="">Select Supplier</option>
+                        <option value="ABC Materials Ltd">ABC Materials Ltd</option>
+                        <option value="XYZ Packaging Co">XYZ Packaging Co</option>
+                        <option value="DEF Equipment Inc">DEF Equipment Inc</option>
+                    </select>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Invoice Number</label>
+                        <input type="text" class="form-input" id="settlementInvoiceNumber" placeholder="Enter invoice number" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" class="form-input" id="settlementAmount" placeholder="Enter amount" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-input" id="settlementDueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-input" id="settlementPaymentMethod" required>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Payment Reference</label>
+                    <input type="text" class="form-input" id="settlementReference" placeholder="Enter payment reference">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-input" id="settlementNotes" placeholder="Enter additional notes" rows="3"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('supplierSettlementModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Process Settlement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Contract Modal -->
+    <div id="addContractModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Add Supplier Contract</h3>
+                <button class="close-modal" onclick="hideModal('addContractModal')">&times;</button>
+            </div>
+            <form onsubmit="addContract(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Contract ID</label>
+                        <input type="text" class="form-input" id="contractId" placeholder="Auto-generated" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Supplier</label>
+                        <select class="form-input" id="contractSupplier" required>
+                            <option value="">Select Supplier</option>
+                            <option value="ABC Materials Ltd">ABC Materials Ltd</option>
+                            <option value="XYZ Packaging Co">XYZ Packaging Co</option>
+                            <option value="DEF Equipment Inc">DEF Equipment Inc</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Contract Type</label>
+                        <select class="form-input" id="contractType" required>
+                            <option value="Supply Agreement">Supply Agreement</option>
+                            <option value="Service Contract">Service Contract</option>
+                            <option value="Maintenance Contract">Maintenance Contract</option>
+                            <option value="Exclusive Agreement">Exclusive Agreement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contract Value</label>
+                        <input type="number" step="0.01" class="form-input" id="contractValue" placeholder="Enter contract value" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-input" id="contractStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-input" id="contractEndDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Contract Terms</label>
+                    <textarea class="form-input" id="contractTerms" placeholder="Enter contract terms and conditions" rows="4" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('addContractModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Contract</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
     <script>
@@ -2906,6 +3600,148 @@
             autoUpdate: true
         };
 
+        // Supplier Management Data
+        let suppliers = [
+            {
+                id: 'SUP001',
+                companyName: 'ABC Materials Ltd',
+                contactPerson: 'John Smith',
+                designation: 'Sales Manager',
+                email: 'john@abcmaterials.com',
+                phone: '+91-9876543210',
+                category: 'Raw Materials',
+                status: 'Active',
+                rating: 4.5,
+                address: '123 Industrial Area, Mumbai, Maharashtra - 400001',
+                gst: '27ABCDE1234F1Z5',
+                pan: 'ABCDE1234F',
+                lastOrder: '2024-09-25',
+                totalValue: 1250000
+            },
+            {
+                id: 'SUP002',
+                companyName: 'XYZ Packaging Co',
+                contactPerson: 'Sarah Johnson',
+                designation: 'Business Development',
+                email: 'sarah@xyzpackaging.com',
+                phone: '+91-9876543211',
+                category: 'Packaging',
+                status: 'Preferred',
+                rating: 4.8,
+                address: '456 Packaging Hub, Delhi, Delhi - 110001',
+                gst: '07FGHIJ5678K2L6',
+                pan: 'FGHIJ5678K',
+                lastOrder: '2024-09-24',
+                totalValue: 890000
+            },
+            {
+                id: 'SUP003',
+                companyName: 'DEF Equipment Inc',
+                contactPerson: 'Mike Wilson',
+                designation: 'Technical Director',
+                email: 'mike@defequipment.com',
+                phone: '+91-9876543212',
+                category: 'Equipment',
+                status: 'Active',
+                rating: 4.2,
+                address: '789 Tech Park, Bangalore, Karnataka - 560001',
+                gst: '29KLMNO9012P3Q7',
+                pan: 'KLMNO9012P',
+                lastOrder: '2024-09-23',
+                totalValue: 2100000
+            }
+        ];
+
+        let purchaseOrders = [
+            {
+                poNumber: 'PO001',
+                supplier: 'ABC Materials Ltd',
+                date: '2024-09-25',
+                items: 5,
+                amount: 125000,
+                status: 'Pending',
+                expectedDelivery: '2024-10-02',
+                priority: 'High'
+            },
+            {
+                poNumber: 'PO002',
+                supplier: 'XYZ Packaging Co',
+                date: '2024-09-24',
+                items: 3,
+                amount: 89000,
+                status: 'Completed',
+                expectedDelivery: '2024-09-30',
+                priority: 'Medium'
+            },
+            {
+                poNumber: 'PO003',
+                supplier: 'DEF Equipment Inc',
+                date: '2024-09-23',
+                items: 2,
+                amount: 210000,
+                status: 'In Transit',
+                expectedDelivery: '2024-10-05',
+                priority: 'Urgent'
+            }
+        ];
+
+        let settlements = [
+            {
+                supplier: 'ABC Materials Ltd',
+                invoiceNumber: 'INV-ABC-001',
+                amount: 125000,
+                dueDate: '2024-10-25',
+                status: 'Pending',
+                paymentMethod: 'Bank Transfer'
+            },
+            {
+                supplier: 'XYZ Packaging Co',
+                invoiceNumber: 'INV-XYZ-002',
+                amount: 89000,
+                dueDate: '2024-10-24',
+                status: 'Paid',
+                paymentMethod: 'Cheque'
+            },
+            {
+                supplier: 'DEF Equipment Inc',
+                invoiceNumber: 'INV-DEF-003',
+                amount: 210000,
+                dueDate: '2024-10-23',
+                status: 'Overdue',
+                paymentMethod: 'Bank Transfer'
+            }
+        ];
+
+        let contracts = [
+            {
+                contractId: 'CON001',
+                supplier: 'ABC Materials Ltd',
+                type: 'Supply Agreement',
+                startDate: '2024-01-01',
+                endDate: '2024-12-31',
+                value: 1500000,
+                status: 'Active'
+            },
+            {
+                contractId: 'CON002',
+                supplier: 'XYZ Packaging Co',
+                type: 'Exclusive Agreement',
+                startDate: '2024-06-01',
+                endDate: '2025-05-31',
+                value: 800000,
+                status: 'Active'
+            },
+            {
+                contractId: 'CON003',
+                supplier: 'DEF Equipment Inc',
+                type: 'Maintenance Contract',
+                startDate: '2024-03-01',
+                endDate: '2025-02-28',
+                value: 500000,
+                status: 'Active'
+            }
+        ];
+
         let productionOrders = [
             { id: 'WO001', product: 'Product X', quantity: 100, status: 'In Progress', startDate: '2024-09-20', expectedCompletion: '2024-09-27' },
             { id: 'WO002', product: 'Product Y', quantity: 200, status: 'Completed', startDate: '2024-09-18', expectedCompletion: '2024-09-25' },
@@ -2956,6 +3792,9 @@
                     break;
                 case 'crm':
                     loadCustomerTable();
+                    break;
+                case 'suppliers':
+                    loadSupplierTable();
                     break;
                 case 'production':
                     loadProductionTable();
@@ -4342,6 +5181,449 @@
 
         function editTransaction(id) {
             alert(`Edit transaction ${id} functionality would be implemented here`);
+        }
+
+        // Supplier Management Functions
+        function loadSupplierTable() {
+            const tbody = document.getElementById('supplierTableBody');
+            tbody.innerHTML = suppliers.map(supplier => `
+                <tr>
+                    <td>${supplier.id}</td>
+                    <td>${supplier.companyName}</td>
+                    <td>${supplier.contactPerson}</td>
+                    <td>${supplier.category}</td>
+                    <td>${'★'.repeat(Math.floor(supplier.rating))} ${supplier.rating}</td>
+                    <td><span class="status-badge ${getSupplierStatusClass(supplier.status)}">${supplier.status}</span></td>
+                    <td>${supplier.lastOrder}</td>
+                    <td>₹${supplier.totalValue.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewSupplier('${supplier.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editSupplier('${supplier.id}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="rateSupplier('${supplier.id}')">Rate</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            loadPurchaseOrderTable();
+            loadSettlementTable();
+            loadContractTable();
+            updateSupplierStats();
+        }
+
+        function loadPurchaseOrderTable() {
+            const tbody = document.getElementById('purchaseOrderTableBody');
+            tbody.innerHTML = purchaseOrders.map(po => `
+                <tr>
+                    <td>${po.poNumber}</td>
+                    <td>${po.supplier}</td>
+                    <td>${po.date}</td>
+                    <td>${po.items}</td>
+                    <td>₹${po.amount.toLocaleString()}</td>
+                    <td><span class="status-badge ${getPOStatusClass(po.status)}">${po.status}</span></td>
+                    <td>${po.expectedDelivery}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewPurchaseOrder('${po.poNumber}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editPurchaseOrder('${po.poNumber}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="trackPurchaseOrder('${po.poNumber}')">Track</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadSettlementTable() {
+            const tbody = document.getElementById('settlementTableBody');
+            tbody.innerHTML = settlements.map(settlement => `
+                <tr>
+                    <td>${settlement.supplier}</td>
+                    <td>${settlement.invoiceNumber}</td>
+                    <td>₹${settlement.amount.toLocaleString()}</td>
+                    <td>${settlement.dueDate}</td>
+                    <td><span class="status-badge ${getSettlementStatusClass(settlement.status)}">${settlement.status}</span></td>
+                    <td>${settlement.paymentMethod}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewSettlement('${settlement.invoiceNumber}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="processSettlement('${settlement.invoiceNumber}')">Pay</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadContractTable() {
+            const tbody = document.getElementById('contractTableBody');
+            tbody.innerHTML = contracts.map(contract => `
+                <tr>
+                    <td>${contract.contractId}</td>
+                    <td>${contract.supplier}</td>
+                    <td>${contract.type}</td>
+                    <td>${contract.startDate}</td>
+                    <td>${contract.endDate}</td>
+                    <td>₹${contract.value.toLocaleString()}</td>
+                    <td><span class="status-badge ${getContractStatusClass(contract.status)}">${contract.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewContract('${contract.contractId}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editContract('${contract.contractId}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="renewContract('${contract.contractId}')">Renew</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateSupplierStats() {
+            const totalSuppliers = suppliers.length;
+            const activeSuppliers = suppliers.filter(s => s.status === 'Active' || s.status === 'Preferred').length;
+            const pendingPOs = purchaseOrders.filter(po => po.status === 'Pending').length;
+            const totalPurchaseValue = purchaseOrders.reduce((sum, po) => sum + po.amount, 0);
+            
+            document.getElementById('totalSuppliersCount').textContent = totalSuppliers;
+            document.getElementById('activeSuppliersCount').textContent = activeSuppliers;
+            document.getElementById('pendingPOsCount').textContent = pendingPOs;
+            document.getElementById('totalPurchaseValue').textContent = `₹${totalPurchaseValue.toLocaleString()}`;
+        }
+
+        function filterSuppliers() {
+            const categoryFilter = document.getElementById('supplierCategoryFilter').value;
+            const statusFilter = document.getElementById('supplierStatusFilter').value;
+            const ratingFilter = document.getElementById('supplierRatingFilter').value;
+            
+            let filteredSuppliers = suppliers;
+            
+            if (categoryFilter) {
+                filteredSuppliers = filteredSuppliers.filter(s => s.category === categoryFilter);
+            }
+            if (statusFilter) {
+                filteredSuppliers = filteredSuppliers.filter(s => s.status === statusFilter);
+            }
+            if (ratingFilter) {
+                filteredSuppliers = filteredSuppliers.filter(s => Math.floor(s.rating) >= parseInt(ratingFilter));
+            }
+            
+            const tbody = document.getElementById('supplierTableBody');
+            tbody.innerHTML = filteredSuppliers.map(supplier => `
+                <tr>
+                    <td>${supplier.id}</td>
+                    <td>${supplier.companyName}</td>
+                    <td>${supplier.contactPerson}</td>
+                    <td>${supplier.category}</td>
+                    <td>${'★'.repeat(Math.floor(supplier.rating))} ${supplier.rating}</td>
+                    <td><span class="status-badge ${getSupplierStatusClass(supplier.status)}">${supplier.status}</span></td>
+                    <td>${supplier.lastOrder}</td>
+                    <td>₹${supplier.totalValue.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewSupplier('${supplier.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editSupplier('${supplier.id}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="rateSupplier('${supplier.id}')">Rate</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Supplier Modal Functions
+        function addSupplier(event) {
+            event.preventDefault();
+            const supplierId = `SUP${String(suppliers.length + 1).padStart(3, '0')}`;
+            
+            const newSupplier = {
+                id: supplierId,
+                companyName: document.getElementById('supplierCompanyName').value,
+                contactPerson: document.getElementById('supplierContactPerson').value,
+                designation: document.getElementById('supplierDesignation').value,
+                email: document.getElementById('supplierEmail').value,
+                phone: document.getElementById('supplierPhone').value,
+                category: document.getElementById('supplierCategory').value,
+                status: document.getElementById('supplierStatus').value,
+                rating: 0,
+                address: document.getElementById('supplierAddress').value,
+                gst: document.getElementById('supplierGST').value,
+                pan: document.getElementById('supplierPAN').value,
+                lastOrder: 'N/A',
+                totalValue: 0
+            };
+            
+            suppliers.unshift(newSupplier);
+            loadSupplierTable();
+            hideModal('addSupplierModal');
+            
+            // Reset form
+            document.getElementById('supplierCompanyName').value = '';
+            document.getElementById('supplierContactPerson').value = '';
+            document.getElementById('supplierDesignation').value = '';
+            document.getElementById('supplierEmail').value = '';
+            document.getElementById('supplierPhone').value = '';
+            document.getElementById('supplierCategory').value = '';
+            document.getElementById('supplierStatus').value = 'Active';
+            document.getElementById('supplierAddress').value = '';
+            document.getElementById('supplierGST').value = '';
+            document.getElementById('supplierPAN').value = '';
+        }
+
+        function createPurchaseOrder(event) {
+            event.preventDefault();
+            const poNumber = `PO${String(purchaseOrders.length + 1).padStart(3, '0')}`;
+            
+            // Calculate total amount
+            const items = document.querySelectorAll('.po-item');
+            let totalAmount = 0;
+            let itemCount = 0;
+            
+            items.forEach(item => {
+                const qty = parseFloat(item.querySelector('input[placeholder="Qty"]').value) || 0;
+                const rate = parseFloat(item.querySelector('input[placeholder="Rate"]').value) || 0;
+                const itemTotal = qty * rate;
+                totalAmount += itemTotal;
+                if (qty > 0) itemCount++;
+            });
+            
+            const newPO = {
+                poNumber: poNumber,
+                supplier: document.getElementById('poSupplier').value,
+                date: document.getElementById('poDate').value,
+                items: itemCount,
+                amount: totalAmount,
+                status: 'Pending',
+                expectedDelivery: document.getElementById('poExpectedDelivery').value,
+                priority: document.getElementById('poPriority').value
+            };
+            
+            purchaseOrders.unshift(newPO);
+            loadPurchaseOrderTable();
+            hideModal('createPurchaseOrderModal');
+            
+            alert(`Purchase Order ${poNumber} created successfully!\nTotal Amount: ₹${totalAmount.toLocaleString()}`);
+        }
+
+        function processSupplierSettlement(event) {
+            event.preventDefault();
+            const supplier = document.getElementById('settlementSupplier').value;
+            const invoiceNumber = document.getElementById('settlementInvoiceNumber').value;
+            const amount = parseFloat(document.getElementById('settlementAmount').value);
+            const dueDate = document.getElementById('settlementDueDate').value;
+            const paymentMethod = document.getElementById('settlementPaymentMethod').value;
+            const reference = document.getElementById('settlementReference').value;
+            
+            const newSettlement = {
+                supplier: supplier,
+                invoiceNumber: invoiceNumber,
+                amount: amount,
+                dueDate: dueDate,
+                status: 'Paid',
+                paymentMethod: paymentMethod
+            };
+            
+            settlements.unshift(newSettlement);
+            loadSettlementTable();
+            hideModal('supplierSettlementModal');
+            
+            alert(`Settlement processed successfully!\nReference: ${reference}\nAmount: ₹${amount.toLocaleString()}`);
+        }
+
+        function addContract(event) {
+            event.preventDefault();
+            const contractId = `CON${String(contracts.length + 1).padStart(3, '0')}`;
+            
+            const newContract = {
+                contractId: contractId,
+                supplier: document.getElementById('contractSupplier').value,
+                type: document.getElementById('contractType').value,
+                startDate: document.getElementById('contractStartDate').value,
+                endDate: document.getElementById('contractEndDate').value,
+                value: parseFloat(document.getElementById('contractValue').value),
+                status: 'Active'
+            };
+            
+            contracts.unshift(newContract);
+            loadContractTable();
+            hideModal('addContractModal');
+            
+            alert(`Contract ${contractId} added successfully!`);
+        }
+
+        // Helper Functions
+        function getSupplierStatusClass(status) {
+            switch(status) {
+                case 'Active': return 'status-delivered';
+                case 'Preferred': return 'status-delivered';
+                case 'Inactive': return 'status-pending';
+                case 'Blacklisted': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+        function getPOStatusClass(status) {
+            switch(status) {
+                case 'Completed': return 'status-delivered';
+                case 'In Transit': return 'status-pending';
+                case 'Pending': return 'status-pending';
+                case 'Overdue': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+        function getSettlementStatusClass(status) {
+            switch(status) {
+                case 'Paid': return 'status-delivered';
+                case 'Pending': return 'status-pending';
+                case 'Overdue': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+        function getContractStatusClass(status) {
+            switch(status) {
+                case 'Active': return 'status-delivered';
+                case 'Expired': return 'status-cancelled';
+                case 'Pending': return 'status-pending';
+                default: return 'status-pending';
+            }
+        }
+
+        function loadSupplierDetails() {
+            const supplier = document.getElementById('poSupplier').value;
+            const detailsDiv = document.getElementById('supplierDetails');
+            
+            if (supplier) {
+                const supplierData = suppliers.find(s => s.companyName === supplier);
+                if (supplierData) {
+                    detailsDiv.innerHTML = `
+                        <h4>${supplierData.companyName}</h4>
+                        <p><strong>Contact:</strong> ${supplierData.contactPerson} (${supplierData.designation})</p>
+                        <p><strong>Phone:</strong> ${supplierData.phone}</p>
+                        <p><strong>Email:</strong> ${supplierData.email}</p>
+                        <p><strong>Address:</strong> ${supplierData.address}</p>
+                        <p><strong>GST:</strong> ${supplierData.gst}</p>
+                    `;
+                }
+            } else {
+                detailsDiv.innerHTML = '<p>Select a supplier to view details</p>';
+            }
+        }
+
+        function calculatePOItemTotal(inputElement) {
+            const itemDiv = inputElement.closest('.po-item');
+            const qtyInput = itemDiv.querySelector('input[placeholder="Qty"]');
+            const rateInput = itemDiv.querySelector('input[placeholder="Rate"]');
+            const totalInput = itemDiv.querySelector('input[placeholder="Total"]');
+            
+            const qty = parseFloat(qtyInput.value) || 0;
+            const rate = parseFloat(rateInput.value) || 0;
+            const total = qty * rate;
+            
+            totalInput.value = total.toFixed(2);
+        }
+
+        function addPOItem() {
+            const itemsContainer = document.getElementById('poItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'po-item';
+            newItem.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: center; margin-bottom: 10px;';
+            newItem.innerHTML = `
+                <input type="text" class="form-input" placeholder="Item Description">
+                <input type="number" class="form-input" placeholder="Qty" onchange="calculatePOItemTotal(this)">
+                <input type="number" step="0.01" class="form-input" placeholder="Rate">
+                <input type="number" step="0.01" class="form-input" placeholder="Total" readonly>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removePOItem(this)">Remove</button>
+            `;
+            itemsContainer.appendChild(newItem);
+        }
+
+        function removePOItem(button) {
+            button.closest('.po-item').remove();
+        }
+
+        function previewPurchaseOrder() {
+            alert('Purchase Order preview functionality would be implemented here with PDF generation');
+        }
+
+        function exportSuppliers() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Supplier ID,Company Name,Contact Person,Category,Rating,Status,Last Order,Total Value\n" +
+                suppliers.map(s => `${s.id},${s.companyName},${s.contactPerson},${s.category},${s.rating},${s.status},${s.lastOrder},${s.totalValue}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "suppliers.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportPurchaseOrders() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "PO Number,Supplier,Date,Items,Amount,Status,Expected Delivery\n" +
+                purchaseOrders.map(po => `${po.poNumber},${po.supplier},${po.date},${po.items},${po.amount},${po.status},${po.expectedDelivery}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "purchase_orders.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Action Functions
+        function viewSupplier(id) {
+            const supplier = suppliers.find(s => s.id === id);
+            if (supplier) {
+                alert(`Supplier Details:\nID: ${supplier.id}\nCompany: ${supplier.companyName}\nContact: ${supplier.contactPerson}\nEmail: ${supplier.email}\nPhone: ${supplier.phone}\nCategory: ${supplier.category}\nStatus: ${supplier.status}\nRating: ${supplier.rating}\nTotal Value: ₹${supplier.totalValue.toLocaleString()}`);
+            }
+        }
+
+        function editSupplier(id) {
+            alert(`Edit supplier ${id} functionality would be implemented here`);
+        }
+
+        function rateSupplier(id) {
+            const rating = prompt('Enter rating (1-5):');
+            if (rating && rating >= 1 && rating <= 5) {
+                const supplier = suppliers.find(s => s.id === id);
+                if (supplier) {
+                    supplier.rating = parseFloat(rating);
+                    loadSupplierTable();
+                    alert(`Rating updated for ${supplier.companyName}: ${rating} stars`);
+                }
+            }
+        }
+
+        function viewPurchaseOrder(poNumber) {
+            const po = purchaseOrders.find(p => p.poNumber === poNumber);
+            if (po) {
+                alert(`Purchase Order Details:\nPO Number: ${po.poNumber}\nSupplier: ${po.supplier}\nDate: ${po.date}\nItems: ${po.items}\nAmount: ₹${po.amount.toLocaleString()}\nStatus: ${po.status}\nExpected Delivery: ${po.expectedDelivery}\nPriority: ${po.priority}`);
+            }
+        }
+
+        function editPurchaseOrder(poNumber) {
+            alert(`Edit purchase order ${poNumber} functionality would be implemented here`);
+        }
+
+        function trackPurchaseOrder(poNumber) {
+            alert(`Track purchase order ${poNumber} functionality would be implemented here`);
+        }
+
+        function viewSettlement(invoiceNumber) {
+            const settlement = settlements.find(s => s.invoiceNumber === invoiceNumber);
+            if (settlement) {
+                alert(`Settlement Details:\nInvoice: ${settlement.invoiceNumber}\nSupplier: ${settlement.supplier}\nAmount: ₹${settlement.amount.toLocaleString()}\nDue Date: ${settlement.dueDate}\nStatus: ${settlement.status}\nPayment Method: ${settlement.paymentMethod}`);
+            }
+        }
+
+        function processSettlement(invoiceNumber) {
+            alert(`Process settlement for ${invoiceNumber} functionality would be implemented here`);
+        }
+
+        function viewContract(contractId) {
+            const contract = contracts.find(c => c.contractId === contractId);
+            if (contract) {
+                alert(`Contract Details:\nContract ID: ${contract.contractId}\nSupplier: ${contract.supplier}\nType: ${contract.type}\nStart Date: ${contract.startDate}\nEnd Date: ${contract.endDate}\nValue: ₹${contract.value.toLocaleString()}\nStatus: ${contract.status}`);
+            }
+        }
+
+        function editContract(contractId) {
+            alert(`Edit contract ${contractId} functionality would be implemented here`);
+        }
+
+        function renewContract(contractId) {
+            alert(`Renew contract ${contractId} functionality would be implemented here`);
         }
 
         function viewProductionOrder(orderId) { alert(`Viewing production order: ${orderId}`); }
