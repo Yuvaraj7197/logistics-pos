@@ -800,23 +800,58 @@
             <div id="orders" class="content-section hidden">
                 <div class="content-header">
                     <h1>Order Management</h1>
-                    <p>Manage customer orders, distributor orders, and production orders</p>
+                    <p>Manage customer orders, distributor orders, and production orders with workflow approval</p>
+                </div>
+
+                <!-- Order Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Order Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="orderStatusFilter" onchange="filterOrders()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="In Production">In Production</option>
+                            <option value="Dispatched">Dispatched</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Returned">Returned</option>
+                        </select>
+                        <select class="form-input" id="orderTypeFilter" onchange="filterOrders()" style="width: 150px;">
+                            <option value="">All Types</option>
+                            <option value="Customer">Customer</option>
+                            <option value="Distributor">Distributor</option>
+                            <option value="Internal">Internal</option>
+                            <option value="Production">Production</option>
+                        </select>
+                        <input type="date" class="form-input" id="orderDateFilter" onchange="filterOrders()" style="width: 150px;">
+                        <button class="btn btn-primary" onclick="showModal('newOrderModal')">New Order</button>
+                        <button class="btn btn-success" onclick="showModal('returnRefundModal')">Process Return</button>
+                    </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">All Orders</h3>
-                        <button class="btn btn-primary" onclick="showModal('newOrderModal')">New Order</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="exportOrders()">Export</button>
+                            <button class="btn btn-success" onclick="bulkApproveOrders()">Bulk Approve</button>
+                        </div>
                     </div>
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="selectAllOrders" onchange="toggleAllOrders()"></th>
                                 <th>Order ID</th>
                                 <th>Type</th>
                                 <th>Customer/Distributor</th>
                                 <th>Amount</th>
                                 <th>Status</th>
+                                <th>Priority</th>
                                 <th>Date</th>
+                                <th>Delivery Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -824,72 +859,241 @@
                             </tbody>
                     </table>
                 </div>
+
+                <!-- Order Workflow Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Order Workflow Status</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="pendingApprovalCount">0</div>
+                            <div class="stat-label">Pending Approval</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-number" id="inProductionCount">0</div>
+                            <div class="stat-label">In Production</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="dispatchedCount">0</div>
+                            <div class="stat-label">Dispatched</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number" id="deliveredCount">0</div>
+                            <div class="stat-label">Delivered</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="inventory" class="content-section hidden">
                 <div class="content-header">
                     <h1>Stock & Inventory Management</h1>
-                    <p>Real-time stock tracking and inventory management</p>
+                    <p>Real-time stock tracking with barcode/QR integration and multi-warehouse management</p>
+                </div>
+
+                <!-- Inventory Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Inventory Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="inventoryCategoryFilter" onchange="filterInventory()" style="width: 150px;">
+                            <option value="">All Categories</option>
+                            <option value="Raw Materials">Raw Materials</option>
+                            <option value="Finished Goods">Finished Goods</option>
+                            <option value="Packaging">Packaging Materials</option>
+                        </select>
+                        <select class="form-input" id="inventoryLocationFilter" onchange="filterInventory()" style="width: 150px;">
+                            <option value="">All Locations</option>
+                            <option value="Warehouse 1">Warehouse 1</option>
+                            <option value="Warehouse 2">Warehouse 2</option>
+                            <option value="Warehouse 3">Warehouse 3</option>
+                            <option value="Production Floor">Production Floor</option>
+                        </select>
+                        <select class="form-input" id="inventoryStatusFilter" onchange="filterInventory()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="low-stock">Low Stock</option>
+                            <option value="out-of-stock">Out of Stock</option>
+                            <option value="normal">Normal Stock</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showModal('addProductModal')">Add Product</button>
+                        <button class="btn btn-success" onclick="showModal('barcodeScannerModal')">Scan Barcode</button>
+                        <button class="btn btn-primary" onclick="showModal('stockAdjustmentModal')">Stock Adjustment</button>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="stat-card">
-                        <div class="stat-number">2,458</div>
+                        <div class="stat-number" id="totalProductsCount">2,458</div>
                         <div class="stat-label">Total Products</div>
                     </div>
                     <div class="stat-card orange">
-                        <div class="stat-number">23</div>
+                        <div class="stat-number" id="lowStockCount">23</div>
                         <div class="stat-label">Low Stock</div>
                     </div>
                     <div class="stat-card red">
-                        <div class="stat-number">5</div>
+                        <div class="stat-number" id="outOfStockCount">5</div>
                         <div class="stat-label">Out of Stock</div>
                     </div>
                     <div class="stat-card green">
-                        <div class="stat-number">₹12,45,678</div>
+                        <div class="stat-number" id="totalInventoryValue">₹12,45,678</div>
                         <div class="stat-label">Total Inventory Value</div>
+                    </div>
+                </div>
+
+                <!-- Multi-Warehouse Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Multi-Warehouse Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('addWarehouseModal')">Add Warehouse</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">1,245</div>
+                            <div class="stat-label">Warehouse 1 Items</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">856</div>
+                            <div class="stat-label">Warehouse 2 Items</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">357</div>
+                            <div class="stat-label">Warehouse 3 Items</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹8,45,678</div>
+                            <div class="stat-label">Total Value</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Inventory Overview</h3>
-                        <button class="btn btn-primary" onclick="showModal('addProductModal')">Add Product</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="exportInventory()">Export</button>
+                            <button class="btn btn-success" onclick="generateReorderReport()">Reorder Report</button>
+                            <button class="btn btn-primary" onclick="showModal('batchTrackingModal')">Batch Tracking</button>
+                        </div>
                     </div>
                     <div class="inventory-grid" id="inventoryGrid">
                         </div>
+                </div>
+
+                <!-- Reorder Alerts -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Reorder Alerts</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Current Stock</th>
+                                <th>Min Stock Level</th>
+                                <th>Reorder Quantity</th>
+                                <th>Supplier</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reorderAlertsTableBody">
+                            </tbody>
+                    </table>
                 </div>
             </div>
 
             <div id="staff" class="content-section hidden">
                 <div class="content-header">
                     <h1>Staff Management</h1>
-                    <p>Manage staff profiles, attendance, and performance</p>
+                    <p>Manage staff profiles, attendance, biometric check-in, and performance tracking</p>
+                </div>
+
+                <!-- Staff Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Staff Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="staffDepartmentFilter" onchange="filterStaff()" style="width: 150px;">
+                            <option value="">All Departments</option>
+                            <option value="Production">Production</option>
+                            <option value="Logistics">Logistics</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Finance">Finance</option>
+                        </select>
+                        <select class="form-input" id="staffRoleFilter" onchange="filterStaff()" style="width: 150px;">
+                            <option value="">All Roles</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Operator">Operator</option>
+                            <option value="Clerk">Clerk</option>
+                        </select>
+                        <select class="form-input" id="staffStatusFilter" onchange="filterStaff()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="Present">Present</option>
+                            <option value="On Leave">On Leave</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showModal('addStaffModal')">Add Staff</button>
+                        <button class="btn btn-success" onclick="showModal('biometricCheckinModal')">Biometric Check-in</button>
+                        <button class="btn btn-primary" onclick="showModal('shiftScheduleModal')">Shift Schedule</button>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="stat-card">
-                        <div class="stat-number">45</div>
+                        <div class="stat-number" id="totalStaffCount">45</div>
                         <div class="stat-label">Total Staff</div>
                     </div>
                     <div class="stat-card green">
-                        <div class="stat-number">42</div>
+                        <div class="stat-number" id="presentTodayCount">42</div>
                         <div class="stat-label">Present Today</div>
                     </div>
                     <div class="stat-card orange">
-                        <div class="stat-number">3</div>
+                        <div class="stat-number" id="onLeaveCount">3</div>
                         <div class="stat-label">On Leave</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">98%</div>
+                        <div class="stat-number" id="attendanceRate">98%</div>
                         <div class="stat-label">Attendance Rate</div>
+                    </div>
+                </div>
+
+                <!-- Shift Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Current Shift Schedule</h3>
+                        <button class="btn btn-primary" onclick="showModal('addShiftModal')">Add Shift</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">15</div>
+                            <div class="stat-label">Morning Shift (6AM-2PM)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">18</div>
+                            <div class="stat-label">Afternoon Shift (2PM-10PM)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Night Shift (10PM-6AM)</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">45</div>
+                            <div class="stat-label">Total Scheduled</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Staff Overview</h3>
-                        <button class="btn btn-primary" onclick="showModal('addStaffModal')">Add Staff</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="exportStaff()">Export</button>
+                            <button class="btn btn-success" onclick="generatePayroll()">Generate Payroll</button>
+                            <button class="btn btn-primary" onclick="showModal('performanceReportModal')">Performance Report</button>
+                        </div>
                     </div>
                     <table class="data-table">
                         <thead>
@@ -898,7 +1102,10 @@
                                 <th>Name</th>
                                 <th>Role</th>
                                 <th>Department</th>
+                                <th>Shift</th>
                                 <th>Status</th>
+                                <th>Check-in Time</th>
+                                <th>Productivity Score</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -906,37 +1113,173 @@
                             </tbody>
                     </table>
                 </div>
+
+                <!-- Attendance Tracking -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Today's Attendance</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Check-in Time</th>
+                                <th>Check-out Time</th>
+                                <th>Hours Worked</th>
+                                <th>Overtime</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Productivity Tracking -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Productivity Metrics</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">Avg. Productivity</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">28</div>
+                            <div class="stat-label">Orders Completed</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-number">2.5</div>
+                            <div class="stat-label">Avg. Hours/Order</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹45,000</div>
+                            <div class="stat-label">Total Payroll</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="accounting" class="content-section hidden">
                 <div class="content-header">
                     <h1>Accounting & Finance</h1>
-                    <p>Financial reports, billing, and tax management</p>
+                    <p>GST-compliant billing, payment gateway integration, multi-currency support, and tax management</p>
+                </div>
+
+                <!-- Financial Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Financial Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="financialPeriodFilter" onchange="filterFinancials()" style="width: 150px;">
+                            <option value="">All Periods</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="year">This Year</option>
+                        </select>
+                        <select class="form-input" id="transactionTypeFilter" onchange="filterFinancials()" style="width: 150px;">
+                            <option value="">All Types</option>
+                            <option value="Sale">Sales</option>
+                            <option value="Purchase">Purchases</option>
+                            <option value="Expense">Expenses</option>
+                            <option value="Payment">Payments</option>
+                        </select>
+                        <select class="form-input" id="currencyFilter" onchange="filterFinancials()" style="width: 150px;">
+                            <option value="">All Currencies</option>
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showModal('createInvoiceModal')">Create Invoice</button>
+                        <button class="btn btn-success" onclick="showModal('paymentGatewayModal')">Process Payment</button>
+                        <button class="btn btn-primary" onclick="showModal('taxReportModal')">Tax Report</button>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="stat-card green">
-                        <div class="stat-number">₹45,67,890</div>
+                        <div class="stat-number" id="monthlyRevenue">₹45,67,890</div>
                         <div class="stat-label">Monthly Revenue</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">₹12,34,567</div>
+                        <div class="stat-number" id="monthlyExpenses">₹12,34,567</div>
                         <div class="stat-label">Expenses</div>
                     </div>
                     <div class="stat-card orange">
-                        <div class="stat-number">₹2,45,678</div>
+                        <div class="stat-number" id="pendingPayments">₹2,45,678</div>
                         <div class="stat-label">Pending Payments</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">₹33,33,223</div>
+                        <div class="stat-number" id="netProfit">₹33,33,223</div>
                         <div class="stat-label">Net Profit</div>
+                    </div>
+                </div>
+
+                <!-- GST & Tax Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">GST & Tax Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('gstSettingsModal')">GST Settings</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">₹4,56,789</div>
+                            <div class="stat-label">CGST Collected</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹4,56,789</div>
+                            <div class="stat-label">SGST Collected</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹2,34,567</div>
+                            <div class="stat-label">IGST Collected</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">₹11,48,145</div>
+                            <div class="stat-label">Total GST</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multi-Currency Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Multi-Currency Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('currencySettingsModal')">Currency Settings</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">₹45,67,890</div>
+                            <div class="stat-label">INR Revenue</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">$12,345</div>
+                            <div class="stat-label">USD Revenue</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">€8,765</div>
+                            <div class="stat-label">EUR Revenue</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">₹52,45,678</div>
+                            <div class="stat-label">Total (INR)</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Recent Transactions</h3>
-                        <button class="btn btn-primary" onclick="showModal('addTransactionModal')">Add Transaction</button>
+                        <h3 class="card-title">Financial Transactions</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('addTransactionModal')">Add Transaction</button>
+                            <button class="btn btn-success" onclick="exportFinancials()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('reconciliationModal')">Reconcile</button>
+                        </div>
                     </div>
                     <table class="data-table">
                         <thead>
@@ -944,7 +1287,10 @@
                                 <th>Date</th>
                                 <th>Transaction ID</th>
                                 <th>Type</th>
+                                <th>Description</th>
                                 <th>Amount</th>
+                                <th>Currency</th>
+                                <th>GST</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -953,37 +1299,188 @@
                             </tbody>
                     </table>
                 </div>
+
+                <!-- Payment Gateway Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Payment Gateway Status</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card green">
+                            <div class="stat-number">98.5%</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹12,34,567</div>
+                            <div class="stat-label">Processed Today</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Failed Transactions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">₹45,678</div>
+                            <div class="stat-label">Refunds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receivables & Payables -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Receivables & Payables</h3>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4>Accounts Receivable</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receivablesTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h4>Accounts Payable</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Supplier</th>
+                                        <th>Amount</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payablesTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="crm" class="content-section hidden">
                 <div class="content-header">
                     <h1>Customer Relationship Management</h1>
-                    <p>Manage customer profiles, loyalty points, and relationships</p>
+                    <p>Enhanced CRM with loyalty points system, customer profiles, reminders, and relationship tracking</p>
+                </div>
+
+                <!-- CRM Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">CRM Filters</h3>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select class="form-input" id="customerSegmentFilter" onchange="filterCustomers()" style="width: 150px;">
+                            <option value="">All Segments</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Regular">Regular</option>
+                            <option value="New">New</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <select class="form-input" id="customerStatusFilter" onchange="filterCustomers()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                        <select class="form-input" id="loyaltyTierFilter" onchange="filterCustomers()" style="width: 150px;">
+                            <option value="">All Tiers</option>
+                            <option value="Gold">Gold (1000+)</option>
+                            <option value="Silver">Silver (500-999)</option>
+                            <option value="Bronze">Bronze (100-499)</option>
+                            <option value="Basic">Basic (0-99)</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showModal('addCustomerModal')">Add Customer</button>
+                        <button class="btn btn-success" onclick="showModal('loyaltyProgramModal')">Loyalty Program</button>
+                        <button class="btn btn-primary" onclick="showModal('customerReminderModal')">Set Reminder</button>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">1,245</div>
+                    <div class="stat-card green">
+                        <div class="stat-number" id="totalCustomersCount">1,250</div>
                         <div class="stat-label">Total Customers</div>
                     </div>
-                    <div class="stat-card green">
-                        <div class="stat-number">892</div>
-                        <div class="stat-label">Active Customers</div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="customerRevenue">₹2,45,678</div>
+                        <div class="stat-label">Customer Revenue</div>
                     </div>
                     <div class="stat-card orange">
-                        <div class="stat-number">156</div>
-                        <div class="stat-label">VIP Customers</div>
+                        <div class="stat-number" id="satisfactionRate">85%</div>
+                        <div class="stat-label">Satisfaction Rate</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">₹25,456</div>
-                        <div class="stat-label">Avg. Order Value</div>
+                        <div class="stat-number" id="newCustomersCount">45</div>
+                        <div class="stat-label">New Customers</div>
+                    </div>
+                </div>
+
+                <!-- Loyalty Program Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Loyalty Program Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('loyaltySettingsModal')">Loyalty Settings</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">125</div>
+                            <div class="stat-label">Gold Members</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">340</div>
+                            <div class="stat-label">Silver Members</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">520</div>
+                            <div class="stat-label">Bronze Members</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-number">₹1,25,000</div>
+                            <div class="stat-label">Points Redeemed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Segmentation -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Customer Segmentation</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">15%</div>
+                            <div class="stat-label">Premium Customers</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">35%</div>
+                            <div class="stat-label">Regular Customers</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">25%</div>
+                            <div class="stat-label">New Customers</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-number">25%</div>
+                            <div class="stat-label">Inactive Customers</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Customer Overview</h3>
-                        <button class="btn btn-primary" onclick="showModal('addCustomerModal')">Add Customer</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('addCustomerModal')">Add Customer</button>
+                            <button class="btn btn-success" onclick="exportCustomers()">Export</button>
+                            <button class="btn btn-primary" onclick="showModal('customerAnalyticsModal')">Analytics</button>
+                        </div>
                     </div>
                     <table class="data-table">
                         <thead>
@@ -992,12 +1489,57 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
+                                <th>Segment</th>
                                 <th>Loyalty Points</th>
+                                <th>Tier</th>
                                 <th>Last Order</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="customerTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Customer Reminders -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Customer Reminders</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Reminder Type</th>
+                                <th>Message</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="remindersTableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <!-- Customer Communication History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Communication History</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Communication Type</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="communicationTableBody">
                             </tbody>
                     </table>
                 </div>
@@ -1131,124 +1673,884 @@
     </div>
 
     <div id="newOrderModal" class="modal-overlay hidden" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h3>Create New Order</h3>
                 <button class="close-modal" onclick="hideModal('newOrderModal')">&times;</button>
             </div>
             <form onsubmit="createOrder(event)">
-                <div class="form-group">
-                    <label class="form-label">Order Type</label>
-                    <select class="form-input" id="orderType" required>
-                        <option value="">Select Order Type</option>
-                        <option value="customer">Customer Order</option>
-                        <option value="distributor">Distributor Order</option>
-                        <option value="internal">Internal Order</option>
-                        <option value="production">Production Order</option>
-                    </select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Order Type</label>
+                        <select class="form-input" id="orderType" required onchange="updateOrderFields()">
+                            <option value="">Select Order Type</option>
+                            <option value="Customer">Customer Order</option>
+                            <option value="Distributor">Distributor Order</option>
+                            <option value="Internal">Internal Order</option>
+                            <option value="Production">Production Order</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-input" id="orderPriority" required>
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
                 </div>
+                
                 <div class="form-group">
                     <label class="form-label">Customer/Distributor</label>
-                    <input type="text" class="form-input" id="orderCustomer" placeholder="Enter customer name" required>
+                    <select class="form-input" id="orderCustomer" required>
+                        <option value="">Select Customer/Distributor</option>
+                        <option value="ABC Distributors">ABC Distributors</option>
+                        <option value="XYZ Retail">XYZ Retail</option>
+                        <option value="Direct Customer">Direct Customer</option>
+                        <option value="PQR Wholesale">PQR Wholesale</option>
+                        <option value="LMN Stores">LMN Stores</option>
+                    </select>
                 </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Product</label>
+                        <select class="form-input" id="orderProduct" required onchange="updateProductPrice()">
+                            <option value="">Select Product</option>
+                            <option value="Product X" data-price="155.00">Product X</option>
+                            <option value="Product Y" data-price="225.00">Product Y</option>
+                            <option value="Product Z" data-price="180.00">Product Z</option>
+                            <option value="Raw Material A" data-price="25.50">Raw Material A</option>
+                            <option value="Raw Material B" data-price="45.75">Raw Material B</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-input" id="orderQuantity" placeholder="Enter quantity" required onchange="calculateTotal()">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" step="0.01" class="form-input" id="orderUnitPrice" placeholder="Unit price" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Amount</label>
+                        <input type="number" step="0.01" class="form-input" id="orderAmount" placeholder="Total amount" readonly>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Expected Delivery Date</label>
+                        <input type="date" class="form-input" id="orderDeliveryDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Terms</label>
+                        <select class="form-input" id="orderPaymentTerms" required>
+                            <option value="COD">Cash on Delivery</option>
+                            <option value="Net15">Net 15 Days</option>
+                            <option value="Net30">Net 30 Days</option>
+                            <option value="Advance">Advance Payment</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Product</label>
-                    <input type="text" class="form-input" id="orderProduct" placeholder="Enter product name" required>
+                    <label class="form-label">Special Instructions</label>
+                    <textarea class="form-input" id="orderInstructions" placeholder="Any special instructions or notes" rows="3"></textarea>
                 </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('newOrderModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Return/Refund Modal -->
+    <div id="returnRefundModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Process Return/Refund</h3>
+                <button class="close-modal" onclick="hideModal('returnRefundModal')">&times;</button>
+            </div>
+            <form onsubmit="processReturnRefund(event)">
                 <div class="form-group">
-                    <label class="form-label">Quantity</label>
-                    <input type="number" class="form-input" id="orderQuantity" placeholder="Enter quantity" required>
+                    <label class="form-label">Order ID</label>
+                    <select class="form-input" id="returnOrderId" required onchange="loadOrderDetails()">
+                        <option value="">Select Order</option>
+                        <option value="ORD-2024-001">ORD-2024-001</option>
+                        <option value="ORD-2024-002">ORD-2024-002</option>
+                        <option value="ORD-2024-003">ORD-2024-003</option>
+                    </select>
                 </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Amount</label>
-                    <input type="number" class="form-input" id="orderAmount" placeholder="Enter amount" required>
+                    <label class="form-label">Return Type</label>
+                    <select class="form-input" id="returnType" required>
+                        <option value="">Select Return Type</option>
+                        <option value="Defective">Defective Product</option>
+                        <option value="Wrong Item">Wrong Item Delivered</option>
+                        <option value="Customer Request">Customer Request</option>
+                        <option value="Damaged">Damaged in Transit</option>
+                    </select>
                 </div>
-                <button type="submit" class="btn btn-primary">Create Order</button>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Return Quantity</label>
+                        <input type="number" class="form-input" id="returnQuantity" placeholder="Enter quantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Refund Amount</label>
+                        <input type="number" step="0.01" class="form-input" id="refundAmount" placeholder="Refund amount" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reason for Return</label>
+                    <textarea class="form-input" id="returnReason" placeholder="Detailed reason for return" rows="3" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('returnRefundModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Process Return</button>
+                </div>
             </form>
         </div>
     </div>
 
     <div id="addProductModal" class="modal-overlay hidden" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h3>Add New Product</h3>
                 <button class="close-modal" onclick="hideModal('addProductModal')">&times;</button>
             </div>
             <form onsubmit="addProduct(event)">
-                <div class="form-group">
-                    <label class="form-label">Product Name</label>
-                    <input type="text" class="form-input" id="productName" placeholder="Enter product name" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" class="form-input" id="productName" placeholder="Enter product name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Product Code/SKU</label>
+                        <input type="text" class="form-input" id="productSKU" placeholder="Enter SKU" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Category</label>
-                    <select class="form-input" id="productCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="raw-materials">Raw Materials</option>
-                        <option value="finished-goods">Finished Goods</option>
-                        <option value="packaging">Packaging Materials</option>
-                    </select>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-input" id="productCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="Raw Materials">Raw Materials</option>
+                            <option value="Finished Goods">Finished Goods</option>
+                            <option value="Packaging">Packaging Materials</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Warehouse Location</label>
+                        <select class="form-input" id="productLocation" required>
+                            <option value="">Select Location</option>
+                            <option value="Warehouse 1">Warehouse 1</option>
+                            <option value="Warehouse 2">Warehouse 2</option>
+                            <option value="Warehouse 3">Warehouse 3</option>
+                            <option value="Production Floor">Production Floor</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Current Stock</label>
-                    <input type="number" class="form-input" id="productStock" placeholder="Enter current stock" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Current Stock</label>
+                        <input type="number" class="form-input" id="productStock" placeholder="Enter current stock" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Minimum Stock Level</label>
+                        <input type="number" class="form-input" id="productMinStock" placeholder="Enter minimum stock level" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Minimum Stock Level</label>
-                    <input type="number" class="form-input" id="productMinStock" placeholder="Enter minimum stock level" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" step="0.01" class="form-input" id="productPrice" placeholder="Enter unit price" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reorder Quantity</label>
+                        <input type="number" class="form-input" id="productReorderQty" placeholder="Enter reorder quantity" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Unit Price</label>
-                    <input type="number" step="0.01" class="form-input" id="productPrice" placeholder="Enter unit price" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Barcode/QR Code</label>
+                        <input type="text" class="form-input" id="productBarcode" placeholder="Enter barcode or scan QR code">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Supplier</label>
+                        <select class="form-input" id="productSupplier" required>
+                            <option value="">Select Supplier</option>
+                            <option value="Supplier A">Supplier A</option>
+                            <option value="Supplier B">Supplier B</option>
+                            <option value="Supplier C">Supplier C</option>
+                        </select>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Product</button>
+                
+                <div class="form-group">
+                    <label class="form-label">Product Description</label>
+                    <textarea class="form-input" id="productDescription" placeholder="Enter product description" rows="3"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('addProductModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Product</button>
+                </div>
             </form>
         </div>
     </div>
 
+    <!-- Barcode Scanner Modal -->
+    <div id="barcodeScannerModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Barcode/QR Scanner</h3>
+                <button class="close-modal" onclick="hideModal('barcodeScannerModal')">&times;</button>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <div style="background: #f0f0f0; padding: 40px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📷</div>
+                    <p>Camera Scanner Placeholder</p>
+                    <p style="font-size: 0.9rem; color: #666;">In a real implementation, this would integrate with device camera</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Or Enter Barcode Manually</label>
+                    <input type="text" class="form-input" id="manualBarcode" placeholder="Enter barcode manually" onchange="lookupProductByBarcode()">
+                </div>
+                <div id="barcodeResult" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Adjustment Modal -->
+    <div id="stockAdjustmentModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Stock Adjustment</h3>
+                <button class="close-modal" onclick="hideModal('stockAdjustmentModal')">&times;</button>
+            </div>
+            <form onsubmit="processStockAdjustment(event)">
+                <div class="form-group">
+                    <label class="form-label">Product</label>
+                    <select class="form-input" id="adjustmentProduct" required onchange="loadProductStock()">
+                        <option value="">Select Product</option>
+                        <option value="Product X">Product X</option>
+                        <option value="Product Y">Product Y</option>
+                        <option value="Raw Material A">Raw Material A</option>
+                        <option value="Raw Material B">Raw Material B</option>
+                    </select>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Current Stock</label>
+                        <input type="number" class="form-input" id="currentStockDisplay" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Adjustment Type</label>
+                        <select class="form-input" id="adjustmentType" required>
+                            <option value="">Select Type</option>
+                            <option value="increase">Stock Increase</option>
+                            <option value="decrease">Stock Decrease</option>
+                            <option value="damaged">Damaged Goods</option>
+                            <option value="expired">Expired Goods</option>
+                            <option value="lost">Lost/Theft</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Adjustment Quantity</label>
+                        <input type="number" class="form-input" id="adjustmentQuantity" placeholder="Enter quantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Stock Level</label>
+                        <input type="number" class="form-input" id="newStockLevel" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reason for Adjustment</label>
+                    <textarea class="form-input" id="adjustmentReason" placeholder="Enter reason for stock adjustment" rows="3" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('stockAdjustmentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Process Adjustment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Batch Tracking Modal -->
+    <div id="batchTrackingModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Batch & Expiry Tracking</h3>
+                <button class="close-modal" onclick="hideModal('batchTrackingModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Product</label>
+                <select class="form-input" id="batchProduct" onchange="loadBatchData()">
+                    <option value="">Select Product</option>
+                    <option value="Product X">Product X</option>
+                    <option value="Product Y">Product Y</option>
+                    <option value="Raw Material A">Raw Material A</option>
+                </select>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Batch Number</th>
+                        <th>Quantity</th>
+                        <th>Manufacturing Date</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="batchTrackingTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">Select a product to view batch information</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div id="addStaffModal" class="modal-overlay hidden" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h3>Add New Staff Member</h3>
                 <button class="close-modal" onclick="hideModal('addStaffModal')">&times;</button>
             </div>
             <form onsubmit="addStaff(event)">
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="staffName" placeholder="Enter full name" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-input" id="staffName" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-input" id="staffId" placeholder="Enter employee ID" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select class="form-input" id="staffRole" required>
+                            <option value="">Select Role</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Operator">Operator</option>
+                            <option value="Clerk">Clerk</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <select class="form-input" id="staffDepartment" required>
+                            <option value="">Select Department</option>
+                            <option value="Production">Production</option>
+                            <option value="Logistics">Logistics</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Finance">Finance</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="staffEmail" placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-input" id="staffPhone" placeholder="Enter phone number" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Shift</label>
+                        <select class="form-input" id="staffShift" required>
+                            <option value="">Select Shift</option>
+                            <option value="Morning (6AM-2PM)">Morning (6AM-2PM)</option>
+                            <option value="Afternoon (2PM-10PM)">Afternoon (2PM-10PM)</option>
+                            <option value="Night (10PM-6AM)">Night (10PM-6AM)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Salary (Monthly)</label>
+                        <input type="number" class="form-input" id="staffSalary" placeholder="Enter monthly salary" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">RFID/Biometric ID</label>
+                        <input type="text" class="form-input" id="staffBiometricId" placeholder="Enter RFID/Biometric ID">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Joining Date</label>
+                        <input type="date" class="form-input" id="staffJoiningDate" required>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('addStaffModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Biometric Check-in Modal -->
+    <div id="biometricCheckinModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Biometric Check-in/Check-out</h3>
+                <button class="close-modal" onclick="hideModal('biometricCheckinModal')">&times;</button>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <div style="background: #f0f0f0; padding: 40px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">👆</div>
+                    <p>Biometric Scanner Placeholder</p>
+                    <p style="font-size: 0.9rem; color: #666;">In a real implementation, this would integrate with biometric scanner</p>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Employee ID</label>
-                    <input type="text" class="form-input" id="staffId" placeholder="Enter employee ID" required>
+                    <label class="form-label">Or Enter Employee ID Manually</label>
+                    <input type="text" class="form-input" id="manualEmployeeId" placeholder="Enter Employee ID" onchange="lookupEmployee()">
                 </div>
+                <div id="employeeLookupResult" style="margin-top: 20px;"></div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-success" onclick="processCheckin()" style="margin-right: 10px;">Check-in</button>
+                    <button class="btn btn-danger" onclick="processCheckout()">Check-out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shift Schedule Modal -->
+    <div id="shiftScheduleModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Shift Schedule Management</h3>
+                <button class="close-modal" onclick="hideModal('shiftScheduleModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Date</label>
+                <input type="date" class="form-input" id="scheduleDate" onchange="loadShiftSchedule()">
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Current Shift</th>
+                        <th>Assigned Shift</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="shiftScheduleTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">Select a date to view shift schedule</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Performance Report Modal -->
+    <div id="performanceReportModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Performance Report</h3>
+                <button class="close-modal" onclick="hideModal('performanceReportModal')">&times;</button>
+            </div>
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <select class="form-input" id="performancePeriod" style="width: 150px;">
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                </select>
+                <input type="date" class="form-input" id="performanceStartDate" style="width: 150px;">
+                <input type="date" class="form-input" id="performanceEndDate" style="width: 150px;">
+                <button class="btn btn-primary" onclick="generatePerformanceReport()">Generate Report</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Tasks Completed</th>
+                        <th>Hours Worked</th>
+                        <th>Productivity Score</th>
+                        <th>Attendance Rate</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="performanceReportTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">Generate report to view performance data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div id="createInvoiceModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Create GST-Compliant Invoice</h3>
+                <button class="close-modal" onclick="hideModal('createInvoiceModal')">&times;</button>
+            </div>
+            <form onsubmit="createInvoice(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Invoice Number</label>
+                        <input type="text" class="form-input" id="invoiceNumber" placeholder="Auto-generated" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Invoice Date</label>
+                        <input type="date" class="form-input" id="invoiceDate" required>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Customer</label>
+                        <select class="form-input" id="invoiceCustomer" required onchange="loadCustomerDetails()">
+                            <option value="">Select Customer</option>
+                            <option value="ABC Distributors">ABC Distributors</option>
+                            <option value="XYZ Retail">XYZ Retail</option>
+                            <option value="Direct Customer">Direct Customer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select class="form-input" id="invoiceCurrency" required onchange="updateCurrencyRate()">
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Role</label>
-                    <select class="form-input" id="staffRole" required>
-                        <option value="">Select Role</option>
-                        <option value="manager">Manager</option>
-                        <option value="supervisor">Supervisor</option>
-                        <option value="operator">Operator</option>
-                        <option value="clerk">Clerk</option>
+                    <label class="form-label">Customer Details</label>
+                    <div id="customerDetails" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <p>Select a customer to view details</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Items</label>
+                    <div id="invoiceItems">
+                        <div class="invoice-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: center; margin-bottom: 10px;">
+                            <select class="form-input" onchange="updateItemPrice(this)">
+                                <option value="">Select Item</option>
+                                <option value="Product X" data-price="155.00">Product X</option>
+                                <option value="Product Y" data-price="225.00">Product Y</option>
+                                <option value="Raw Material A" data-price="25.50">Raw Material A</option>
+                            </select>
+                            <input type="number" class="form-input" placeholder="Qty" onchange="calculateItemTotal(this)">
+                            <input type="number" step="0.01" class="form-input" placeholder="Rate" readonly>
+                            <input type="number" step="0.01" class="form-input" placeholder="GST%" value="18">
+                            <input type="number" step="0.01" class="form-input" placeholder="Total" readonly>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeInvoiceItem(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addInvoiceItem()">Add Item</button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Payment Terms</label>
+                        <select class="form-input" id="invoicePaymentTerms" required>
+                            <option value="COD">Cash on Delivery</option>
+                            <option value="Net15">Net 15 Days</option>
+                            <option value="Net30">Net 30 Days</option>
+                            <option value="Advance">Advance Payment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-input" id="invoiceDueDate" required>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('createInvoiceModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="previewInvoice()">Preview</button>
+                    <button type="submit" class="btn btn-success">Create Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Gateway Modal -->
+    <div id="paymentGatewayModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Process Payment</h3>
+                <button class="close-modal" onclick="hideModal('paymentGatewayModal')">&times;</button>
+            </div>
+            <form onsubmit="processPayment(event)">
+                <div class="form-group">
+                    <label class="form-label">Invoice/Order ID</label>
+                    <input type="text" class="form-input" id="paymentInvoiceId" placeholder="Enter invoice or order ID" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" class="form-input" id="paymentAmount" placeholder="Enter amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select class="form-input" id="paymentCurrency" required>
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-input" id="paymentMethod" required onchange="updatePaymentFields()">
+                        <option value="">Select Payment Method</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="upi">UPI</option>
+                        <option value="netbanking">Net Banking</option>
+                        <option value="wallet">Digital Wallet</option>
+                        <option value="cash">Cash</option>
+                        <option value="cheque">Cheque</option>
                     </select>
                 </div>
+                
+                <div id="paymentFields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Card Number</label>
+                        <input type="text" class="form-input" id="cardNumber" placeholder="Enter card number">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="text" class="form-input" id="cardExpiry" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-input" id="cardCVV" placeholder="CVV">
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Department</label>
-                    <select class="form-input" id="staffDepartment" required>
-                        <option value="">Select Department</option>
-                        <option value="production">Production</option>
-                        <option value="logistics">Logistics</option>
-                        <option value="sales">Sales</option>
-                        <option value="finance">Finance</option>
+                    <label class="form-label">Payment Reference</label>
+                    <input type="text" class="form-input" id="paymentReference" placeholder="Enter payment reference">
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('paymentGatewayModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Process Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GST Settings Modal -->
+    <div id="gstSettingsModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>GST Settings</h3>
+                <button class="close-modal" onclick="hideModal('gstSettingsModal')">&times;</button>
+            </div>
+            <form onsubmit="saveGSTSettings(event)">
+                <div class="form-group">
+                    <label class="form-label">GST Number</label>
+                    <input type="text" class="form-input" id="gstNumber" placeholder="Enter GST number" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">CGST Rate (%)</label>
+                        <input type="number" step="0.01" class="form-input" id="cgstRate" placeholder="Enter CGST rate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SGST Rate (%)</label>
+                        <input type="number" step="0.01" class="form-input" id="sgstRate" placeholder="Enter SGST rate" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">IGST Rate (%)</label>
+                    <input type="number" step="0.01" class="form-input" id="igstRate" placeholder="Enter IGST rate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Business Address</label>
+                    <textarea class="form-input" id="businessAddress" placeholder="Enter business address" rows="3" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('gstSettingsModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Currency Settings Modal -->
+    <div id="currencySettingsModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Currency Settings</h3>
+                <button class="close-modal" onclick="hideModal('currencySettingsModal')">&times;</button>
+            </div>
+            <form onsubmit="saveCurrencySettings(event)">
+                <div class="form-group">
+                    <label class="form-label">Base Currency</label>
+                    <select class="form-input" id="baseCurrency" required>
+                        <option value="INR">INR (₹)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
                     </select>
                 </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="staffEmail" placeholder="Enter email address" required>
+                    <label class="form-label">Exchange Rates</label>
+                    <div id="exchangeRates">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" class="form-input" value="USD" readonly>
+                            <input type="number" step="0.0001" class="form-input" id="usdRate" placeholder="Exchange rate">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" class="form-input" value="EUR" readonly>
+                            <input type="number" step="0.0001" class="form-input" id="eurRate" placeholder="Exchange rate">
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Phone</label>
-                    <input type="tel" class="form-input" id="staffPhone" placeholder="Enter phone number" required>
+                    <label class="form-label">Auto Update Rates</label>
+                    <input type="checkbox" id="autoUpdateRates"> Update exchange rates automatically
                 </div>
-                <button type="submit" class="btn btn-primary">Add Staff</button>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('currencySettingsModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tax Report Modal -->
+    <div id="taxReportModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Tax Report</h3>
+                <button class="close-modal" onclick="hideModal('taxReportModal')">&times;</button>
+            </div>
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <select class="form-input" id="taxReportPeriod" style="width: 150px;">
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <input type="date" class="form-input" id="taxReportStartDate" style="width: 150px;">
+                <input type="date" class="form-input" id="taxReportEndDate" style="width: 150px;">
+                <button class="btn btn-primary" onclick="generateTaxReport()">Generate Report</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Sales</th>
+                        <th>CGST</th>
+                        <th>SGST</th>
+                        <th>IGST</th>
+                        <th>Total GST</th>
+                        <th>Net Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="taxReportTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">Generate report to view tax data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Transaction Modal -->
+    <div id="addTransactionModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Add Transaction</h3>
+                <button class="close-modal" onclick="hideModal('addTransactionModal')">&times;</button>
+            </div>
+            <form onsubmit="addTransaction(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Transaction Type</label>
+                        <select class="form-input" id="transactionType" required>
+                            <option value="">Select Type</option>
+                            <option value="Sale">Sale</option>
+                            <option value="Purchase">Purchase</option>
+                            <option value="Expense">Expense</option>
+                            <option value="Payment">Payment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select class="form-input" id="transactionCurrency" required>
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" class="form-input" id="transactionAmount" placeholder="Enter amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">GST Amount</label>
+                        <input type="number" step="0.01" class="form-input" id="transactionGST" placeholder="Enter GST amount">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input" id="transactionDescription" placeholder="Enter description" rows="3" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="hideModal('addTransactionModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                </div>
             </form>
         </div>
     </div>
@@ -1256,29 +2558,259 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
     <script>
-        // Mock Data
+        // Enhanced Mock Data
         let orders = [
-            { id: 'ORD-2024-001', type: 'Customer', customer: 'ABC Distributors', amount: 25400, status: 'Delivered', date: '2024-09-25' },
-            { id: 'ORD-2024-002', type: 'Distributor', customer: 'XYZ Retail', amount: 18750, status: 'Dispatched', date: '2024-09-25' },
-            { id: 'ORD-2024-003', type: 'Customer', customer: 'Direct Customer', amount: 12300, status: 'In Production', date: '2024-09-24' },
-            { id: 'ORD-2024-004', type: 'Production', customer: 'Internal', amount: 35600, status: 'Pending', date: '2024-09-24' },
-            { id: 'ORD-2024-005', type: 'Internal', customer: 'Branch Transfer', amount: 8900, status: 'Cancelled', date: '2024-09-23' }
+            { 
+                id: 'ORD-2024-001', 
+                type: 'Customer', 
+                customer: 'ABC Distributors', 
+                amount: 25400, 
+                status: 'Delivered', 
+                priority: 'High',
+                date: '2024-09-25',
+                deliveryDate: '2024-09-27',
+                paymentTerms: 'Net30',
+                instructions: 'Handle with care',
+                approvedBy: 'John Smith',
+                approvedDate: '2024-09-25'
+            },
+            { 
+                id: 'ORD-2024-002', 
+                type: 'Distributor', 
+                customer: 'XYZ Retail', 
+                amount: 18750, 
+                status: 'Dispatched', 
+                priority: 'Normal',
+                date: '2024-09-25',
+                deliveryDate: '2024-09-28',
+                paymentTerms: 'Net15',
+                instructions: 'Priority delivery',
+                approvedBy: 'Sarah Johnson',
+                approvedDate: '2024-09-25'
+            },
+            { 
+                id: 'ORD-2024-003', 
+                type: 'Customer', 
+                customer: 'Direct Customer', 
+                amount: 12300, 
+                status: 'In Production', 
+                priority: 'Normal',
+                date: '2024-09-24',
+                deliveryDate: '2024-09-30',
+                paymentTerms: 'COD',
+                instructions: 'Standard processing',
+                approvedBy: 'Mike Wilson',
+                approvedDate: '2024-09-24'
+            },
+            { 
+                id: 'ORD-2024-004', 
+                type: 'Production', 
+                customer: 'Internal', 
+                amount: 35600, 
+                status: 'Pending', 
+                priority: 'Urgent',
+                date: '2024-09-24',
+                deliveryDate: '2024-09-26',
+                paymentTerms: 'Advance',
+                instructions: 'Urgent production order',
+                approvedBy: null,
+                approvedDate: null
+            },
+            { 
+                id: 'ORD-2024-005', 
+                type: 'Internal', 
+                customer: 'Branch Transfer', 
+                amount: 8900, 
+                status: 'Cancelled', 
+                priority: 'Normal',
+                date: '2024-09-23',
+                deliveryDate: '2024-09-25',
+                paymentTerms: 'Internal',
+                instructions: 'Branch transfer cancelled',
+                approvedBy: 'David Lee',
+                approvedDate: '2024-09-23'
+            }
         ];
 
         let inventory = [
-            { name: 'Raw Material A', category: 'Raw Materials', stock: 500, minStock: 100, price: 25.50, location: 'Warehouse 1' },
-            { name: 'Product X', category: 'Finished Goods', stock: 75, minStock: 100, price: 155.00, location: 'Warehouse 2' },
-            { name: 'Packaging Box', category: 'Packaging', stock: 200, minStock: 50, price: 5.25, location: 'Warehouse 1' },
-            { name: 'Raw Material B', category: 'Raw Materials', stock: 25, minStock: 50, price: 45.75, location: 'Warehouse 3' },
-            { name: 'Product Y', category: 'Finished Goods', stock: 150, minStock: 80, price: 225.00, location: 'Warehouse 2' }
+            { 
+                name: 'Raw Material A', 
+                sku: 'RM-A-001',
+                category: 'Raw Materials', 
+                stock: 500, 
+                minStock: 100, 
+                price: 25.50, 
+                location: 'Warehouse 1',
+                reorderQty: 200,
+                supplier: 'Supplier A',
+                barcode: '1234567890123',
+                description: 'High quality raw material for production'
+            },
+            { 
+                name: 'Product X', 
+                sku: 'PRD-X-001',
+                category: 'Finished Goods', 
+                stock: 75, 
+                minStock: 100, 
+                price: 155.00, 
+                location: 'Warehouse 2',
+                reorderQty: 150,
+                supplier: 'Supplier B',
+                barcode: '2345678901234',
+                description: 'Premium finished product'
+            },
+            { 
+                name: 'Packaging Box', 
+                sku: 'PKG-B-001',
+                category: 'Packaging', 
+                stock: 200, 
+                minStock: 50, 
+                price: 5.25, 
+                location: 'Warehouse 1',
+                reorderQty: 100,
+                supplier: 'Supplier C',
+                barcode: '3456789012345',
+                description: 'Standard packaging material'
+            },
+            { 
+                name: 'Raw Material B', 
+                sku: 'RM-B-001',
+                category: 'Raw Materials', 
+                stock: 25, 
+                minStock: 50, 
+                price: 45.75, 
+                location: 'Warehouse 3',
+                reorderQty: 100,
+                supplier: 'Supplier A',
+                barcode: '4567890123456',
+                description: 'Secondary raw material'
+            },
+            { 
+                name: 'Product Y', 
+                sku: 'PRD-Y-001',
+                category: 'Finished Goods', 
+                stock: 150, 
+                minStock: 80, 
+                price: 225.00, 
+                location: 'Warehouse 2',
+                reorderQty: 120,
+                supplier: 'Supplier B',
+                barcode: '5678901234567',
+                description: 'Deluxe finished product'
+            }
         ];
 
+        // Batch tracking data
+        let batchData = {
+            'Product X': [
+                { batchNumber: 'BATCH-X-001', quantity: 50, manufacturingDate: '2024-08-15', expiryDate: '2025-08-15', status: 'Active', location: 'Warehouse 2' },
+                { batchNumber: 'BATCH-X-002', quantity: 25, manufacturingDate: '2024-09-01', expiryDate: '2025-09-01', status: 'Active', location: 'Warehouse 2' }
+            ],
+            'Product Y': [
+                { batchNumber: 'BATCH-Y-001', quantity: 100, manufacturingDate: '2024-08-20', expiryDate: '2025-08-20', status: 'Active', location: 'Warehouse 2' },
+                { batchNumber: 'BATCH-Y-002', quantity: 50, manufacturingDate: '2024-09-05', expiryDate: '2025-09-05', status: 'Active', location: 'Warehouse 2' }
+            ],
+            'Raw Material A': [
+                { batchNumber: 'BATCH-RM-A-001', quantity: 300, manufacturingDate: '2024-08-10', expiryDate: '2025-08-10', status: 'Active', location: 'Warehouse 1' },
+                { batchNumber: 'BATCH-RM-A-002', quantity: 200, manufacturingDate: '2024-09-01', expiryDate: '2025-09-01', status: 'Active', location: 'Warehouse 1' }
+            ]
+        };
+
         let staff = [
-            { id: 'EMP001', name: 'John Smith', role: 'Manager', department: 'Production', status: 'Present', email: 'john.smith@company.com', phone: '+91-9876543210' },
-            { id: 'EMP002', name: 'Sarah Johnson', role: 'Supervisor', department: 'Logistics', status: 'Present', email: 'sarah.johnson@company.com', phone: '+91-9876543211' },
-            { id: 'EMP003', name: 'Mike Wilson', role: 'Operator', department: 'Production', status: 'On Leave', email: 'mike.wilson@company.com', phone: '+91-9876543212' },
-            { id: 'EMP004', name: 'Lisa Brown', role: 'Clerk', department: 'Finance', status: 'Present', email: 'lisa.brown@company.com', phone: '+91-9876543213' },
-            { id: 'EMP005', name: 'David Lee', role: 'Manager', department: 'Sales', status: 'Present', email: 'david.lee@company.com', phone: '+91-9876543214' }
+            { 
+                id: 'EMP001', 
+                name: 'John Smith', 
+                role: 'Manager', 
+                department: 'Production', 
+                status: 'Present', 
+                email: 'john.smith@company.com', 
+                phone: '+91-9876543210',
+                shift: 'Morning (6AM-2PM)',
+                salary: 75000,
+                biometricId: 'BIO001',
+                joiningDate: '2023-01-15',
+                checkinTime: '06:15',
+                checkoutTime: null,
+                productivityScore: 95,
+                attendanceRate: 98
+            },
+            { 
+                id: 'EMP002', 
+                name: 'Sarah Johnson', 
+                role: 'Supervisor', 
+                department: 'Logistics', 
+                status: 'Present', 
+                email: 'sarah.johnson@company.com', 
+                phone: '+91-9876543211',
+                shift: 'Afternoon (2PM-10PM)',
+                salary: 55000,
+                biometricId: 'BIO002',
+                joiningDate: '2023-03-20',
+                checkinTime: '14:00',
+                checkoutTime: null,
+                productivityScore: 92,
+                attendanceRate: 96
+            },
+            { 
+                id: 'EMP003', 
+                name: 'Mike Wilson', 
+                role: 'Operator', 
+                department: 'Production', 
+                status: 'On Leave', 
+                email: 'mike.wilson@company.com', 
+                phone: '+91-9876543212',
+                shift: 'Morning (6AM-2PM)',
+                salary: 35000,
+                biometricId: 'BIO003',
+                joiningDate: '2023-05-10',
+                checkinTime: null,
+                checkoutTime: null,
+                productivityScore: 88,
+                attendanceRate: 94
+            },
+            { 
+                id: 'EMP004', 
+                name: 'Lisa Brown', 
+                role: 'Clerk', 
+                department: 'Finance', 
+                status: 'Present', 
+                email: 'lisa.brown@company.com', 
+                phone: '+91-9876543213',
+                shift: 'Morning (6AM-2PM)',
+                salary: 30000,
+                biometricId: 'BIO004',
+                joiningDate: '2023-02-28',
+                checkinTime: '06:30',
+                checkoutTime: null,
+                productivityScore: 90,
+                attendanceRate: 97
+            },
+            { 
+                id: 'EMP005', 
+                name: 'David Lee', 
+                role: 'Manager', 
+                department: 'Sales', 
+                status: 'Present', 
+                email: 'david.lee@company.com', 
+                phone: '+91-9876543214',
+                shift: 'Morning (6AM-2PM)',
+                salary: 70000,
+                biometricId: 'BIO005',
+                joiningDate: '2023-01-10',
+                checkinTime: '06:00',
+                checkoutTime: null,
+                productivityScore: 96,
+                attendanceRate: 99
+            }
+        ];
+
+        // Attendance tracking data
+        let attendanceData = [
+            { employeeId: 'EMP001', employeeName: 'John Smith', checkinTime: '06:15', checkoutTime: null, hoursWorked: 8, overtime: 0, status: 'Present' },
+            { employeeId: 'EMP002', employeeName: 'Sarah Johnson', checkinTime: '14:00', checkoutTime: null, hoursWorked: 6, overtime: 0, status: 'Present' },
+            { employeeId: 'EMP003', employeeName: 'Mike Wilson', checkinTime: null, checkoutTime: null, hoursWorked: 0, overtime: 0, status: 'On Leave' },
+            { employeeId: 'EMP004', employeeName: 'Lisa Brown', checkinTime: '06:30', checkoutTime: null, hoursWorked: 7.5, overtime: 0, status: 'Present' },
+            { employeeId: 'EMP005', employeeName: 'David Lee', checkinTime: '06:00', checkoutTime: null, hoursWorked: 8, overtime: 0, status: 'Present' }
         ];
 
         let customers = [
@@ -1290,12 +2822,89 @@
         ];
 
         let transactions = [
-            { id: 'TXN001', date: '2024-09-25', type: 'Sale', amount: 25400, status: 'Completed' },
-            { id: 'TXN002', date: '2024-09-25', type: 'Purchase', amount: -12500, status: 'Completed' },
-            { id: 'TXN003', date: '2024-09-24', type: 'Sale', amount: 18750, status: 'Pending' },
-            { id: 'TXN004', date: '2024-09-24', type: 'Expense', amount: -3400, status: 'Completed' },
-            { id: 'TXN005', date: '2024-09-23', type: 'Sale', amount: 35600, status: 'Completed' }
+            { 
+                id: 'TXN001', 
+                date: '2024-09-25', 
+                type: 'Sale', 
+                amount: 25400, 
+                currency: 'INR',
+                gst: 4572,
+                description: 'Product X sale to ABC Distributors',
+                status: 'Completed' 
+            },
+            { 
+                id: 'TXN002', 
+                date: '2024-09-25', 
+                type: 'Purchase', 
+                amount: -12500, 
+                currency: 'INR',
+                gst: 2250,
+                description: 'Raw material purchase from Supplier A',
+                status: 'Completed' 
+            },
+            { 
+                id: 'TXN003', 
+                date: '2024-09-24', 
+                type: 'Sale', 
+                amount: 18750, 
+                currency: 'USD',
+                gst: 3375,
+                description: 'Product Y export sale',
+                status: 'Pending' 
+            },
+            { 
+                id: 'TXN004', 
+                date: '2024-09-24', 
+                type: 'Expense', 
+                amount: -3400, 
+                currency: 'INR',
+                gst: 0,
+                description: 'Office maintenance expense',
+                status: 'Completed' 
+            },
+            { 
+                id: 'TXN005', 
+                date: '2024-09-23', 
+                type: 'Sale', 
+                amount: 35600, 
+                currency: 'INR',
+                gst: 6408,
+                description: 'Bulk order from XYZ Retail',
+                status: 'Completed' 
+            }
         ];
+
+        // Receivables and Payables data
+        let receivables = [
+            { customer: 'ABC Distributors', amount: 25400, dueDate: '2024-10-25', status: 'Pending' },
+            { customer: 'XYZ Retail', amount: 18750, dueDate: '2024-10-24', status: 'Overdue' },
+            { customer: 'Direct Customer', amount: 12300, dueDate: '2024-10-30', status: 'Pending' }
+        ];
+
+        let payables = [
+            { supplier: 'Supplier A', amount: 12500, dueDate: '2024-10-15', status: 'Pending' },
+            { supplier: 'Supplier B', amount: 8900, dueDate: '2024-10-20', status: 'Pending' },
+            { supplier: 'Supplier C', amount: 5600, dueDate: '2024-10-10', status: 'Overdue' }
+        ];
+
+        // GST Settings
+        let gstSettings = {
+            gstNumber: '29ABCDE1234F1Z5',
+            cgstRate: 9,
+            sgstRate: 9,
+            igstRate: 18,
+            businessAddress: '123 Business Park, Industrial Area, Mumbai, Maharashtra - 400001'
+        };
+
+        // Currency Settings
+        let currencySettings = {
+            baseCurrency: 'INR',
+            exchangeRates: {
+                USD: 83.25,
+                EUR: 89.50
+            },
+            autoUpdate: true
+        };
 
         let productionOrders = [
             { id: 'WO001', product: 'Product X', quantity: 100, status: 'In Progress', startDate: '2024-09-20', expectedCompletion: '2024-09-27' },
@@ -1373,23 +2982,31 @@
             modal.style.display = 'none';
         }
 
-        // Table Loading Functions
+        // Enhanced Table Loading Functions
         function loadOrdersTable() {
             const tbody = document.getElementById('ordersTableBody');
             tbody.innerHTML = orders.map(order => `
                 <tr>
+                    <td><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
                     <td>${order.id}</td>
                     <td>${order.type}</td>
                     <td>${order.customer}</td>
                     <td>₹${order.amount.toLocaleString()}</td>
                     <td><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '')}">${order.status}</span></td>
+                    <td><span class="status-badge ${order.priority === 'Urgent' ? 'status-cancelled' : order.priority === 'High' ? 'status-pending' : 'status-delivered'}">${order.priority}</span></td>
                     <td>${order.date}</td>
+                    <td>${order.deliveryDate}</td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="viewOrder('${order.id}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editOrder('${order.id}')">Edit</button>
+                        ${order.status === 'Pending' ? `<button class="btn btn-success btn-sm" onclick="approveOrder('${order.id}')">Approve</button>` : ''}
+                        ${order.status === 'Approved' ? `<button class="btn btn-success btn-sm" onclick="startProduction('${order.id}')">Start Production</button>` : ''}
+                        ${order.status === 'In Production' ? `<button class="btn btn-success btn-sm" onclick="dispatchOrder('${order.id}')">Dispatch</button>` : ''}
+                        <button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.id}')">Cancel</button>
                     </td>
                 </tr>
             `).join('');
+            
+            updateOrderWorkflowStats();
         }
 
         function loadInventoryGrid() {
@@ -1398,12 +3015,101 @@
                 <div class="inventory-item ${item.stock <= item.minStock ? 'low-stock' : ''}">
                     <h4>${item.name}</h4>
                     <div class="inventory-details">
+                        <p><strong>SKU:</strong> ${item.sku}</p>
                         <p><strong>Category:</strong> ${item.category}</p>
                         <p><strong>Current Stock:</strong> ${item.stock} units</p>
                         <p><strong>Min Stock:</strong> ${item.minStock} units</p>
                         <p><strong>Unit Price:</strong> ₹${item.price}</p>
                         <p><strong>Location:</strong> ${item.location}</p>
+                        <p><strong>Supplier:</strong> ${item.supplier}</p>
+                        <p><strong>Barcode:</strong> ${item.barcode}</p>
                         ${item.stock <= item.minStock ? '<p style="color: #F44336;"><strong>⚠️ Low Stock Alert!</strong></p>' : ''}
+                        <div style="margin-top: 10px;">
+                            <button class="btn btn-primary btn-sm" onclick="viewProduct('${item.name}')">View</button>
+                            <button class="btn btn-success btn-sm" onclick="adjustStock('${item.name}')">Adjust</button>
+                            <button class="btn btn-primary btn-sm" onclick="viewBatch('${item.name}')">Batches</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            updateInventoryStats();
+            loadReorderAlerts();
+        }
+
+        function updateInventoryStats() {
+            const totalProducts = inventory.length;
+            const lowStockCount = inventory.filter(item => item.stock <= item.minStock).length;
+            const outOfStockCount = inventory.filter(item => item.stock === 0).length;
+            const totalValue = inventory.reduce((sum, item) => sum + (item.stock * item.price), 0);
+            
+            document.getElementById('totalProductsCount').textContent = totalProducts;
+            document.getElementById('lowStockCount').textContent = lowStockCount;
+            document.getElementById('outOfStockCount').textContent = outOfStockCount;
+            document.getElementById('totalInventoryValue').textContent = `₹${totalValue.toLocaleString()}`;
+        }
+
+        function loadReorderAlerts() {
+            const tbody = document.getElementById('reorderAlertsTableBody');
+            const lowStockItems = inventory.filter(item => item.stock <= item.minStock);
+            
+            tbody.innerHTML = lowStockItems.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.stock}</td>
+                    <td>${item.minStock}</td>
+                    <td>${item.reorderQty}</td>
+                    <td>${item.supplier}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="createPurchaseOrder('${item.name}')">Create PO</button>
+                        <button class="btn btn-success btn-sm" onclick="reorderProduct('${item.name}')">Reorder</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterInventory() {
+            const categoryFilter = document.getElementById('inventoryCategoryFilter').value;
+            const locationFilter = document.getElementById('inventoryLocationFilter').value;
+            const statusFilter = document.getElementById('inventoryStatusFilter').value;
+            
+            let filteredInventory = inventory;
+            
+            if (categoryFilter) {
+                filteredInventory = filteredInventory.filter(item => item.category === categoryFilter);
+            }
+            if (locationFilter) {
+                filteredInventory = filteredInventory.filter(item => item.location === locationFilter);
+            }
+            if (statusFilter) {
+                if (statusFilter === 'low-stock') {
+                    filteredInventory = filteredInventory.filter(item => item.stock <= item.minStock && item.stock > 0);
+                } else if (statusFilter === 'out-of-stock') {
+                    filteredInventory = filteredInventory.filter(item => item.stock === 0);
+                } else if (statusFilter === 'normal') {
+                    filteredInventory = filteredInventory.filter(item => item.stock > item.minStock);
+                }
+            }
+            
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = filteredInventory.map(item => `
+                <div class="inventory-item ${item.stock <= item.minStock ? 'low-stock' : ''}">
+                    <h4>${item.name}</h4>
+                    <div class="inventory-details">
+                        <p><strong>SKU:</strong> ${item.sku}</p>
+                        <p><strong>Category:</strong> ${item.category}</p>
+                        <p><strong>Current Stock:</strong> ${item.stock} units</p>
+                        <p><strong>Min Stock:</strong> ${item.minStock} units</p>
+                        <p><strong>Unit Price:</strong> ₹${item.price}</p>
+                        <p><strong>Location:</strong> ${item.location}</p>
+                        <p><strong>Supplier:</strong> ${item.supplier}</p>
+                        <p><strong>Barcode:</strong> ${item.barcode}</p>
+                        ${item.stock <= item.minStock ? '<p style="color: #F44336;"><strong>⚠️ Low Stock Alert!</strong></p>' : ''}
+                        <div style="margin-top: 10px;">
+                            <button class="btn btn-primary btn-sm" onclick="viewProduct('${item.name}')">View</button>
+                            <button class="btn btn-success btn-sm" onclick="adjustStock('${item.name}')">Adjust</button>
+                            <button class="btn btn-primary btn-sm" onclick="viewBatch('${item.name}')">Batches</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -1417,10 +3123,83 @@
                     <td>${member.name}</td>
                     <td>${member.role}</td>
                     <td>${member.department}</td>
+                    <td>${member.shift}</td>
                     <td><span class="status-badge ${member.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${member.status}</span></td>
+                    <td>${member.checkinTime || 'Not checked in'}</td>
+                    <td>${member.productivityScore}%</td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="viewStaff('${member.id}')">View</button>
                         <button class="btn btn-success btn-sm" onclick="editStaff('${member.id}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="viewAttendance('${member.id}')">Attendance</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            loadAttendanceTable();
+            updateStaffStats();
+        }
+
+        function loadAttendanceTable() {
+            const tbody = document.getElementById('attendanceTableBody');
+            tbody.innerHTML = attendanceData.map(attendance => `
+                <tr>
+                    <td>${attendance.employeeName}</td>
+                    <td>${attendance.checkinTime || 'Not checked in'}</td>
+                    <td>${attendance.checkoutTime || 'Not checked out'}</td>
+                    <td>${attendance.hoursWorked}</td>
+                    <td>${attendance.overtime}</td>
+                    <td><span class="status-badge ${attendance.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${attendance.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="manageAttendance('${attendance.employeeId}')">Manage</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStaffStats() {
+            const totalStaff = staff.length;
+            const presentToday = staff.filter(member => member.status === 'Present').length;
+            const onLeave = staff.filter(member => member.status === 'On Leave').length;
+            const avgAttendanceRate = staff.reduce((sum, member) => sum + member.attendanceRate, 0) / totalStaff;
+            
+            document.getElementById('totalStaffCount').textContent = totalStaff;
+            document.getElementById('presentTodayCount').textContent = presentToday;
+            document.getElementById('onLeaveCount').textContent = onLeave;
+            document.getElementById('attendanceRate').textContent = `${Math.round(avgAttendanceRate)}%`;
+        }
+
+        function filterStaff() {
+            const departmentFilter = document.getElementById('staffDepartmentFilter').value;
+            const roleFilter = document.getElementById('staffRoleFilter').value;
+            const statusFilter = document.getElementById('staffStatusFilter').value;
+            
+            let filteredStaff = staff;
+            
+            if (departmentFilter) {
+                filteredStaff = filteredStaff.filter(member => member.department === departmentFilter);
+            }
+            if (roleFilter) {
+                filteredStaff = filteredStaff.filter(member => member.role === roleFilter);
+            }
+            if (statusFilter) {
+                filteredStaff = filteredStaff.filter(member => member.status === statusFilter);
+            }
+            
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = filteredStaff.map(member => `
+                <tr>
+                    <td>${member.id}</td>
+                    <td>${member.name}</td>
+                    <td>${member.role}</td>
+                    <td>${member.department}</td>
+                    <td>${member.shift}</td>
+                    <td><span class="status-badge ${member.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${member.status}</span></td>
+                    <td>${member.checkinTime || 'Not checked in'}</td>
+                    <td>${member.productivityScore}%</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewStaff('${member.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editStaff('${member.id}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="viewAttendance('${member.id}')">Attendance</button>
                     </td>
                 </tr>
             `).join('');
@@ -1451,13 +3230,99 @@
                     <td>${transaction.date}</td>
                     <td>${transaction.id}</td>
                     <td>${transaction.type}</td>
-                    <td style="color: ${transaction.amount > 0 ? '#4CAF50' : '#F44336'}">₹${Math.abs(transaction.amount).toLocaleString()}</td>
+                    <td>${transaction.description}</td>
+                    <td style="color: ${transaction.amount > 0 ? '#4CAF50' : '#F44336'}">${getCurrencySymbol(transaction.currency)}${Math.abs(transaction.amount).toLocaleString()}</td>
+                    <td>${transaction.currency}</td>
+                    <td>${getCurrencySymbol(transaction.currency)}${transaction.gst.toLocaleString()}</td>
                     <td><span class="status-badge ${transaction.status === 'Completed' ? 'status-delivered' : 'status-pending'}">${transaction.status}</span></td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="viewTransaction('${transaction.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editTransaction('${transaction.id}')">Edit</button>
                     </td>
                 </tr>
             `).join('');
+            
+            loadReceivablesTable();
+            loadPayablesTable();
+            updateFinancialStats();
+        }
+
+        function loadReceivablesTable() {
+            const tbody = document.getElementById('receivablesTableBody');
+            tbody.innerHTML = receivables.map(receivable => `
+                <tr>
+                    <td>${receivable.customer}</td>
+                    <td>₹${receivable.amount.toLocaleString()}</td>
+                    <td>${receivable.dueDate}</td>
+                    <td><span class="status-badge ${receivable.status === 'Pending' ? 'status-pending' : 'status-cancelled'}">${receivable.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function loadPayablesTable() {
+            const tbody = document.getElementById('payablesTableBody');
+            tbody.innerHTML = payables.map(payable => `
+                <tr>
+                    <td>${payable.supplier}</td>
+                    <td>₹${payable.amount.toLocaleString()}</td>
+                    <td>${payable.dueDate}</td>
+                    <td><span class="status-badge ${payable.status === 'Pending' ? 'status-pending' : 'status-cancelled'}">${payable.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateFinancialStats() {
+            const monthlyRevenue = transactions.filter(t => t.type === 'Sale' && t.status === 'Completed').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            const monthlyExpenses = transactions.filter(t => (t.type === 'Purchase' || t.type === 'Expense') && t.status === 'Completed').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            const pendingPayments = receivables.reduce((sum, r) => sum + r.amount, 0);
+            const netProfit = monthlyRevenue - monthlyExpenses;
+            
+            document.getElementById('monthlyRevenue').textContent = `₹${monthlyRevenue.toLocaleString()}`;
+            document.getElementById('monthlyExpenses').textContent = `₹${monthlyExpenses.toLocaleString()}`;
+            document.getElementById('pendingPayments').textContent = `₹${pendingPayments.toLocaleString()}`;
+            document.getElementById('netProfit').textContent = `₹${netProfit.toLocaleString()}`;
+        }
+
+        function filterFinancials() {
+            const periodFilter = document.getElementById('financialPeriodFilter').value;
+            const typeFilter = document.getElementById('transactionTypeFilter').value;
+            const currencyFilter = document.getElementById('currencyFilter').value;
+            
+            let filteredTransactions = transactions;
+            
+            if (typeFilter) {
+                filteredTransactions = filteredTransactions.filter(t => t.type === typeFilter);
+            }
+            if (currencyFilter) {
+                filteredTransactions = filteredTransactions.filter(t => t.currency === currencyFilter);
+            }
+            
+            const tbody = document.getElementById('transactionTableBody');
+            tbody.innerHTML = filteredTransactions.map(transaction => `
+                <tr>
+                    <td>${transaction.date}</td>
+                    <td>${transaction.id}</td>
+                    <td>${transaction.type}</td>
+                    <td>${transaction.description}</td>
+                    <td style="color: ${transaction.amount > 0 ? '#4CAF50' : '#F44336'}">${getCurrencySymbol(transaction.currency)}${Math.abs(transaction.amount).toLocaleString()}</td>
+                    <td>${transaction.currency}</td>
+                    <td>${getCurrencySymbol(transaction.currency)}${transaction.gst.toLocaleString()}</td>
+                    <td><span class="status-badge ${transaction.status === 'Completed' ? 'status-delivered' : 'status-pending'}">${transaction.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewTransaction('${transaction.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editTransaction('${transaction.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getCurrencySymbol(currency) {
+            switch(currency) {
+                case 'USD': return '$';
+                case 'EUR': return '€';
+                case 'INR': return '₹';
+                default: return '₹';
+            }
         }
 
         function loadProductionTable() {
@@ -1535,7 +3400,7 @@
             });
         }
 
-        // Form Handlers
+        // Enhanced Form Handlers
         function createOrder(event) {
             event.preventDefault();
             const newOrder = {
@@ -1544,26 +3409,250 @@
                 customer: document.getElementById('orderCustomer').value,
                 amount: parseFloat(document.getElementById('orderAmount').value),
                 status: 'Pending',
-                date: new Date().toISOString().split('T')[0]
+                priority: document.getElementById('orderPriority').value,
+                date: new Date().toISOString().split('T')[0],
+                deliveryDate: document.getElementById('orderDeliveryDate').value,
+                paymentTerms: document.getElementById('orderPaymentTerms').value,
+                instructions: document.getElementById('orderInstructions').value,
+                approvedBy: null,
+                approvedDate: null
             };
             orders.push(newOrder);
             hideModal('newOrderModal');
             if (document.getElementById('orders').classList.contains('hidden') === false) {
                  loadOrdersTable();
             }
-            alert('Order created successfully!');
+            alert('Order created successfully! Status: Pending Approval');
             event.target.reset();
+        }
+
+        function processReturnRefund(event) {
+            event.preventDefault();
+            const returnData = {
+                orderId: document.getElementById('returnOrderId').value,
+                returnType: document.getElementById('returnType').value,
+                quantity: parseInt(document.getElementById('returnQuantity').value),
+                refundAmount: parseFloat(document.getElementById('refundAmount').value),
+                reason: document.getElementById('returnReason').value,
+                processedBy: currentUser ? currentUser.name : 'System',
+                processedDate: new Date().toISOString().split('T')[0]
+            };
+            
+            // Update order status to returned
+            const order = orders.find(o => o.id === returnData.orderId);
+            if (order) {
+                order.status = 'Returned';
+            }
+            
+            hideModal('returnRefundModal');
+            if (document.getElementById('orders').classList.contains('hidden') === false) {
+                 loadOrdersTable();
+            }
+            alert(`Return processed successfully! Refund amount: ₹${returnData.refundAmount.toLocaleString()}`);
+            event.target.reset();
+        }
+
+        // Order Management Functions
+        function approveOrder(orderId) {
+            if (confirm('Are you sure you want to approve this order?')) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'Approved';
+                    order.approvedBy = currentUser ? currentUser.name : 'System';
+                    order.approvedDate = new Date().toISOString().split('T')[0];
+                    loadOrdersTable();
+                    alert('Order approved successfully!');
+                }
+            }
+        }
+
+        function startProduction(orderId) {
+            if (confirm('Start production for this order?')) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'In Production';
+                    loadOrdersTable();
+                    alert('Production started for order!');
+                }
+            }
+        }
+
+        function dispatchOrder(orderId) {
+            if (confirm('Dispatch this order?')) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'Dispatched';
+                    loadOrdersTable();
+                    alert('Order dispatched successfully!');
+                }
+            }
+        }
+
+        function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'Cancelled';
+                    loadOrdersTable();
+                    alert('Order cancelled successfully!');
+                }
+            }
+        }
+
+        function updateOrderWorkflowStats() {
+            const pendingCount = orders.filter(o => o.status === 'Pending').length;
+            const inProductionCount = orders.filter(o => o.status === 'In Production').length;
+            const dispatchedCount = orders.filter(o => o.status === 'Dispatched').length;
+            const deliveredCount = orders.filter(o => o.status === 'Delivered').length;
+            
+            document.getElementById('pendingApprovalCount').textContent = pendingCount;
+            document.getElementById('inProductionCount').textContent = inProductionCount;
+            document.getElementById('dispatchedCount').textContent = dispatchedCount;
+            document.getElementById('deliveredCount').textContent = deliveredCount;
+        }
+
+        function filterOrders() {
+            const statusFilter = document.getElementById('orderStatusFilter').value;
+            const typeFilter = document.getElementById('orderTypeFilter').value;
+            const dateFilter = document.getElementById('orderDateFilter').value;
+            
+            let filteredOrders = orders;
+            
+            if (statusFilter) {
+                filteredOrders = filteredOrders.filter(o => o.status === statusFilter);
+            }
+            if (typeFilter) {
+                filteredOrders = filteredOrders.filter(o => o.type === typeFilter);
+            }
+            if (dateFilter) {
+                filteredOrders = filteredOrders.filter(o => o.date === dateFilter);
+            }
+            
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = filteredOrders.map(order => `
+                <tr>
+                    <td><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
+                    <td>${order.id}</td>
+                    <td>${order.type}</td>
+                    <td>${order.customer}</td>
+                    <td>₹${order.amount.toLocaleString()}</td>
+                    <td><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '')}">${order.status}</span></td>
+                    <td><span class="status-badge ${order.priority === 'Urgent' ? 'status-cancelled' : order.priority === 'High' ? 'status-pending' : 'status-delivered'}">${order.priority}</span></td>
+                    <td>${order.date}</td>
+                    <td>${order.deliveryDate}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewOrder('${order.id}')">View</button>
+                        ${order.status === 'Pending' ? `<button class="btn btn-success btn-sm" onclick="approveOrder('${order.id}')">Approve</button>` : ''}
+                        ${order.status === 'Approved' ? `<button class="btn btn-success btn-sm" onclick="startProduction('${order.id}')">Start Production</button>` : ''}
+                        ${order.status === 'In Production' ? `<button class="btn btn-success btn-sm" onclick="dispatchOrder('${order.id}')">Dispatch</button>` : ''}
+                        <button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.id}')">Cancel</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleAllOrders() {
+            const selectAll = document.getElementById('selectAllOrders');
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+        }
+
+        function bulkApproveOrders() {
+            const selectedOrders = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
+            if (selectedOrders.length === 0) {
+                alert('Please select orders to approve');
+                return;
+            }
+            
+            if (confirm(`Approve ${selectedOrders.length} selected orders?`)) {
+                selectedOrders.forEach(orderId => {
+                    const order = orders.find(o => o.id === orderId);
+                    if (order && order.status === 'Pending') {
+                        order.status = 'Approved';
+                        order.approvedBy = currentUser ? currentUser.name : 'System';
+                        order.approvedDate = new Date().toISOString().split('T')[0];
+                    }
+                });
+                loadOrdersTable();
+                alert(`${selectedOrders.length} orders approved successfully!`);
+            }
+        }
+
+        function exportOrders() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Order ID,Type,Customer,Amount,Status,Priority,Date,Delivery Date,Payment Terms\n" +
+                orders.map(order => 
+                    `${order.id},${order.type},${order.customer},${order.amount},${order.status},${order.priority},${order.date},${order.deliveryDate},${order.paymentTerms}`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "orders_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Order Form Helper Functions
+        function updateOrderFields() {
+            const orderType = document.getElementById('orderType').value;
+            const customerSelect = document.getElementById('orderCustomer');
+            
+            // Update customer options based on order type
+            if (orderType === 'Internal' || orderType === 'Production') {
+                customerSelect.innerHTML = '<option value="Internal">Internal</option>';
+            } else {
+                customerSelect.innerHTML = `
+                    <option value="">Select Customer/Distributor</option>
+                    <option value="ABC Distributors">ABC Distributors</option>
+                    <option value="XYZ Retail">XYZ Retail</option>
+                    <option value="Direct Customer">Direct Customer</option>
+                    <option value="PQR Wholesale">PQR Wholesale</option>
+                    <option value="LMN Stores">LMN Stores</option>
+                `;
+            }
+        }
+
+        function updateProductPrice() {
+            const productSelect = document.getElementById('orderProduct');
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            document.getElementById('orderUnitPrice').value = price;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const quantity = parseFloat(document.getElementById('orderQuantity').value) || 0;
+            const unitPrice = parseFloat(document.getElementById('orderUnitPrice').value) || 0;
+            const total = quantity * unitPrice;
+            document.getElementById('orderAmount').value = total.toFixed(2);
+        }
+
+        function loadOrderDetails() {
+            const orderId = document.getElementById('returnOrderId').value;
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                document.getElementById('refundAmount').value = order.amount;
+            }
         }
 
         function addProduct(event) {
             event.preventDefault();
             const newProduct = {
                 name: document.getElementById('productName').value,
+                sku: document.getElementById('productSKU').value,
                 category: document.getElementById('productCategory').value,
                 stock: parseInt(document.getElementById('productStock').value),
                 minStock: parseInt(document.getElementById('productMinStock').value),
                 price: parseFloat(document.getElementById('productPrice').value),
-                location: 'Warehouse 1' // Default location
+                location: document.getElementById('productLocation').value,
+                reorderQty: parseInt(document.getElementById('productReorderQty').value),
+                supplier: document.getElementById('productSupplier').value,
+                barcode: document.getElementById('productBarcode').value,
+                description: document.getElementById('productDescription').value
             };
             inventory.push(newProduct);
             hideModal('addProductModal');
@@ -1572,6 +3661,188 @@
             }
             alert('Product added successfully!');
             event.target.reset();
+        }
+
+        // Enhanced Inventory Management Functions
+        function lookupProductByBarcode() {
+            const barcode = document.getElementById('manualBarcode').value;
+            const product = inventory.find(item => item.barcode === barcode);
+            const resultDiv = document.getElementById('barcodeResult');
+            
+            if (product) {
+                resultDiv.innerHTML = `
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+                        <h4>Product Found!</h4>
+                        <p><strong>Name:</strong> ${product.name}</p>
+                        <p><strong>SKU:</strong> ${product.sku}</p>
+                        <p><strong>Stock:</strong> ${product.stock} units</p>
+                        <p><strong>Location:</strong> ${product.location}</p>
+                        <p><strong>Price:</strong> ₹${product.price}</p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div style="background: #ffebee; padding: 15px; border-radius: 8px; border-left: 4px solid #f44336;">
+                        <h4>Product Not Found</h4>
+                        <p>No product found with barcode: ${barcode}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function processStockAdjustment(event) {
+            event.preventDefault();
+            const productName = document.getElementById('adjustmentProduct').value;
+            const adjustmentType = document.getElementById('adjustmentType').value;
+            const quantity = parseInt(document.getElementById('adjustmentQuantity').value);
+            const reason = document.getElementById('adjustmentReason').value;
+            
+            const product = inventory.find(item => item.name === productName);
+            if (product) {
+                let newStock = product.stock;
+                
+                if (adjustmentType === 'increase') {
+                    newStock += quantity;
+                } else {
+                    newStock -= quantity;
+                }
+                
+                product.stock = Math.max(0, newStock);
+                
+                // Log the adjustment
+                console.log(`Stock adjustment: ${productName} - ${adjustmentType} ${quantity} units. Reason: ${reason}`);
+                
+                hideModal('stockAdjustmentModal');
+                if (document.getElementById('inventory').classList.contains('hidden') === false) {
+                    loadInventoryGrid();
+                }
+                alert(`Stock adjustment processed successfully! New stock: ${product.stock} units`);
+                event.target.reset();
+            }
+        }
+
+        function loadProductStock() {
+            const productName = document.getElementById('adjustmentProduct').value;
+            const product = inventory.find(item => item.name === productName);
+            if (product) {
+                document.getElementById('currentStockDisplay').value = product.stock;
+                document.getElementById('adjustmentQuantity').addEventListener('input', function() {
+                    const adjustmentType = document.getElementById('adjustmentType').value;
+                    const quantity = parseInt(this.value) || 0;
+                    let newStock = product.stock;
+                    
+                    if (adjustmentType === 'increase') {
+                        newStock += quantity;
+                    } else if (adjustmentType === 'decrease' || adjustmentType === 'damaged' || adjustmentType === 'expired' || adjustmentType === 'lost') {
+                        newStock -= quantity;
+                    }
+                    
+                    document.getElementById('newStockLevel').value = Math.max(0, newStock);
+                });
+            }
+        }
+
+        function loadBatchData() {
+            const productName = document.getElementById('batchProduct').value;
+            const tbody = document.getElementById('batchTrackingTableBody');
+            
+            if (productName && batchData[productName]) {
+                tbody.innerHTML = batchData[productName].map(batch => `
+                    <tr>
+                        <td>${batch.batchNumber}</td>
+                        <td>${batch.quantity}</td>
+                        <td>${batch.manufacturingDate}</td>
+                        <td>${batch.expiryDate}</td>
+                        <td><span class="status-badge status-delivered">${batch.status}</span></td>
+                        <td>${batch.location}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="viewBatchDetails('${batch.batchNumber}')">View</button>
+                            <button class="btn btn-success btn-sm" onclick="updateBatchStatus('${batch.batchNumber}')">Update</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No batch data available for this product</td></tr>';
+            }
+        }
+
+        function exportInventory() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Product Name,SKU,Category,Stock,Min Stock,Price,Location,Supplier,Barcode\n" +
+                inventory.map(item => 
+                    `${item.name},${item.sku},${item.category},${item.stock},${item.minStock},${item.price},${item.location},${item.supplier},${item.barcode}`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "inventory_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function generateReorderReport() {
+            const lowStockItems = inventory.filter(item => item.stock <= item.minStock);
+            const reportContent = "data:text/csv;charset=utf-8," + 
+                "Product Name,SKU,Current Stock,Min Stock,Reorder Quantity,Supplier,Location\n" +
+                lowStockItems.map(item => 
+                    `${item.name},${item.sku},${item.stock},${item.minStock},${item.reorderQty},${item.supplier},${item.location}`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(reportContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "reorder_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Inventory Action Functions
+        function viewProduct(productName) {
+            const product = inventory.find(item => item.name === productName);
+            if (product) {
+                alert(`Product Details:\n\nName: ${product.name}\nSKU: ${product.sku}\nCategory: ${product.category}\nStock: ${product.stock}\nMin Stock: ${product.minStock}\nPrice: ₹${product.price}\nLocation: ${product.location}\nSupplier: ${product.supplier}\nBarcode: ${product.barcode}\nDescription: ${product.description}`);
+            }
+        }
+
+        function adjustStock(productName) {
+            document.getElementById('adjustmentProduct').value = productName;
+            loadProductStock();
+            showModal('stockAdjustmentModal');
+        }
+
+        function viewBatch(productName) {
+            document.getElementById('batchProduct').value = productName;
+            loadBatchData();
+            showModal('batchTrackingModal');
+        }
+
+        function createPurchaseOrder(productName) {
+            const product = inventory.find(item => item.name === productName);
+            if (product) {
+                alert(`Creating Purchase Order for ${product.name}\nReorder Quantity: ${product.reorderQty}\nSupplier: ${product.supplier}\nEstimated Cost: ₹${(product.reorderQty * product.price).toLocaleString()}`);
+            }
+        }
+
+        function reorderProduct(productName) {
+            const product = inventory.find(item => item.name === productName);
+            if (product) {
+                if (confirm(`Reorder ${product.reorderQty} units of ${product.name} from ${product.supplier}?`)) {
+                    product.stock += product.reorderQty;
+                    loadInventoryGrid();
+                    alert(`Reorder processed! New stock: ${product.stock} units`);
+                }
+            }
+        }
+
+        function viewBatchDetails(batchNumber) {
+            alert(`Batch Details for ${batchNumber}\n\nThis would show detailed batch information including:\n- Manufacturing details\n- Quality control data\n- Storage conditions\n- Movement history`);
+        }
+
+        function updateBatchStatus(batchNumber) {
+            alert(`Update batch status for ${batchNumber}\n\nThis would allow updating:\n- Batch status\n- Location\n- Quality status\n- Expiry information`);
         }
 
         function addStaff(event) {
@@ -1583,15 +3854,223 @@
                 department: document.getElementById('staffDepartment').value,
                 status: 'Present',
                 email: document.getElementById('staffEmail').value,
-                phone: document.getElementById('staffPhone').value
+                phone: document.getElementById('staffPhone').value,
+                shift: document.getElementById('staffShift').value,
+                salary: parseFloat(document.getElementById('staffSalary').value),
+                biometricId: document.getElementById('staffBiometricId').value,
+                joiningDate: document.getElementById('staffJoiningDate').value,
+                checkinTime: null,
+                checkoutTime: null,
+                productivityScore: 85, // Default productivity score
+                attendanceRate: 100 // Default attendance rate for new employees
             };
             staff.push(newStaff);
+            
+            // Add to attendance data
+            attendanceData.push({
+                employeeId: newStaff.id,
+                employeeName: newStaff.name,
+                checkinTime: null,
+                checkoutTime: null,
+                hoursWorked: 0,
+                overtime: 0,
+                status: 'Present'
+            });
+            
             hideModal('addStaffModal');
-             if (document.getElementById('staff').classList.contains('hidden') === false) {
+            if (document.getElementById('staff').classList.contains('hidden') === false) {
                 loadStaffTable();
             }
             alert('Staff member added successfully!');
             event.target.reset();
+        }
+
+        // Enhanced Staff Management Functions
+        function lookupEmployee() {
+            const employeeId = document.getElementById('manualEmployeeId').value;
+            const employee = staff.find(member => member.id === employeeId);
+            const resultDiv = document.getElementById('employeeLookupResult');
+            
+            if (employee) {
+                resultDiv.innerHTML = `
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+                        <h4>Employee Found!</h4>
+                        <p><strong>Name:</strong> ${employee.name}</p>
+                        <p><strong>Department:</strong> ${employee.department}</p>
+                        <p><strong>Shift:</strong> ${employee.shift}</p>
+                        <p><strong>Status:</strong> ${employee.status}</p>
+                        <p><strong>Check-in Time:</strong> ${employee.checkinTime || 'Not checked in'}</p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div style="background: #ffebee; padding: 15px; border-radius: 8px; border-left: 4px solid #f44336;">
+                        <h4>Employee Not Found</h4>
+                        <p>No employee found with ID: ${employeeId}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function processCheckin() {
+            const employeeId = document.getElementById('manualEmployeeId').value;
+            const employee = staff.find(member => member.id === employeeId);
+            
+            if (employee) {
+                const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                employee.checkinTime = currentTime;
+                employee.status = 'Present';
+                
+                // Update attendance data
+                const attendance = attendanceData.find(att => att.employeeId === employeeId);
+                if (attendance) {
+                    attendance.checkinTime = currentTime;
+                    attendance.status = 'Present';
+                }
+                
+                loadStaffTable();
+                alert(`${employee.name} checked in successfully at ${currentTime}`);
+                document.getElementById('manualEmployeeId').value = '';
+                document.getElementById('employeeLookupResult').innerHTML = '';
+            } else {
+                alert('Please enter a valid Employee ID');
+            }
+        }
+
+        function processCheckout() {
+            const employeeId = document.getElementById('manualEmployeeId').value;
+            const employee = staff.find(member => member.id === employeeId);
+            
+            if (employee && employee.checkinTime) {
+                const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                employee.checkoutTime = currentTime;
+                
+                // Calculate hours worked
+                const checkinTime = new Date(`2000-01-01T${employee.checkinTime}:00`);
+                const checkoutTime = new Date(`2000-01-01T${currentTime}:00`);
+                const hoursWorked = (checkoutTime - checkinTime) / (1000 * 60 * 60);
+                
+                // Update attendance data
+                const attendance = attendanceData.find(att => att.employeeId === employeeId);
+                if (attendance) {
+                    attendance.checkoutTime = currentTime;
+                    attendance.hoursWorked = Math.round(hoursWorked * 10) / 10;
+                    attendance.overtime = Math.max(0, hoursWorked - 8);
+                }
+                
+                loadStaffTable();
+                alert(`${employee.name} checked out successfully at ${currentTime}. Hours worked: ${Math.round(hoursWorked * 10) / 10}`);
+                document.getElementById('manualEmployeeId').value = '';
+                document.getElementById('employeeLookupResult').innerHTML = '';
+            } else {
+                alert('Employee must check in first before checking out');
+            }
+        }
+
+        function loadShiftSchedule() {
+            const selectedDate = document.getElementById('scheduleDate').value;
+            const tbody = document.getElementById('shiftScheduleTableBody');
+            
+            if (selectedDate) {
+                tbody.innerHTML = staff.map(member => `
+                    <tr>
+                        <td>${member.name}</td>
+                        <td>${member.department}</td>
+                        <td>${member.shift}</td>
+                        <td>${member.shift}</td>
+                        <td><span class="status-badge ${member.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${member.status}</span></td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="changeShift('${member.id}')">Change Shift</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function generatePerformanceReport() {
+            const period = document.getElementById('performancePeriod').value;
+            const startDate = document.getElementById('performanceStartDate').value;
+            const endDate = document.getElementById('performanceEndDate').value;
+            
+            const tbody = document.getElementById('performanceReportTableBody');
+            tbody.innerHTML = staff.map(member => {
+                const tasksCompleted = Math.floor(Math.random() * 20) + 10; // Random for demo
+                const hoursWorked = Math.floor(Math.random() * 40) + 160; // Random for demo
+                const rating = member.productivityScore > 95 ? 'Excellent' : member.productivityScore > 85 ? 'Good' : 'Average';
+                
+                return `
+                    <tr>
+                        <td>${member.name}</td>
+                        <td>${member.department}</td>
+                        <td>${tasksCompleted}</td>
+                        <td>${hoursWorked}</td>
+                        <td>${member.productivityScore}%</td>
+                        <td>${member.attendanceRate}%</td>
+                        <td><span class="status-badge ${rating === 'Excellent' ? 'status-delivered' : rating === 'Good' ? 'status-pending' : 'status-cancelled'}">${rating}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportStaff() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Employee ID,Name,Role,Department,Shift,Status,Check-in Time,Productivity Score,Attendance Rate,Salary\n" +
+                staff.map(member => 
+                    `${member.id},${member.name},${member.role},${member.department},${member.shift},${member.status},${member.checkinTime || 'Not checked in'},${member.productivityScore},${member.attendanceRate},${member.salary}`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "staff_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function generatePayroll() {
+            const totalPayroll = staff.reduce((sum, member) => sum + member.salary, 0);
+            const presentStaff = staff.filter(member => member.status === 'Present');
+            const presentPayroll = presentStaff.reduce((sum, member) => sum + member.salary, 0);
+            
+            alert(`Payroll Summary:\n\nTotal Staff: ${staff.length}\nPresent Today: ${presentStaff.length}\nTotal Monthly Payroll: ₹${totalPayroll.toLocaleString()}\nPresent Staff Payroll: ₹${presentPayroll.toLocaleString()}\n\nPayroll report generated successfully!`);
+        }
+
+        // Staff Action Functions
+        function viewStaff(staffId) {
+            const member = staff.find(s => s.id === staffId);
+            if (member) {
+                alert(`Staff Details:\n\nName: ${member.name}\nEmployee ID: ${member.id}\nRole: ${member.role}\nDepartment: ${member.department}\nShift: ${member.shift}\nStatus: ${member.status}\nEmail: ${member.email}\nPhone: ${member.phone}\nSalary: ₹${member.salary.toLocaleString()}\nBiometric ID: ${member.biometricId}\nJoining Date: ${member.joiningDate}\nProductivity Score: ${member.productivityScore}%\nAttendance Rate: ${member.attendanceRate}%`);
+            }
+        }
+
+        function editStaff(staffId) {
+            alert(`Edit staff member: ${staffId}\n\nThis would open an edit form with all staff details`);
+        }
+
+        function viewAttendance(staffId) {
+            const member = staff.find(s => s.id === staffId);
+            const attendance = attendanceData.find(att => att.employeeId === staffId);
+            
+            if (member && attendance) {
+                alert(`Attendance Details for ${member.name}:\n\nCheck-in Time: ${attendance.checkinTime || 'Not checked in'}\nCheck-out Time: ${attendance.checkoutTime || 'Not checked out'}\nHours Worked: ${attendance.hoursWorked}\nOvertime: ${attendance.overtime}\nStatus: ${attendance.status}`);
+            }
+        }
+
+        function manageAttendance(employeeId) {
+            alert(`Manage attendance for employee: ${employeeId}\n\nThis would allow:\n- Manual check-in/check-out\n- Leave management\n- Attendance corrections`);
+        }
+
+        function changeShift(employeeId) {
+            const member = staff.find(s => s.id === employeeId);
+            if (member) {
+                const newShift = prompt(`Change shift for ${member.name}\nCurrent shift: ${member.shift}\nEnter new shift:`, member.shift);
+                if (newShift && newShift !== member.shift) {
+                    member.shift = newShift;
+                    loadShiftSchedule();
+                    alert(`Shift changed successfully for ${member.name}`);
+                }
+            }
         }
 
         // Action Functions (placeholders)
@@ -1601,7 +4080,270 @@
         function editStaff(staffId) { alert(`Editing staff: ${staffId}`); }
         function viewCustomer(customerId) { alert(`Viewing customer: ${customerId}`); }
         function editCustomer(customerId) { alert(`Editing customer: ${customerId}`); }
-        function viewTransaction(transactionId) { alert(`Viewing transaction: ${transactionId}`); }
+        // Invoice Management Functions
+        function createInvoice(event) {
+            event.preventDefault();
+            const invoiceNumber = document.getElementById('invoiceNumber').value || `INV${String(Date.now()).slice(-6)}`;
+            const invoiceDate = document.getElementById('invoiceDate').value;
+            const customer = document.getElementById('invoiceCustomer').value;
+            const currency = document.getElementById('invoiceCurrency').value;
+            
+            // Calculate totals
+            const items = document.querySelectorAll('.invoice-item');
+            let subtotal = 0;
+            let totalGST = 0;
+            
+            items.forEach(item => {
+                const qty = parseFloat(item.querySelector('input[placeholder="Qty"]').value) || 0;
+                const rate = parseFloat(item.querySelector('input[placeholder="Rate"]').value) || 0;
+                const gstRate = parseFloat(item.querySelector('input[placeholder="GST%"]').value) || 0;
+                const itemTotal = qty * rate;
+                const gstAmount = (itemTotal * gstRate) / 100;
+                subtotal += itemTotal;
+                totalGST += gstAmount;
+            });
+            
+            const totalAmount = subtotal + totalGST;
+            
+            // Create invoice transaction
+            const invoiceTransaction = {
+                id: invoiceNumber,
+                date: invoiceDate,
+                type: 'Sale',
+                amount: totalAmount,
+                currency: currency,
+                gst: totalGST,
+                description: `Invoice ${invoiceNumber} - ${customer}`,
+                status: 'Completed'
+            };
+            
+            transactions.unshift(invoiceTransaction);
+            loadTransactionTable();
+            hideModal('createInvoiceModal');
+            
+            alert(`Invoice ${invoiceNumber} created successfully!\nTotal Amount: ${getCurrencySymbol(currency)}${totalAmount.toLocaleString()}`);
+        }
+
+        function loadCustomerDetails() {
+            const customer = document.getElementById('invoiceCustomer').value;
+            const detailsDiv = document.getElementById('customerDetails');
+            
+            if (customer) {
+                detailsDiv.innerHTML = `
+                    <h4>${customer}</h4>
+                    <p><strong>Address:</strong> 123 Business Street, Mumbai, Maharashtra - 400001</p>
+                    <p><strong>GST Number:</strong> 27ABCDE1234F1Z5</p>
+                    <p><strong>Contact:</strong> +91-9876543210</p>
+                    <p><strong>Email:</strong> ${customer.toLowerCase().replace(/\s+/g, '')}@example.com</p>
+                `;
+            } else {
+                detailsDiv.innerHTML = '<p>Select a customer to view details</p>';
+            }
+        }
+
+        function updateItemPrice(selectElement) {
+            const price = selectElement.options[selectElement.selectedIndex].getAttribute('data-price');
+            const rateInput = selectElement.parentElement.querySelector('input[placeholder="Rate"]');
+            if (price) {
+                rateInput.value = price;
+                calculateItemTotal(rateInput);
+            }
+        }
+
+        function calculateItemTotal(inputElement) {
+            const itemDiv = inputElement.closest('.invoice-item');
+            const qtyInput = itemDiv.querySelector('input[placeholder="Qty"]');
+            const rateInput = itemDiv.querySelector('input[placeholder="Rate"]');
+            const gstInput = itemDiv.querySelector('input[placeholder="GST%"]');
+            const totalInput = itemDiv.querySelector('input[placeholder="Total"]');
+            
+            const qty = parseFloat(qtyInput.value) || 0;
+            const rate = parseFloat(rateInput.value) || 0;
+            const gstRate = parseFloat(gstInput.value) || 0;
+            
+            const subtotal = qty * rate;
+            const gstAmount = (subtotal * gstRate) / 100;
+            const total = subtotal + gstAmount;
+            
+            totalInput.value = total.toFixed(2);
+        }
+
+        function addInvoiceItem() {
+            const itemsContainer = document.getElementById('invoiceItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'invoice-item';
+            newItem.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: center; margin-bottom: 10px;';
+            newItem.innerHTML = `
+                <select class="form-input" onchange="updateItemPrice(this)">
+                    <option value="">Select Item</option>
+                    <option value="Product X" data-price="155.00">Product X</option>
+                    <option value="Product Y" data-price="225.00">Product Y</option>
+                    <option value="Raw Material A" data-price="25.50">Raw Material A</option>
+                </select>
+                <input type="number" class="form-input" placeholder="Qty" onchange="calculateItemTotal(this)">
+                <input type="number" step="0.01" class="form-input" placeholder="Rate" readonly>
+                <input type="number" step="0.01" class="form-input" placeholder="GST%" value="18">
+                <input type="number" step="0.01" class="form-input" placeholder="Total" readonly>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeInvoiceItem(this)">Remove</button>
+            `;
+            itemsContainer.appendChild(newItem);
+        }
+
+        function removeInvoiceItem(button) {
+            button.closest('.invoice-item').remove();
+        }
+
+        function previewInvoice() {
+            alert('Invoice preview functionality would be implemented here with PDF generation');
+        }
+
+        function viewTransaction(transactionId) { 
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (transaction) {
+                alert(`Transaction Details:\nID: ${transaction.id}\nDate: ${transaction.date}\nType: ${transaction.type}\nAmount: ${getCurrencySymbol(transaction.currency)}${Math.abs(transaction.amount).toLocaleString()}\nGST: ${getCurrencySymbol(transaction.currency)}${transaction.gst.toLocaleString()}\nDescription: ${transaction.description}\nStatus: ${transaction.status}`);
+            }
+        }
+        // Payment Gateway Functions
+        function processPayment(event) {
+            event.preventDefault();
+            const invoiceId = document.getElementById('paymentInvoiceId').value;
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const currency = document.getElementById('paymentCurrency').value;
+            const method = document.getElementById('paymentMethod').value;
+            const reference = document.getElementById('paymentReference').value;
+            
+            // Simulate payment processing
+            const paymentTransaction = {
+                id: `PAY${String(Date.now()).slice(-6)}`,
+                date: new Date().toISOString().split('T')[0],
+                type: 'Payment',
+                amount: amount,
+                currency: currency,
+                gst: 0,
+                description: `Payment for ${invoiceId} via ${method}`,
+                status: 'Completed'
+            };
+            
+            transactions.unshift(paymentTransaction);
+            loadTransactionTable();
+            hideModal('paymentGatewayModal');
+            
+            alert(`Payment processed successfully!\nReference: ${reference}\nAmount: ${getCurrencySymbol(currency)}${amount.toLocaleString()}`);
+        }
+
+        function updatePaymentFields() {
+            const method = document.getElementById('paymentMethod').value;
+            const fieldsDiv = document.getElementById('paymentFields');
+            
+            if (method === 'card') {
+                fieldsDiv.style.display = 'block';
+            } else {
+                fieldsDiv.style.display = 'none';
+            }
+        }
+
+        // GST Settings Functions
+        function saveGSTSettings(event) {
+            event.preventDefault();
+            gstSettings.gstNumber = document.getElementById('gstNumber').value;
+            gstSettings.cgstRate = parseFloat(document.getElementById('cgstRate').value);
+            gstSettings.sgstRate = parseFloat(document.getElementById('sgstRate').value);
+            gstSettings.igstRate = parseFloat(document.getElementById('igstRate').value);
+            gstSettings.businessAddress = document.getElementById('businessAddress').value;
+            
+            hideModal('gstSettingsModal');
+            alert('GST settings saved successfully!');
+        }
+
+        // Currency Settings Functions
+        function saveCurrencySettings(event) {
+            event.preventDefault();
+            currencySettings.baseCurrency = document.getElementById('baseCurrency').value;
+            currencySettings.exchangeRates.USD = parseFloat(document.getElementById('usdRate').value);
+            currencySettings.exchangeRates.EUR = parseFloat(document.getElementById('eurRate').value);
+            currencySettings.autoUpdate = document.getElementById('autoUpdateRates').checked;
+            
+            hideModal('currencySettingsModal');
+            alert('Currency settings saved successfully!');
+        }
+
+        function updateCurrencyRate() {
+            const currency = document.getElementById('invoiceCurrency').value;
+            alert(`Exchange rate updated for ${currency}`);
+        }
+
+        // Tax Report Functions
+        function generateTaxReport() {
+            const reportData = [
+                { period: 'September 2024', sales: 4567890, cgst: 456789, sgst: 456789, igst: 234567, totalGST: 1148145, netAmount: 3419745 },
+                { period: 'August 2024', sales: 4234567, cgst: 423457, sgst: 423457, igst: 216789, totalGST: 1063703, netAmount: 3170864 },
+                { period: 'July 2024', sales: 3890123, cgst: 389012, sgst: 389012, igst: 198901, totalGST: 976925, netAmount: 2913198 }
+            ];
+            
+            const tbody = document.getElementById('taxReportTableBody');
+            tbody.innerHTML = reportData.map(row => `
+                <tr>
+                    <td>${row.period}</td>
+                    <td>₹${row.sales.toLocaleString()}</td>
+                    <td>₹${row.cgst.toLocaleString()}</td>
+                    <td>₹${row.sgst.toLocaleString()}</td>
+                    <td>₹${row.igst.toLocaleString()}</td>
+                    <td>₹${row.totalGST.toLocaleString()}</td>
+                    <td>₹${row.netAmount.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Enhanced Transaction Functions
+        function addTransaction(event) {
+            event.preventDefault();
+            const type = document.getElementById('transactionType').value;
+            const amount = parseFloat(document.getElementById('transactionAmount').value);
+            const currency = document.getElementById('transactionCurrency').value;
+            const gst = parseFloat(document.getElementById('transactionGST').value) || 0;
+            const description = document.getElementById('transactionDescription').value;
+            
+            const newTransaction = {
+                id: `TXN${String(transactions.length + 1).padStart(3, '0')}`,
+                date: new Date().toISOString().split('T')[0],
+                type: type,
+                amount: type === 'Purchase' || type === 'Expense' ? -amount : amount,
+                currency: currency,
+                gst: gst,
+                description: description,
+                status: 'Completed'
+            };
+            
+            transactions.unshift(newTransaction);
+            loadTransactionTable();
+            hideModal('addTransactionModal');
+            
+            // Reset form
+            document.getElementById('transactionType').value = '';
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionCurrency').value = 'INR';
+            document.getElementById('transactionGST').value = '';
+            document.getElementById('transactionDescription').value = '';
+        }
+
+        function exportFinancials() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Date,Transaction ID,Type,Description,Amount,Currency,GST,Status\n" +
+                transactions.map(t => `${t.date},${t.id},${t.type},${t.description},${t.amount},${t.currency},${t.gst},${t.status}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "financial_transactions.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function editTransaction(id) {
+            alert(`Edit transaction ${id} functionality would be implemented here`);
+        }
+
         function viewProductionOrder(orderId) { alert(`Viewing production order: ${orderId}`); }
         function editProductionOrder(orderId) { alert(`Editing production order: ${orderId}`); }
         function trackDelivery(deliveryId) { alert(`Tracking delivery: ${deliveryId}`); }
