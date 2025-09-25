@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Application - Logistics & Production</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/primeicons/6.0.1/primeicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/primeng/16.0.2/resources/themes/lara-light-blue/theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/primeng/16.0.2/resources/primeng.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .pos-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .nav-menu {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            margin: 2px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #333;
+        }
+
+        .nav-item:hover {
+            background: rgba(33, 150, 243, 0.1);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            min-width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .content-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background: rgba(33, 150, 243, 0.05);
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-inproduction { background: #cce5ff; color: #004085; }
+        .status-dispatched { background: #d1ecf1; color: #0c5460; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(33, 150, 243, 0.4);
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            box-shadow: 0 4px 20px rgba(255, 152, 0, 0.3);
+        }
+
+        .stat-card.red {
+            background: linear-gradient(135deg, #F44336, #D32F2F);
+            box-shadow: 0 4px 20px rgba(244, 67, 54, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #F44336, #D32F2F);
+            color: white;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                overflow: hidden;
+            }
+
+            .sidebar:hover {
+                width: 280px;
+            }
+
+            .nav-item span {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .sidebar:hover .nav-item span {
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Chart container */
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.hidden {
+            display: none !important;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .inventory-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .inventory-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .inventory-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .low-stock {
+            border-left-color: #F44336;
+            background: #ffebee;
+        }
+
+        /* Login Screen Styles */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group-login {
+            position: relative;
+        }
+
+        .form-group-login label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input-login {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            box-sizing: border-box;
+        }
+
+        .form-input-login:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+            background: white;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .login-footer p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .login-footer a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f44336;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+            font-size: 0.9rem;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 80%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            right: 20%;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        /* Hide main app initially */
+        .pos-container {
+            display: none;
+        }
+
+        .pos-container.show {
+            display: flex;
+        }
+
+        /* Responsive login */
+        @media (max-width: 480px) {
+            .login-card {
+                margin: 20px;
+                padding: 30px 25px;
+            }
+            
+            .login-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="login-card">
+            <div class="login-header">
+                <h1>POS System</h1>
+                <p>Logistics & Production Management</p>
+            </div>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div id="errorMessage" class="error-message hidden"></div>
+                <div id="successMessage" class="success-message hidden"></div>
+                
+                <div class="form-group-login">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-input-login" placeholder="Enter your username" required>
+                </div>
+                
+                <div class="form-group-login">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-input-login" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Demo Credentials: <strong>admin</strong> / <strong>password123</strong></p>
+                <p>Need help? <a href="#" onclick="showForgotPassword()">Forgot Password?</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main POS Application -->
+    <div id="mainApp" class="pos-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>POS System</h2>
+                <p>Logistics & Production</p>
+                <button class="btn btn-danger" onclick="logout()" style="margin-top: 10px; padding: 8px 16px; font-size: 0.8rem;">
+                    <i class="pi pi-sign-out"></i> Logout
+                </button>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="showSection('dashboard', event)">
+                    <i class="pi pi-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="showSection('orders', event)">
+                    <i class="pi pi-shopping-cart"></i>
+                    <span>Order Management</span>
+                </div>
+                <div class="nav-item" onclick="showSection('inventory', event)">
+                    <i class="pi pi-box"></i>
+                    <span>Inventory</span>
+                </div>
+                <div class="nav-item" onclick="showSection('staff', event)">
+                    <i class="pi pi-users"></i>
+                    <span>Staff Management</span>
+                </div>
+                <div class="nav-item" onclick="showSection('accounting', event)">
+                    <i class="pi pi-calculator"></i>
+                    <span>Accounting</span>
+                </div>
+                <div class="nav-item" onclick="showSection('crm', event)">
+                    <i class="pi pi-user"></i>
+                    <span>CRM</span>
+                </div>
+                <div class="nav-item" onclick="showSection('production', event)">
+                    <i class="pi pi-cog"></i>
+                    <span>Production</span>
+                </div>
+                <div class="nav-item" onclick="showSection('logistics', event)">
+                    <i class="pi pi-truck"></i>
+                    <span>Logistics</span>
+                </div>
+                <div class="nav-item" onclick="showSection('reports', event)">
+                    <i class="pi pi-chart-bar"></i>
+                    <span>Reports</span>
+                </div>
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <div id="dashboard" class="content-section">
+                <div class="content-header">
+                    <h1>Dashboard</h1>
+                    <p>Welcome to your POS management system overview</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">1,247</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number">₹5,67,890</div>
+                        <div class="stat-label">Revenue Today</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Pending Orders</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-number">23</div>
+                        <div class="stat-label">Low Stock Items</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Orders</h3>
+                        <button class="btn btn-primary" onclick="showSection('orders', event)">View All</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#ORD-2024-001</td>
+                                <td>ABC Distributors</td>
+                                <td>₹25,400</td>
+                                <td><span class="status-badge status-delivered">Delivered</span></td>
+                                <td>2024-09-25</td>
+                            </tr>
+                            <tr>
+                                <td>#ORD-2024-002</td>
+                                <td>XYZ Retail</td>
+                                <td>₹18,750</td>
+                                <td><span class="status-badge status-dispatched">Dispatched</span></td>
+                                <td>2024-09-25</td>
+                            </tr>
+                            <tr>
+                                <td>#ORD-2024-003</td>
+                                <td>Direct Customer</td>
+                                <td>₹12,300</td>
+                                <td><span class="status-badge status-inproduction">In Production</span></td>
+                                <td>2024-09-24</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="orders" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Order Management</h1>
+                    <p>Manage customer orders, distributor orders, and production orders</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">All Orders</h3>
+                        <button class="btn btn-primary" onclick="showModal('newOrderModal')">New Order</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Type</th>
+                                <th>Customer/Distributor</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="inventory" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Stock & Inventory Management</h1>
+                    <p>Real-time stock tracking and inventory management</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">2,458</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">23</div>
+                        <div class="stat-label">Low Stock</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Out of Stock</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number">₹12,45,678</div>
+                        <div class="stat-label">Total Inventory Value</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Inventory Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('addProductModal')">Add Product</button>
+                    </div>
+                    <div class="inventory-grid" id="inventoryGrid">
+                        </div>
+                </div>
+            </div>
+
+            <div id="staff" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Staff Management</h1>
+                    <p>Manage staff profiles, attendance, and performance</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">45</div>
+                        <div class="stat-label">Total Staff</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number">42</div>
+                        <div class="stat-label">Present Today</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">On Leave</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Attendance Rate</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Staff Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('addStaffModal')">Add Staff</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="accounting" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Accounting & Finance</h1>
+                    <p>Financial reports, billing, and tax management</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card green">
+                        <div class="stat-number">₹45,67,890</div>
+                        <div class="stat-label">Monthly Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">₹12,34,567</div>
+                        <div class="stat-label">Expenses</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">₹2,45,678</div>
+                        <div class="stat-label">Pending Payments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">₹33,33,223</div>
+                        <div class="stat-label">Net Profit</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Transactions</h3>
+                        <button class="btn btn-primary" onclick="showModal('addTransactionModal')">Add Transaction</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Transaction ID</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="crm" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Customer Relationship Management</h1>
+                    <p>Manage customer profiles, loyalty points, and relationships</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">1,245</div>
+                        <div class="stat-label">Total Customers</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number">892</div>
+                        <div class="stat-label">Active Customers</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">VIP Customers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">₹25,456</div>
+                        <div class="stat-label">Avg. Order Value</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Customer Overview</h3>
+                        <button class="btn btn-primary" onclick="showModal('addCustomerModal')">Add Customer</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Loyalty Points</th>
+                                <th>Last Order</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="production" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Production Management</h1>
+                    <p>Manage production orders, BOM, and work order tracking</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">45</div>
+                        <div class="stat-label">Active Work Orders</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number">28</div>
+                        <div class="stat-label">Completed Today</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Pending Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">85%</div>
+                        <div class="stat-label">Production Efficiency</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production Orders</h3>
+                        <button class="btn btn-primary" onclick="showModal('addProductionOrderModal')">New Production Order</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Work Order ID</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Started Date</th>
+                                <th>Expected Completion</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productionTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="logistics" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Logistics & Dispatch</h1>
+                    <p>Vehicle allocation, route optimization, and delivery tracking</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">25</div>
+                        <div class="stat-label">Active Vehicles</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-number">18</div>
+                        <div class="stat-label">On Route</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-number">45</div>
+                        <div class="stat-label">Pending Deliveries</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">92%</div>
+                        <div class="stat-label">On-Time Delivery</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Delivery Schedule</h3>
+                        <button class="btn btn-primary" onclick="showModal('scheduleDeliveryModal')">Schedule Delivery</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Delivery ID</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Vehicle</th>
+                                <th>Driver</th>
+                                <th>Status</th>
+                                <th>ETA</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logisticsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="reports" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Reports & Analytics</h1>
+                    <p>Comprehensive business intelligence and analytics</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Sales Performance</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Reports</h3>
+                    </div>
+                    <div class="dashboard-grid">
+                        <button class="btn btn-primary" onclick="generateReport('daily')">Daily Sales Report</button>
+                        <button class="btn btn-primary" onclick="generateReport('monthly')">Monthly Report</button>
+                        <button class="btn btn-primary" onclick="generateReport('inventory')">Inventory Report</button>
+                        <button class="btn btn-primary" onclick="generateReport('profit')">Profit & Loss</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="newOrderModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Order</h3>
+                <button class="close-modal" onclick="hideModal('newOrderModal')">&times;</button>
+            </div>
+            <form onsubmit="createOrder(event)">
+                <div class="form-group">
+                    <label class="form-label">Order Type</label>
+                    <select class="form-input" id="orderType" required>
+                        <option value="">Select Order Type</option>
+                        <option value="customer">Customer Order</option>
+                        <option value="distributor">Distributor Order</option>
+                        <option value="internal">Internal Order</option>
+                        <option value="production">Production Order</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer/Distributor</label>
+                    <input type="text" class="form-input" id="orderCustomer" placeholder="Enter customer name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Product</label>
+                    <input type="text" class="form-input" id="orderProduct" placeholder="Enter product name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" class="form-input" id="orderQuantity" placeholder="Enter quantity" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-input" id="orderAmount" placeholder="Enter amount" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Order</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addProductModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Product</h3>
+                <button class="close-modal" onclick="hideModal('addProductModal')">&times;</button>
+            </div>
+            <form onsubmit="addProduct(event)">
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" class="form-input" id="productName" placeholder="Enter product name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="productCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="raw-materials">Raw Materials</option>
+                        <option value="finished-goods">Finished Goods</option>
+                        <option value="packaging">Packaging Materials</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Stock</label>
+                    <input type="number" class="form-input" id="productStock" placeholder="Enter current stock" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Minimum Stock Level</label>
+                    <input type="number" class="form-input" id="productMinStock" placeholder="Enter minimum stock level" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Unit Price</label>
+                    <input type="number" step="0.01" class="form-input" id="productPrice" placeholder="Enter unit price" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Product</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addStaffModal" class="modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Staff Member</h3>
+                <button class="close-modal" onclick="hideModal('addStaffModal')">&times;</button>
+            </div>
+            <form onsubmit="addStaff(event)">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="staffName" placeholder="Enter full name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Employee ID</label>
+                    <input type="text" class="form-input" id="staffId" placeholder="Enter employee ID" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-input" id="staffRole" required>
+                        <option value="">Select Role</option>
+                        <option value="manager">Manager</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="operator">Operator</option>
+                        <option value="clerk">Clerk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select class="form-input" id="staffDepartment" required>
+                        <option value="">Select Department</option>
+                        <option value="production">Production</option>
+                        <option value="logistics">Logistics</option>
+                        <option value="sales">Sales</option>
+                        <option value="finance">Finance</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="staffEmail" placeholder="Enter email address" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="staffPhone" placeholder="Enter phone number" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Staff</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script>
+        // Mock Data
+        let orders = [
+            { id: 'ORD-2024-001', type: 'Customer', customer: 'ABC Distributors', amount: 25400, status: 'Delivered', date: '2024-09-25' },
+            { id: 'ORD-2024-002', type: 'Distributor', customer: 'XYZ Retail', amount: 18750, status: 'Dispatched', date: '2024-09-25' },
+            { id: 'ORD-2024-003', type: 'Customer', customer: 'Direct Customer', amount: 12300, status: 'In Production', date: '2024-09-24' },
+            { id: 'ORD-2024-004', type: 'Production', customer: 'Internal', amount: 35600, status: 'Pending', date: '2024-09-24' },
+            { id: 'ORD-2024-005', type: 'Internal', customer: 'Branch Transfer', amount: 8900, status: 'Cancelled', date: '2024-09-23' }
+        ];
+
+        let inventory = [
+            { name: 'Raw Material A', category: 'Raw Materials', stock: 500, minStock: 100, price: 25.50, location: 'Warehouse 1' },
+            { name: 'Product X', category: 'Finished Goods', stock: 75, minStock: 100, price: 155.00, location: 'Warehouse 2' },
+            { name: 'Packaging Box', category: 'Packaging', stock: 200, minStock: 50, price: 5.25, location: 'Warehouse 1' },
+            { name: 'Raw Material B', category: 'Raw Materials', stock: 25, minStock: 50, price: 45.75, location: 'Warehouse 3' },
+            { name: 'Product Y', category: 'Finished Goods', stock: 150, minStock: 80, price: 225.00, location: 'Warehouse 2' }
+        ];
+
+        let staff = [
+            { id: 'EMP001', name: 'John Smith', role: 'Manager', department: 'Production', status: 'Present', email: 'john.smith@company.com', phone: '+91-9876543210' },
+            { id: 'EMP002', name: 'Sarah Johnson', role: 'Supervisor', department: 'Logistics', status: 'Present', email: 'sarah.johnson@company.com', phone: '+91-9876543211' },
+            { id: 'EMP003', name: 'Mike Wilson', role: 'Operator', department: 'Production', status: 'On Leave', email: 'mike.wilson@company.com', phone: '+91-9876543212' },
+            { id: 'EMP004', name: 'Lisa Brown', role: 'Clerk', department: 'Finance', status: 'Present', email: 'lisa.brown@company.com', phone: '+91-9876543213' },
+            { id: 'EMP005', name: 'David Lee', role: 'Manager', department: 'Sales', status: 'Present', email: 'david.lee@company.com', phone: '+91-9876543214' }
+        ];
+
+        let customers = [
+            { id: 'CUST001', name: 'ABC Distributors', email: 'contact@abcdist.com', phone: '+91-9876543220', loyaltyPoints: 2500, lastOrder: '2024-09-25' },
+            { id: 'CUST002', name: 'XYZ Retail', email: 'orders@xyzretail.com', phone: '+91-9876543221', loyaltyPoints: 1800, lastOrder: '2024-09-24' },
+            { id: 'CUST003', name: 'Direct Customer 1', email: 'customer1@gmail.com', phone: '+91-9876543222', loyaltyPoints: 450, lastOrder: '2024-09-20' },
+            { id: 'CUST004', name: 'PQR Wholesale', email: 'info@pqrwholesale.com', phone: '+91-9876543223', loyaltyPoints: 3200, lastOrder: '2024-09-23' },
+            { id: 'CUST005', name: 'LMN Stores', email: 'purchase@lmnstores.com', phone: '+91-9876543224', loyaltyPoints: 980, lastOrder: '2024-09-22' }
+        ];
+
+        let transactions = [
+            { id: 'TXN001', date: '2024-09-25', type: 'Sale', amount: 25400, status: 'Completed' },
+            { id: 'TXN002', date: '2024-09-25', type: 'Purchase', amount: -12500, status: 'Completed' },
+            { id: 'TXN003', date: '2024-09-24', type: 'Sale', amount: 18750, status: 'Pending' },
+            { id: 'TXN004', date: '2024-09-24', type: 'Expense', amount: -3400, status: 'Completed' },
+            { id: 'TXN005', date: '2024-09-23', type: 'Sale', amount: 35600, status: 'Completed' }
+        ];
+
+        let productionOrders = [
+            { id: 'WO001', product: 'Product X', quantity: 100, status: 'In Progress', startDate: '2024-09-20', expectedCompletion: '2024-09-27' },
+            { id: 'WO002', product: 'Product Y', quantity: 200, status: 'Completed', startDate: '2024-09-18', expectedCompletion: '2024-09-25' },
+            { id: 'WO003', product: 'Product Z', quantity: 150, status: 'Pending', startDate: '2024-09-26', expectedCompletion: '2024-10-03' },
+            { id: 'WO004', product: 'Product A', quantity: 75, status: 'In Progress', startDate: '2024-09-22', expectedCompletion: '2024-09-29' }
+        ];
+
+        let deliveries = [
+            { id: 'DEL001', orderId: 'ORD-2024-001', customer: 'ABC Distributors', vehicle: 'TN-01-AB-1234', driver: 'Raj Kumar', status: 'In Transit', eta: '14:30' },
+            { id: 'DEL002', orderId: 'ORD-2024-002', customer: 'XYZ Retail', vehicle: 'TN-01-CD-5678', driver: 'Suresh Babu', status: 'Delivered', eta: 'Completed' },
+            { id: 'DEL003', orderId: 'ORD-2024-003', customer: 'Direct Customer', vehicle: 'TN-01-EF-9012', driver: 'Mohan Das', status: 'Scheduled', eta: '16:00' },
+            { id: 'DEL004', orderId: 'ORD-2024-004', customer: 'PQR Wholesale', vehicle: 'TN-01-GH-3456', driver: 'Kumar Singh', status: 'Loading', eta: '15:45' }
+        ];
+
+        // Navigation Functions
+        function showSection(sectionId, event) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update active nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            if (event && event.currentTarget) {
+                event.currentTarget.closest('.nav-item').classList.add('active');
+            }
+            
+            // Load section data
+            loadSectionData(sectionId);
+        }
+
+        function loadSectionData(sectionId) {
+            switch(sectionId) {
+                case 'orders':
+                    loadOrdersTable();
+                    break;
+                case 'inventory':
+                    loadInventoryGrid();
+                    break;
+                case 'staff':
+                    loadStaffTable();
+                    break;
+                case 'accounting':
+                    loadTransactionTable();
+                    break;
+                case 'crm':
+                    loadCustomerTable();
+                    break;
+                case 'production':
+                    loadProductionTable();
+                    break;
+                case 'logistics':
+                    loadLogisticsTable();
+                    break;
+                case 'reports':
+                    loadSalesChart();
+                    break;
+            }
+        }
+
+        // Modal Functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+
+        // Table Loading Functions
+        function loadOrdersTable() {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order.id}</td>
+                    <td>${order.type}</td>
+                    <td>${order.customer}</td>
+                    <td>₹${order.amount.toLocaleString()}</td>
+                    <td><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '')}">${order.status}</span></td>
+                    <td>${order.date}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewOrder('${order.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editOrder('${order.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadInventoryGrid() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = inventory.map(item => `
+                <div class="inventory-item ${item.stock <= item.minStock ? 'low-stock' : ''}">
+                    <h4>${item.name}</h4>
+                    <div class="inventory-details">
+                        <p><strong>Category:</strong> ${item.category}</p>
+                        <p><strong>Current Stock:</strong> ${item.stock} units</p>
+                        <p><strong>Min Stock:</strong> ${item.minStock} units</p>
+                        <p><strong>Unit Price:</strong> ₹${item.price}</p>
+                        <p><strong>Location:</strong> ${item.location}</p>
+                        ${item.stock <= item.minStock ? '<p style="color: #F44336;"><strong>⚠️ Low Stock Alert!</strong></p>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadStaffTable() {
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = staff.map(member => `
+                <tr>
+                    <td>${member.id}</td>
+                    <td>${member.name}</td>
+                    <td>${member.role}</td>
+                    <td>${member.department}</td>
+                    <td><span class="status-badge ${member.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${member.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewStaff('${member.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editStaff('${member.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadCustomerTable() {
+            const tbody = document.getElementById('customerTableBody');
+            tbody.innerHTML = customers.map(customer => `
+                <tr>
+                    <td>${customer.id}</td>
+                    <td>${customer.name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.loyaltyPoints}</td>
+                    <td>${customer.lastOrder}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewCustomer('${customer.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editCustomer('${customer.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadTransactionTable() {
+            const tbody = document.getElementById('transactionTableBody');
+            tbody.innerHTML = transactions.map(transaction => `
+                <tr>
+                    <td>${transaction.date}</td>
+                    <td>${transaction.id}</td>
+                    <td>${transaction.type}</td>
+                    <td style="color: ${transaction.amount > 0 ? '#4CAF50' : '#F44336'}">₹${Math.abs(transaction.amount).toLocaleString()}</td>
+                    <td><span class="status-badge ${transaction.status === 'Completed' ? 'status-delivered' : 'status-pending'}">${transaction.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewTransaction('${transaction.id}')">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadProductionTable() {
+            const tbody = document.getElementById('productionTableBody');
+            tbody.innerHTML = productionOrders.map(order => `
+                <tr>
+                    <td>${order.id}</td>
+                    <td>${order.product}</td>
+                    <td>${order.quantity}</td>
+                    <td><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '')}">${order.status}</span></td>
+                    <td>${order.startDate}</td>
+                    <td>${order.expectedCompletion}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="viewProductionOrder('${order.id}')">View</button>
+                        <button class="btn btn-success btn-sm" onclick="editProductionOrder('${order.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadLogisticsTable() {
+            const tbody = document.getElementById('logisticsTableBody');
+            tbody.innerHTML = deliveries.map(delivery => `
+                <tr>
+                    <td>${delivery.id}</td>
+                    <td>${delivery.orderId}</td>
+                    <td>${delivery.customer}</td>
+                    <td>${delivery.vehicle}</td>
+                    <td>${delivery.driver}</td>
+                    <td><span class="status-badge status-${delivery.status.toLowerCase().replace(/\s+/g, '')}">${delivery.status}</span></td>
+                    <td>${delivery.eta}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="trackDelivery('${delivery.id}')">Track</button>
+                        <button class="btn btn-success btn-sm" onclick="updateDelivery('${delivery.id}')">Update</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Chart Functions
+        function loadSalesChart() {
+            const ctx = document.getElementById('salesChart');
+            if (!ctx) return;
+            // Destroy existing chart instance if it exists to prevent errors
+            if (window.mySalesChart instanceof Chart) {
+                window.mySalesChart.destroy();
+            }
+            window.mySalesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                    datasets: [{
+                        label: 'Sales Revenue (₹ Lakhs)',
+                        data: [45, 52, 48, 61, 55, 67, 73, 69, 75],
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Form Handlers
+        function createOrder(event) {
+            event.preventDefault();
+            const newOrder = {
+                id: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
+                type: document.getElementById('orderType').value,
+                customer: document.getElementById('orderCustomer').value,
+                amount: parseFloat(document.getElementById('orderAmount').value),
+                status: 'Pending',
+                date: new Date().toISOString().split('T')[0]
+            };
+            orders.push(newOrder);
+            hideModal('newOrderModal');
+            if (document.getElementById('orders').classList.contains('hidden') === false) {
+                 loadOrdersTable();
+            }
+            alert('Order created successfully!');
+            event.target.reset();
+        }
+
+        function addProduct(event) {
+            event.preventDefault();
+            const newProduct = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                stock: parseInt(document.getElementById('productStock').value),
+                minStock: parseInt(document.getElementById('productMinStock').value),
+                price: parseFloat(document.getElementById('productPrice').value),
+                location: 'Warehouse 1' // Default location
+            };
+            inventory.push(newProduct);
+            hideModal('addProductModal');
+            if (document.getElementById('inventory').classList.contains('hidden') === false) {
+                loadInventoryGrid();
+            }
+            alert('Product added successfully!');
+            event.target.reset();
+        }
+
+        function addStaff(event) {
+            event.preventDefault();
+            const newStaff = {
+                id: document.getElementById('staffId').value,
+                name: document.getElementById('staffName').value,
+                role: document.getElementById('staffRole').value,
+                department: document.getElementById('staffDepartment').value,
+                status: 'Present',
+                email: document.getElementById('staffEmail').value,
+                phone: document.getElementById('staffPhone').value
+            };
+            staff.push(newStaff);
+            hideModal('addStaffModal');
+             if (document.getElementById('staff').classList.contains('hidden') === false) {
+                loadStaffTable();
+            }
+            alert('Staff member added successfully!');
+            event.target.reset();
+        }
+
+        // Action Functions (placeholders)
+        function viewOrder(orderId) { alert(`Viewing order: ${orderId}`); }
+        function editOrder(orderId) { alert(`Editing order: ${orderId}`); }
+        function viewStaff(staffId) { alert(`Viewing staff: ${staffId}`); }
+        function editStaff(staffId) { alert(`Editing staff: ${staffId}`); }
+        function viewCustomer(customerId) { alert(`Viewing customer: ${customerId}`); }
+        function editCustomer(customerId) { alert(`Editing customer: ${customerId}`); }
+        function viewTransaction(transactionId) { alert(`Viewing transaction: ${transactionId}`); }
+        function viewProductionOrder(orderId) { alert(`Viewing production order: ${orderId}`); }
+        function editProductionOrder(orderId) { alert(`Editing production order: ${orderId}`); }
+        function trackDelivery(deliveryId) { alert(`Tracking delivery: ${deliveryId}`); }
+        function updateDelivery(deliveryId) { alert(`Updating delivery: ${deliveryId}`); }
+
+        function generateReport(reportType) {
+            alert(`Generating ${reportType} report...`);
+        }
+
+        // Authentication System
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // Demo users database
+        const users = [
+            { username: 'admin', password: 'password123', role: 'Administrator', name: 'System Administrator' },
+            { username: 'manager', password: 'manager123', role: 'Manager', name: 'Production Manager' },
+            { username: 'staff', password: 'staff123', role: 'Staff', name: 'Staff Member' },
+            { username: 'demo', password: 'demo123', role: 'Demo User', name: 'Demo User' }
+        ];
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Clear previous messages
+            hideMessage('errorMessage');
+            hideMessage('successMessage');
+            
+            // Find user
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                isLoggedIn = true;
+                
+                showMessage('successMessage', `Welcome back, ${user.name}!`);
+                
+                // Save login status
+                saveLoginStatus();
+                
+                // Delay before showing main app for better UX
+                setTimeout(() => {
+                    showMainApp();
+                }, 1000);
+            } else {
+                showMessage('errorMessage', 'Invalid username or password. Please try again.');
+                // Clear password field
+                document.getElementById('password').value = '';
+            }
+        }
+
+        function showMessage(messageId, text) {
+            const messageElement = document.getElementById(messageId);
+            messageElement.textContent = text;
+            messageElement.classList.remove('hidden');
+        }
+
+        function hideMessage(messageId) {
+            document.getElementById(messageId).classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').classList.add('show');
+            
+            // Update sidebar header with user info
+            const sidebarHeader = document.querySelector('.sidebar-header');
+            const userInfo = document.createElement('p');
+            userInfo.style.marginTop = '5px';
+            userInfo.style.fontSize = '0.8rem';
+            userInfo.style.opacity = '0.9';
+            userInfo.innerHTML = `Welcome, <strong>${currentUser.name}</strong><br><small>${currentUser.role}</small>`;
+            sidebarHeader.appendChild(userInfo);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                isLoggedIn = false;
+                currentUser = null;
+                
+                // Clear saved login status
+                localStorage.removeItem('currentUser');
+                
+                // Hide main app and show login
+                document.getElementById('mainApp').classList.remove('show');
+                document.getElementById('loginScreen').style.display = 'flex';
+                
+                // Clear form
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                
+                // Clear messages
+                hideMessage('errorMessage');
+                hideMessage('successMessage');
+                
+                // Remove user info from sidebar
+                const userInfo = document.querySelector('.sidebar-header p:last-child');
+                if (userInfo && userInfo.innerHTML.includes('Welcome')) {
+                    userInfo.remove();
+                }
+            }
+        }
+
+        function showForgotPassword() {
+            alert('Please contact your system administrator to reset your password.\n\nDemo credentials:\nUsername: admin\nPassword: password123');
+        }
+
+        // Check if user is already logged in (for demo purposes)
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                isLoggedIn = true;
+                showMainApp();
+            }
+        }
+
+        // Save login status
+        function saveLoginStatus() {
+            if (currentUser) {
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+            // No need to load all tables, dashboard is shown by default
+        });
+
+        // Close modals when clicking outside or ESC key
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.add('hidden');
+            }
+        });
+
+        // Close modal with ESC key
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const openModals = document.querySelectorAll('.modal-overlay:not(.hidden)');
+                openModals.forEach(modal => modal.classList.add('hidden'));
+            }
+        });
+
+        // Prevent modal from closing when clicking inside modal content
+        document.querySelectorAll('.modal-content').forEach(modalContent => {
+            modalContent.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+</body>
+</html>
