@@ -635,6 +635,103 @@
                 font-size: 2rem;
             }
         }
+
+        /* Dropdown Actions */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-btn:hover {
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 160px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            right: 0;
+            top: 100%;
+            margin-top: 5px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+
+        .dropdown-content.show {
+            display: block;
+            animation: dropdownFadeIn 0.2s ease;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            color: #333;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #2196F3;
+        }
+
+        .dropdown-item.danger:hover {
+            background-color: #ffebee;
+            color: #f44336;
+        }
+
+        .dropdown-item.success:hover {
+            background-color: #e8f5e8;
+            color: #4caf50;
+        }
+
+        .dropdown-item.warning:hover {
+            background-color: #fff3e0;
+            color: #ff9800;
+        }
+
+        .dropdown-icon {
+            font-size: 0.875rem;
+        }
     </style>
     
     
@@ -3824,53 +3921,72 @@
         // Enhanced Table Loading Functions
         function loadOrdersTable() {
             const tbody = document.getElementById('ordersTableBody');
-            tbody.innerHTML = orders.map(order => `
-                <tr>
-                    <td><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
-                    <td>${order.id}</td>
-                    <td>${order.type}</td>
-                    <td>${order.customer}</td>
-                    <td>₹${order.amount.toLocaleString()}</td>
-                    <td><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '')}">${order.status}</span></td>
-                    <td><span class="status-badge ${order.priority === 'Urgent' ? 'status-cancelled' : order.priority === 'High' ? 'status-pending' : 'status-delivered'}">${order.priority}</span></td>
-                    <td>${order.date}</td>
-                    <td>${order.deliveryDate}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewOrder('${order.id}')">View</button>
-                        ${order.status === 'Pending' ? `<button class="btn btn-success btn-sm" onclick="approveOrder('${order.id}')">Approve</button>` : ''}
-                        ${order.status === 'Approved' ? `<button class="btn btn-success btn-sm" onclick="startProduction('${order.id}')">Start Production</button>` : ''}
-                        ${order.status === 'In Production' ? `<button class="btn btn-success btn-sm" onclick="dispatchOrder('${order.id}')">Dispatch</button>` : ''}
-                        <button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.id}')">Cancel</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = orders.map(order => {
+                // Create actions array based on order status
+                let actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewOrder('${order.id}')` }
+                ];
+                
+                if (order.status === 'Pending') {
+                    actions.push({ text: 'Approve', icon: 'pi-check', class: 'success', onclick: `approveOrder('${order.id}')` });
+                } else if (order.status === 'Approved') {
+                    actions.push({ text: 'Start Production', icon: 'pi-cog', class: 'success', onclick: `startProduction('${order.id}')` });
+                } else if (order.status === 'In Production') {
+                    actions.push({ text: 'Dispatch', icon: 'pi-truck', class: 'success', onclick: `dispatchOrder('${order.id}')` });
+                }
+                
+                actions.push({ text: 'Cancel', icon: 'pi-times', class: 'danger', onclick: `cancelOrder('${order.id}')` });
+                
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
+                        <td>${order.id}</td>
+                        <td>${order.type}</td>
+                        <td>${order.customer}</td>
+                        <td>₹${order.amount.toLocaleString()}</td>
+                        <td><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '')}">${order.status}</span></td>
+                        <td><span class="status-badge ${order.priority === 'Urgent' ? 'status-cancelled' : order.priority === 'High' ? 'status-pending' : 'status-delivered'}">${order.priority}</span></td>
+                        <td>${order.date}</td>
+                        <td>${order.deliveryDate}</td>
+                        <td>${createDropdownHTML(`order-${order.id}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
             
             updateOrderWorkflowStats();
         }
 
         function loadInventoryGrid() {
             const grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = inventory.map(item => `
-                <div class="inventory-item ${item.stock <= item.minStock ? 'low-stock' : ''}">
-                    <h4>${item.name}</h4>
-                    <div class="inventory-details">
-                        <p><strong>SKU:</strong> ${item.sku}</p>
-                        <p><strong>Category:</strong> ${item.category}</p>
-                        <p><strong>Current Stock:</strong> ${item.stock} units</p>
-                        <p><strong>Min Stock:</strong> ${item.minStock} units</p>
-                        <p><strong>Unit Price:</strong> ₹${item.price}</p>
-                        <p><strong>Location:</strong> ${item.location}</p>
-                        <p><strong>Supplier:</strong> ${item.supplier}</p>
-                        <p><strong>Barcode:</strong> ${item.barcode}</p>
-                        ${item.stock <= item.minStock ? '<p style="color: #F44336;"><strong>⚠️ Low Stock Alert!</strong></p>' : ''}
-                        <div style="margin-top: 10px;">
-                            <button class="btn btn-primary btn-sm" onclick="viewProduct('${item.name}')">View</button>
-                            <button class="btn btn-success btn-sm" onclick="adjustStock('${item.name}')">Adjust</button>
-                            <button class="btn btn-primary btn-sm" onclick="viewBatch('${item.name}')">Batches</button>
+            grid.innerHTML = inventory.map(item => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewProduct('${item.name}')` },
+                    { text: 'Adjust Stock', icon: 'pi-pencil', class: 'success', onclick: `adjustStock('${item.name}')` },
+                    { text: 'View Batches', icon: 'pi-list', onclick: `viewBatch('${item.name}')` },
+                    { text: 'Create PO', icon: 'pi-shopping-cart', class: 'warning', onclick: `createPurchaseOrder('${item.name}')` },
+                    { text: 'Reorder', icon: 'pi-refresh', class: 'success', onclick: `reorderProduct('${item.name}')` }
+                ];
+                
+                return `
+                    <div class="inventory-item ${item.stock <= item.minStock ? 'low-stock' : ''}">
+                        <h4>${item.name}</h4>
+                        <div class="inventory-details">
+                            <p><strong>SKU:</strong> ${item.sku}</p>
+                            <p><strong>Category:</strong> ${item.category}</p>
+                            <p><strong>Current Stock:</strong> ${item.stock} units</p>
+                            <p><strong>Min Stock:</strong> ${item.minStock} units</p>
+                            <p><strong>Unit Price:</strong> ₹${item.price}</p>
+                            <p><strong>Location:</strong> ${item.location}</p>
+                            <p><strong>Supplier:</strong> ${item.supplier}</p>
+                            <p><strong>Barcode:</strong> ${item.barcode}</p>
+                            ${item.stock <= item.minStock ? '<p style="color: #F44336;"><strong>⚠️ Low Stock Alert!</strong></p>' : ''}
+                            <div style="margin-top: 10px;">
+                                ${createDropdownHTML(`inventory-${item.name.replace(/\s+/g, '-')}`, actions)}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             
             updateInventoryStats();
             loadReorderAlerts();
@@ -3956,23 +4072,28 @@
 
         function loadStaffTable() {
             const tbody = document.getElementById('staffTableBody');
-            tbody.innerHTML = staff.map(member => `
-                <tr>
-                    <td>${member.id}</td>
-                    <td>${member.name}</td>
-                    <td>${member.role}</td>
-                    <td>${member.department}</td>
-                    <td>${member.shift}</td>
-                    <td><span class="status-badge ${member.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${member.status}</span></td>
-                    <td>${member.checkinTime || 'Not checked in'}</td>
-                    <td>${member.productivityScore}%</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewStaff('${member.id}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editStaff('${member.id}')">Edit</button>
-                        <button class="btn btn-primary btn-sm" onclick="viewAttendance('${member.id}')">Attendance</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = staff.map(member => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewStaff('${member.id}')` },
+                    { text: 'Edit', icon: 'pi-pencil', class: 'success', onclick: `editStaff('${member.id}')` },
+                    { text: 'Attendance', icon: 'pi-calendar', onclick: `viewAttendance('${member.id}')` },
+                    { text: 'Change Shift', icon: 'pi-clock', class: 'warning', onclick: `changeShift('${member.id}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${member.id}</td>
+                        <td>${member.name}</td>
+                        <td>${member.role}</td>
+                        <td>${member.department}</td>
+                        <td>${member.shift}</td>
+                        <td><span class="status-badge ${member.status === 'Present' ? 'status-delivered' : 'status-cancelled'}">${member.status}</span></td>
+                        <td>${member.checkinTime || 'Not checked in'}</td>
+                        <td>${member.productivityScore}%</td>
+                        <td>${createDropdownHTML(`staff-${member.id}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
             
             loadAttendanceTable();
             updateStaffStats();
@@ -4046,40 +4167,53 @@
 
         function loadCustomerTable() {
             const tbody = document.getElementById('customerTableBody');
-            tbody.innerHTML = customers.map(customer => `
-                <tr>
-                    <td>${customer.id}</td>
-                    <td>${customer.name}</td>
-                    <td>${customer.email}</td>
-                    <td>${customer.phone}</td>
-                    <td>${customer.loyaltyPoints}</td>
-                    <td>${customer.lastOrder}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewCustomer('${customer.id}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editCustomer('${customer.id}')">Edit</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = customers.map(customer => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewCustomer('${customer.id}')` },
+                    { text: 'Edit', icon: 'pi-pencil', class: 'success', onclick: `editCustomer('${customer.id}')` },
+                    { text: 'Orders', icon: 'pi-shopping-cart', onclick: `viewCustomerOrders('${customer.id}')` },
+                    { text: 'Add Points', icon: 'pi-star', class: 'warning', onclick: `addLoyaltyPoints('${customer.id}')` },
+                    { text: 'Send Email', icon: 'pi-envelope', onclick: `sendCustomerEmail('${customer.id}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${customer.id}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.email}</td>
+                        <td>${customer.phone}</td>
+                        <td>${customer.loyaltyPoints}</td>
+                        <td>${customer.lastOrder}</td>
+                        <td>${createDropdownHTML(`customer-${customer.id}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function loadTransactionTable() {
             const tbody = document.getElementById('transactionTableBody');
-            tbody.innerHTML = transactions.map(transaction => `
-                <tr>
-                    <td>${transaction.date}</td>
-                    <td>${transaction.id}</td>
-                    <td>${transaction.type}</td>
-                    <td>${transaction.description}</td>
-                    <td style="color: ${transaction.amount > 0 ? '#4CAF50' : '#F44336'}">${getCurrencySymbol(transaction.currency)}${Math.abs(transaction.amount).toLocaleString()}</td>
-                    <td>${transaction.currency}</td>
-                    <td>${getCurrencySymbol(transaction.currency)}${transaction.gst.toLocaleString()}</td>
-                    <td><span class="status-badge ${transaction.status === 'Completed' ? 'status-delivered' : 'status-pending'}">${transaction.status}</span></td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewTransaction('${transaction.id}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editTransaction('${transaction.id}')">Edit</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = transactions.map(transaction => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewTransaction('${transaction.id}')` },
+                    { text: 'Edit', icon: 'pi-pencil', class: 'success', onclick: `editTransaction('${transaction.id}')` },
+                    { text: 'Print', icon: 'pi-print', onclick: `printTransaction('${transaction.id}')` },
+                    { text: 'Duplicate', icon: 'pi-copy', class: 'warning', onclick: `duplicateTransaction('${transaction.id}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${transaction.date}</td>
+                        <td>${transaction.id}</td>
+                        <td>${transaction.type}</td>
+                        <td>${transaction.description}</td>
+                        <td style="color: ${transaction.amount > 0 ? '#4CAF50' : '#F44336'}">${getCurrencySymbol(transaction.currency)}${Math.abs(transaction.amount).toLocaleString()}</td>
+                        <td>${transaction.currency}</td>
+                        <td>${getCurrencySymbol(transaction.currency)}${transaction.gst.toLocaleString()}</td>
+                        <td><span class="status-badge ${transaction.status === 'Completed' ? 'status-delivered' : 'status-pending'}">${transaction.status}</span></td>
+                        <td>${createDropdownHTML(`transaction-${transaction.id}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
             
             loadReceivablesTable();
             loadPayablesTable();
@@ -5186,23 +5320,29 @@
         // Supplier Management Functions
         function loadSupplierTable() {
             const tbody = document.getElementById('supplierTableBody');
-            tbody.innerHTML = suppliers.map(supplier => `
-                <tr>
-                    <td>${supplier.id}</td>
-                    <td>${supplier.companyName}</td>
-                    <td>${supplier.contactPerson}</td>
-                    <td>${supplier.category}</td>
-                    <td>${'★'.repeat(Math.floor(supplier.rating))} ${supplier.rating}</td>
-                    <td><span class="status-badge ${getSupplierStatusClass(supplier.status)}">${supplier.status}</span></td>
-                    <td>${supplier.lastOrder}</td>
-                    <td>₹${supplier.totalValue.toLocaleString()}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewSupplier('${supplier.id}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editSupplier('${supplier.id}')">Edit</button>
-                        <button class="btn btn-primary btn-sm" onclick="rateSupplier('${supplier.id}')">Rate</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = suppliers.map(supplier => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewSupplier('${supplier.id}')` },
+                    { text: 'Edit', icon: 'pi-pencil', class: 'success', onclick: `editSupplier('${supplier.id}')` },
+                    { text: 'Rate', icon: 'pi-star', class: 'warning', onclick: `rateSupplier('${supplier.id}')` },
+                    { text: 'Create PO', icon: 'pi-shopping-cart', onclick: `createSupplierPO('${supplier.id}')` },
+                    { text: 'View Orders', icon: 'pi-list', onclick: `viewSupplierOrders('${supplier.id}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${supplier.id}</td>
+                        <td>${supplier.companyName}</td>
+                        <td>${supplier.contactPerson}</td>
+                        <td>${supplier.category}</td>
+                        <td>${'★'.repeat(Math.floor(supplier.rating))} ${supplier.rating}</td>
+                        <td><span class="status-badge ${getSupplierStatusClass(supplier.status)}">${supplier.status}</span></td>
+                        <td>${supplier.lastOrder}</td>
+                        <td>₹${supplier.totalValue.toLocaleString()}</td>
+                        <td>${createDropdownHTML(`supplier-${supplier.id}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
             
             loadPurchaseOrderTable();
             loadSettlementTable();
@@ -5212,60 +5352,78 @@
 
         function loadPurchaseOrderTable() {
             const tbody = document.getElementById('purchaseOrderTableBody');
-            tbody.innerHTML = purchaseOrders.map(po => `
-                <tr>
-                    <td>${po.poNumber}</td>
-                    <td>${po.supplier}</td>
-                    <td>${po.date}</td>
-                    <td>${po.items}</td>
-                    <td>₹${po.amount.toLocaleString()}</td>
-                    <td><span class="status-badge ${getPOStatusClass(po.status)}">${po.status}</span></td>
-                    <td>${po.expectedDelivery}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewPurchaseOrder('${po.poNumber}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editPurchaseOrder('${po.poNumber}')">Edit</button>
-                        <button class="btn btn-primary btn-sm" onclick="trackPurchaseOrder('${po.poNumber}')">Track</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = purchaseOrders.map(po => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewPurchaseOrder('${po.poNumber}')` },
+                    { text: 'Edit', icon: 'pi-pencil', class: 'success', onclick: `editPurchaseOrder('${po.poNumber}')` },
+                    { text: 'Track', icon: 'pi-map', onclick: `trackPurchaseOrder('${po.poNumber}')` },
+                    { text: 'Print', icon: 'pi-print', onclick: `printPurchaseOrder('${po.poNumber}')` },
+                    { text: 'Cancel', icon: 'pi-times', class: 'danger', onclick: `cancelPurchaseOrder('${po.poNumber}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${po.poNumber}</td>
+                        <td>${po.supplier}</td>
+                        <td>${po.date}</td>
+                        <td>${po.items}</td>
+                        <td>₹${po.amount.toLocaleString()}</td>
+                        <td><span class="status-badge ${getPOStatusClass(po.status)}">${po.status}</span></td>
+                        <td>${po.expectedDelivery}</td>
+                        <td>${createDropdownHTML(`po-${po.poNumber}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function loadSettlementTable() {
             const tbody = document.getElementById('settlementTableBody');
-            tbody.innerHTML = settlements.map(settlement => `
-                <tr>
-                    <td>${settlement.supplier}</td>
-                    <td>${settlement.invoiceNumber}</td>
-                    <td>₹${settlement.amount.toLocaleString()}</td>
-                    <td>${settlement.dueDate}</td>
-                    <td><span class="status-badge ${getSettlementStatusClass(settlement.status)}">${settlement.status}</span></td>
-                    <td>${settlement.paymentMethod}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewSettlement('${settlement.invoiceNumber}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="processSettlement('${settlement.invoiceNumber}')">Pay</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = settlements.map(settlement => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewSettlement('${settlement.invoiceNumber}')` },
+                    { text: 'Pay', icon: 'pi-money-bill', class: 'success', onclick: `processSettlement('${settlement.invoiceNumber}')` },
+                    { text: 'Print', icon: 'pi-print', onclick: `printSettlement('${settlement.invoiceNumber}')` },
+                    { text: 'Remind', icon: 'pi-bell', class: 'warning', onclick: `remindSupplier('${settlement.invoiceNumber}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${settlement.supplier}</td>
+                        <td>${settlement.invoiceNumber}</td>
+                        <td>₹${settlement.amount.toLocaleString()}</td>
+                        <td>${settlement.dueDate}</td>
+                        <td><span class="status-badge ${getSettlementStatusClass(settlement.status)}">${settlement.status}</span></td>
+                        <td>${settlement.paymentMethod}</td>
+                        <td>${createDropdownHTML(`settlement-${settlement.invoiceNumber}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function loadContractTable() {
             const tbody = document.getElementById('contractTableBody');
-            tbody.innerHTML = contracts.map(contract => `
-                <tr>
-                    <td>${contract.contractId}</td>
-                    <td>${contract.supplier}</td>
-                    <td>${contract.type}</td>
-                    <td>${contract.startDate}</td>
-                    <td>${contract.endDate}</td>
-                    <td>₹${contract.value.toLocaleString()}</td>
-                    <td><span class="status-badge ${getContractStatusClass(contract.status)}">${contract.status}</span></td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="viewContract('${contract.contractId}')">View</button>
-                        <button class="btn btn-success btn-sm" onclick="editContract('${contract.contractId}')">Edit</button>
-                        <button class="btn btn-primary btn-sm" onclick="renewContract('${contract.contractId}')">Renew</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = contracts.map(contract => {
+                const actions = [
+                    { text: 'View', icon: 'pi-eye', onclick: `viewContract('${contract.contractId}')` },
+                    { text: 'Edit', icon: 'pi-pencil', class: 'success', onclick: `editContract('${contract.contractId}')` },
+                    { text: 'Renew', icon: 'pi-refresh', class: 'warning', onclick: `renewContract('${contract.contractId}')` },
+                    { text: 'Print', icon: 'pi-print', onclick: `printContract('${contract.contractId}')` },
+                    { text: 'Terminate', icon: 'pi-times', class: 'danger', onclick: `terminateContract('${contract.contractId}')` }
+                ];
+                
+                return `
+                    <tr>
+                        <td>${contract.contractId}</td>
+                        <td>${contract.supplier}</td>
+                        <td>${contract.type}</td>
+                        <td>${contract.startDate}</td>
+                        <td>${contract.endDate}</td>
+                        <td>₹${contract.value.toLocaleString()}</td>
+                        <td><span class="status-badge ${getContractStatusClass(contract.status)}">${contract.status}</span></td>
+                        <td>${createDropdownHTML(`contract-${contract.contractId}`, actions)}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function updateSupplierStats() {
@@ -5626,6 +5784,59 @@
             alert(`Renew contract ${contractId} functionality would be implemented here`);
         }
 
+        // Additional dropdown action functions
+        function printTransaction(id) {
+            alert(`Print transaction ${id} functionality would be implemented here`);
+        }
+
+        function duplicateTransaction(id) {
+            alert(`Duplicate transaction ${id} functionality would be implemented here`);
+        }
+
+        function viewCustomerOrders(id) {
+            alert(`View customer orders for ${id} functionality would be implemented here`);
+        }
+
+        function addLoyaltyPoints(id) {
+            alert(`Add loyalty points for customer ${id} functionality would be implemented here`);
+        }
+
+        function sendCustomerEmail(id) {
+            alert(`Send email to customer ${id} functionality would be implemented here`);
+        }
+
+        function createSupplierPO(id) {
+            alert(`Create purchase order for supplier ${id} functionality would be implemented here`);
+        }
+
+        function viewSupplierOrders(id) {
+            alert(`View orders for supplier ${id} functionality would be implemented here`);
+        }
+
+        function printPurchaseOrder(poNumber) {
+            alert(`Print purchase order ${poNumber} functionality would be implemented here`);
+        }
+
+        function cancelPurchaseOrder(poNumber) {
+            alert(`Cancel purchase order ${poNumber} functionality would be implemented here`);
+        }
+
+        function printSettlement(invoiceNumber) {
+            alert(`Print settlement ${invoiceNumber} functionality would be implemented here`);
+        }
+
+        function remindSupplier(invoiceNumber) {
+            alert(`Remind supplier for ${invoiceNumber} functionality would be implemented here`);
+        }
+
+        function printContract(contractId) {
+            alert(`Print contract ${contractId} functionality would be implemented here`);
+        }
+
+        function terminateContract(contractId) {
+            alert(`Terminate contract ${contractId} functionality would be implemented here`);
+        }
+
         function viewProductionOrder(orderId) { alert(`Viewing production order: ${orderId}`); }
         function editProductionOrder(orderId) { alert(`Editing production order: ${orderId}`); }
         function trackDelivery(deliveryId) { alert(`Tracking delivery: ${deliveryId}`); }
@@ -5633,6 +5844,64 @@
 
         function generateReport(reportType) {
             alert(`Generating ${reportType} report...`);
+        }
+
+        // Dropdown Functions
+        function toggleDropdown(dropdownId) {
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-content.show').forEach(dropdown => {
+                if (dropdown.id !== dropdownId) {
+                    dropdown.classList.remove('show');
+                }
+            });
+            
+            // Toggle current dropdown
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-content.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Helper function to create dropdown HTML
+        function createDropdownHTML(id, actions) {
+            let dropdownHTML = `
+                <div class="dropdown">
+                    <button class="dropdown-btn" onclick="toggleDropdown('${id}')">
+                        Actions <i class="pi pi-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-content" id="${id}">
+            `;
+            
+            actions.forEach(action => {
+                const iconClass = action.icon || 'pi pi-eye';
+                const itemClass = action.class || '';
+                dropdownHTML += `
+                    <div class="dropdown-item ${itemClass}" onclick="${action.onclick}">
+                        <i class="pi ${iconClass} dropdown-icon"></i>
+                        ${action.text}
+                    </div>
+                `;
+            });
+            
+            dropdownHTML += `
+                    </div>
+                </div>
+            `;
+            
+            return dropdownHTML;
         }
 
         // Authentication System
