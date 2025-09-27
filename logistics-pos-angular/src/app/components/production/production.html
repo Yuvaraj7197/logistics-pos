@@ -1,0 +1,433 @@
+<div class="production-container">
+  <div class="content-header">
+    <h1>Production Management</h1>
+    <p>Comprehensive production management with manufacturing orders, quality control, production lines, and equipment tracking</p>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showAddOrder()">
+        <i class="pi pi-plus"></i>
+        Add Order
+      </button>
+      <button class="btn btn-success" (click)="showAddQualityCheck()">
+        <i class="pi pi-check-circle"></i>
+        Quality Check
+      </button>
+      <button class="btn btn-info" (click)="showProductionLineManagement()">
+        <i class="pi pi-cog"></i>
+        Production Lines
+      </button>
+      <button class="btn btn-warning" (click)="showEquipmentManagement()">
+        <i class="pi pi-wrench"></i>
+        Equipment
+      </button>
+      <button class="btn btn-secondary" (click)="showBatchTracking()">
+        <i class="pi pi-tags"></i>
+        Batch Tracking
+      </button>
+    </div>
+  </div>
+
+  <!-- Production Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Production Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="statusFilter" name="statusFilter">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select [(ngModel)]="priorityFilter" name="priorityFilter">
+            <option value="">All Priorities</option>
+            <option value="Urgent">Urgent</option>
+            <option value="High">High</option>
+            <option value="Normal">Normal</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Production Line</label>
+          <select [(ngModel)]="productionLineFilter" name="productionLineFilter">
+            <option value="">All Lines</option>
+            <option *ngFor="let line of productionLines" [value]="line.id">{{ line.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Production Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-file"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionStats().totalOrders }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-clock"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionStats().inProgress }}</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionStats().completed }}</div>
+        <div class="stat-label">Completed</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-hourglass"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionStats().pending }}</div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quality Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-shield"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getQualityStats().totalChecks }}</div>
+        <div class="stat-label">Total Checks</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getQualityStats().passed }}</div>
+        <div class="stat-label">Passed</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-times"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getQualityStats().failed }}</div>
+        <div class="stat-label">Failed</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getQualityStats().avgDefects | number:'1.1-1' }}</div>
+        <div class="stat-label">Avg Defects</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Production Line Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-cog"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionLineStats().activeLines }}</div>
+        <div class="stat-label">Active Lines</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-pause"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionLineStats().idleLines }}</div>
+        <div class="stat-label">Idle Lines</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-wrench"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionLineStats().maintenanceLines }}</div>
+        <div class="stat-label">Maintenance</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getProductionLineStats().avgEfficiency | number:'1.0-0' }}%</div>
+        <div class="stat-label">Avg Efficiency</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manufacturing Orders -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Manufacturing Orders</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportProductionData()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Batch Number</th>
+              <th>Production Line</th>
+              <th>Assigned To</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Estimated Hours</th>
+              <th>Actual Hours</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of getFilteredOrders()">
+              <td>{{ order.id }}</td>
+              <td>{{ order.productName }}</td>
+              <td>{{ order.quantity | number:'1.0-0' }}</td>
+              <td>{{ order.batchNumber }}</td>
+              <td>{{ order.productionLine }}</td>
+              <td>{{ order.assignedTo }}</td>
+              <td>{{ order.startDate }}</td>
+              <td>{{ order.endDate }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(order.status)">{{ order.status }}</span></td>
+              <td><span class="status-badge" [class]="getPriorityClass(order.priority)">{{ order.priority }}</span></td>
+              <td>{{ order.estimatedHours }}h</td>
+              <td>{{ order.actualHours }}h</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary" (click)="updateOrderStatus(order, 'In Progress')">
+                    <i class="pi pi-play"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success" (click)="updateOrderStatus(order, 'Completed')">
+                    <i class="pi pi-check"></i>
+                  </button>
+                  <button class="btn btn-sm btn-info">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quality Control -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Quality Control</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportQualityData()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>QC ID</th>
+              <th>Product</th>
+              <th>Batch Number</th>
+              <th>Test Date</th>
+              <th>Inspector</th>
+              <th>Status</th>
+              <th>Defects</th>
+              <th>Test Results</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let qc of qualityChecks">
+              <td>{{ qc.id }}</td>
+              <td>{{ qc.productName }}</td>
+              <td>{{ qc.batchNumber }}</td>
+              <td>{{ qc.testDate }}</td>
+              <td>{{ qc.inspector }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(qc.status)">{{ qc.status }}</span></td>
+              <td>{{ qc.defects }}</td>
+              <td>
+                <div class="test-results">
+                  <span *ngFor="let result of qc.testResults"
+                        class="test-result"
+                        [class.passed]="result.passed"
+                        [class.failed]="!result.passed">
+                    {{ result.testName }}: {{ result.result }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="pi pi-print"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Production Lines -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Production Lines</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Line ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Capacity</th>
+              <th>Current Order</th>
+              <th>Efficiency</th>
+              <th>Last Maintenance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of productionLines">
+              <td>{{ line.id }}</td>
+              <td>{{ line.name }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(line.status)">{{ line.status }}</span></td>
+              <td>{{ line.capacity | number:'1.0-0' }}</td>
+              <td>{{ line.currentOrder || 'None' }}</td>
+              <td>
+                <div class="efficiency-bar">
+                  <div class="efficiency-fill" [style.width.%]="line.efficiency"></div>
+                  <span>{{ line.efficiency }}%</span>
+                </div>
+              </td>
+              <td>{{ line.lastMaintenance }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="pi pi-wrench"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Equipment Management -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Equipment Management</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportEquipmentData()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Equipment ID</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Production Line</th>
+              <th>Efficiency</th>
+              <th>Last Maintenance</th>
+              <th>Next Maintenance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let eq of equipment">
+              <td>{{ eq.id }}</td>
+              <td>{{ eq.name }}</td>
+              <td>{{ eq.type }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(eq.status)">{{ eq.status }}</span></td>
+              <td>{{ eq.productionLine }}</td>
+              <td>
+                <div class="efficiency-bar">
+                  <div class="efficiency-fill" [style.width.%]="eq.efficiency"></div>
+                  <span>{{ eq.efficiency }}%</span>
+                </div>
+              </td>
+              <td>{{ eq.lastMaintenance }}</td>
+              <td>{{ eq.nextMaintenance }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="pi pi-wrench"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

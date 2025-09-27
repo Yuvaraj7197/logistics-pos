@@ -1,0 +1,254 @@
+<div class="staff-container">
+  <div class="content-header">
+    <h1>Staff Management</h1>
+    <p>Manage employees, attendance, and productivity</p>
+    <button class="btn btn-primary" (click)="showAddStaffModal()">
+      <i class="pi pi-plus"></i>
+      Add Staff
+    </button>
+  </div>
+
+  <!-- Staff Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ (staff$ | async)?.length || 0 }}</div>
+        <div class="stat-label">Total Staff</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getPresentStaffCount() }}</div>
+        <div class="stat-label">Present Today</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-calendar-times"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getOnLeaveStaffCount() }}</div>
+        <div class="stat-label">On Leave</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">95%</div>
+        <div class="stat-label">Avg Attendance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button class="action-btn" (click)="showAttendanceManagement()">
+      <i class="pi pi-calendar"></i>
+      <span>Attendance Management</span>
+    </button>
+    <button class="action-btn">
+      <i class="pi pi-chart-bar"></i>
+      <span>Productivity Reports</span>
+    </button>
+    <button class="action-btn">
+      <i class="pi pi-clock"></i>
+      <span>Shift Management</span>
+    </button>
+    <button class="action-btn">
+      <i class="pi pi-print"></i>
+      <span>Print Reports</span>
+    </button>
+  </div>
+
+  <!-- Staff Table -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Staff Directory</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Shift</th>
+              <th>Status</th>
+              <th>Check-in Time</th>
+              <th>Productivity</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let member of staff$ | async">
+              <td>{{ member.id }}</td>
+              <td>{{ member.name }}</td>
+              <td>{{ member.role }}</td>
+              <td>{{ member.department }}</td>
+              <td>{{ member.shift }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(member.status)">{{ member.status }}</span></td>
+              <td>{{ member.checkinTime || 'Not checked in' }}</td>
+              <td>{{ member.productivityScore }}%</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary" (click)="checkIn(member)" *ngIf="!member.checkinTime">
+                    <i class="pi pi-sign-in"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning" (click)="checkOut(member)" *ngIf="member.checkinTime && !member.checkoutTime">
+                    <i class="pi pi-sign-out"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Staff Modal -->
+  <div class="modal-overlay" [class.hidden]="!showAddModal" (click)="hideAddStaffModal()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add New Staff Member</h3>
+        <button class="close-modal" (click)="hideAddStaffModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="addStaff()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffId">Employee ID</label>
+              <input type="text" id="staffId" [(ngModel)]="newStaff.id" name="staffId" readonly>
+            </div>
+            <div class="form-group">
+              <label for="staffName">Full Name</label>
+              <input type="text" id="staffName" [(ngModel)]="newStaff.name" name="staffName" placeholder="Enter full name" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffRole">Role</label>
+              <select id="staffRole" [(ngModel)]="newStaff.role" name="staffRole" required>
+                <option value="">Select Role</option>
+                <option value="Manager">Manager</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Operator">Operator</option>
+                <option value="Technician">Technician</option>
+                <option value="Assistant">Assistant</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="staffDepartment">Department</label>
+              <select id="staffDepartment" [(ngModel)]="newStaff.department" name="staffDepartment" required>
+                <option value="">Select Department</option>
+                <option value="Production">Production</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Quality">Quality</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Administration">Administration</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffEmail">Email</label>
+              <input type="email" id="staffEmail" [(ngModel)]="newStaff.email" name="staffEmail" placeholder="Enter email" required>
+            </div>
+            <div class="form-group">
+              <label for="staffPhone">Phone</label>
+              <input type="tel" id="staffPhone" [(ngModel)]="newStaff.phone" name="staffPhone" placeholder="Enter phone number" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffShift">Shift</label>
+              <select id="staffShift" [(ngModel)]="newStaff.shift" name="staffShift" required>
+                <option value="">Select Shift</option>
+                <option value="Morning (6AM-2PM)">Morning (6AM-2PM)</option>
+                <option value="Afternoon (2PM-10PM)">Afternoon (2PM-10PM)</option>
+                <option value="Night (10PM-6AM)">Night (10PM-6AM)</option>
+                <option value="Flexible">Flexible</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="staffSalary">Salary</label>
+              <input type="number" id="staffSalary" [(ngModel)]="newStaff.salary" name="staffSalary" placeholder="Enter salary" min="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffBiometricId">Biometric ID</label>
+              <input type="text" id="staffBiometricId" [(ngModel)]="newStaff.biometricId" name="staffBiometricId" placeholder="Enter biometric ID">
+            </div>
+            <div class="form-group">
+              <label for="staffJoiningDate">Joining Date</label>
+              <input type="date" id="staffJoiningDate" [(ngModel)]="newStaff.joiningDate" name="staffJoiningDate" required>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-danger" (click)="hideAddStaffModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Staff Member</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Modal -->
+  <div class="modal-overlay" [class.hidden]="!showAttendanceModal" (click)="hideAttendanceModal()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Attendance Management</h3>
+        <button class="close-modal" (click)="hideAttendanceModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Employee Name</th>
+                <th>Check-in Time</th>
+                <th>Check-out Time</th>
+                <th>Hours Worked</th>
+                <th>Overtime</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let attendance of attendanceData">
+                <td>{{ attendance.employeeName }}</td>
+                <td>{{ attendance.checkinTime || 'Not checked in' }}</td>
+                <td>{{ attendance.checkoutTime || 'Not checked out' }}</td>
+                <td>{{ attendance.hoursWorked }} hrs</td>
+                <td>{{ attendance.overtime }} hrs</td>
+                <td><span class="status-badge" [class]="getStatusClass(attendance.status)">{{ attendance.status }}</span></td>
+                <td>
+                  <button class="btn btn-sm btn-primary">Manage</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

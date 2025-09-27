@@ -1,0 +1,418 @@
+<div class="crm-container">
+  <div class="content-header">
+    <h1>Customer Relationship Management</h1>
+    <p>Enhanced CRM with loyalty points system, customer profiles, reminders, and relationship tracking</p>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showAddCustomer()">
+        <i class="pi pi-plus"></i>
+        Add Customer
+      </button>
+      <button class="btn btn-success" (click)="showLoyaltyProgram()">
+        <i class="pi pi-star"></i>
+        Loyalty Program
+      </button>
+      <button class="btn btn-info" (click)="showCustomerReminder()">
+        <i class="pi pi-bell"></i>
+        Set Reminder
+      </button>
+    </div>
+  </div>
+
+  <!-- CRM Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>CRM Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Customer Segment</label>
+          <select [(ngModel)]="segmentFilter" name="segmentFilter">
+            <option value="">All Segments</option>
+            <option value="Premium">Premium</option>
+            <option value="Regular">Regular</option>
+            <option value="New">New</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="statusFilter" name="statusFilter">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="VIP">VIP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Loyalty Tier</label>
+          <select [(ngModel)]="loyaltyTierFilter" name="loyaltyTierFilter">
+            <option value="">All Tiers</option>
+            <option value="Gold">Gold (1000+)</option>
+            <option value="Silver">Silver (500-999)</option>
+            <option value="Bronze">Bronze (100-499)</option>
+            <option value="Basic">Basic (0-99)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getCustomerStats().totalCustomers }}</div>
+        <div class="stat-label">Total Customers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getCustomerStats().activeCustomers }}</div>
+        <div class="stat-label">Active Customers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-star"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getCustomerStats().premiumCustomers }}</div>
+        <div class="stat-label">Premium Customers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-heart"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getCustomerStats().avgSatisfaction | number:'1.1-1' }}</div>
+        <div class="stat-label">Avg Satisfaction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loyalty Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-star-fill"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLoyaltyStats().goldMembers }}</div>
+        <div class="stat-label">Gold Members</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-star"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLoyaltyStats().silverMembers }}</div>
+        <div class="stat-label">Silver Members</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLoyaltyStats().bronzeMembers }}</div>
+        <div class="stat-label">Bronze Members</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-coins"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLoyaltyStats().totalPoints | number:'1.0-0' }}</div>
+        <div class="stat-label">Total Points</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Directory -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Customer Directory</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportCustomers()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+        <button class="btn btn-success" (click)="showCustomerAnalytics()">
+          <i class="pi pi-chart-bar"></i>
+          Analytics
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Segment</th>
+              <th>Status</th>
+              <th>Loyalty Tier</th>
+              <th>Points</th>
+              <th>Total Spent</th>
+              <th>Last Order</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let customer of getFilteredCustomers()">
+              <td>{{ customer.id }}</td>
+              <td>{{ customer.name }}</td>
+              <td>{{ customer.email }}</td>
+              <td>{{ customer.phone }}</td>
+              <td><span class="status-badge" [class]="getSegmentClass(customer.segment)">{{ customer.segment }}</span></td>
+              <td><span class="status-badge" [class]="getStatusClass(customer.status)">{{ customer.status }}</span></td>
+              <td><span class="status-badge" [class]="getTierClass(customer.loyaltyTier)">{{ customer.loyaltyTier }}</span></td>
+              <td>{{ customer.loyaltyPoints | number:'1.0-0' }}</td>
+              <td>₹{{ customer.totalSpent | number:'1.0-0' }}</td>
+              <td>{{ customer.lastOrderDate }}</td>
+              <td>{{ customer.satisfactionRating | number:'1.1-1' }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-info">
+                    <i class="pi pi-star"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Customer Modal -->
+  <div class="modal-overlay" [class.hidden]="!showAddCustomerModal" (click)="hideAddCustomer()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add New Customer</h3>
+        <button class="close-modal" (click)="hideAddCustomer()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="addCustomer()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customerId">Customer ID</label>
+              <input type="text" id="customerId" [(ngModel)]="newCustomer.id" name="customerId" readonly>
+            </div>
+            <div class="form-group">
+              <label for="customerName">Full Name</label>
+              <input type="text" id="customerName" [(ngModel)]="newCustomer.name" name="customerName" placeholder="Enter full name" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customerEmail">Email</label>
+              <input type="email" id="customerEmail" [(ngModel)]="newCustomer.email" name="customerEmail" placeholder="Enter email" required>
+            </div>
+            <div class="form-group">
+              <label for="customerPhone">Phone</label>
+              <input type="tel" id="customerPhone" [(ngModel)]="newCustomer.phone" name="customerPhone" placeholder="Enter phone number" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="customerAddress">Address</label>
+            <textarea id="customerAddress" [(ngModel)]="newCustomer.address" name="customerAddress" placeholder="Enter complete address" rows="3"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customerSegment">Segment</label>
+              <select id="customerSegment" [(ngModel)]="newCustomer.segment" name="customerSegment" required>
+                <option value="Regular">Regular</option>
+                <option value="Premium">Premium</option>
+                <option value="New">New</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="customerStatus">Status</label>
+              <select id="customerStatus" [(ngModel)]="newCustomer.status" name="customerStatus" required>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="VIP">VIP</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="customerNotes">Notes</label>
+            <textarea id="customerNotes" [(ngModel)]="newCustomer.notes" name="customerNotes" placeholder="Enter customer notes" rows="3"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-danger" (click)="hideAddCustomer()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Customer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loyalty Program Modal -->
+  <div class="modal-overlay" [class.hidden]="!showLoyaltyModal" (click)="hideLoyaltyModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Loyalty Program Management</h3>
+        <button class="close-modal" (click)="hideLoyaltyModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="loyalty-program">
+          <h4>{{ loyaltyProgram.name }}</h4>
+          <p>{{ loyaltyProgram.description }}</p>
+          <p><strong>Points per Rupee:</strong> {{ loyaltyProgram.pointsPerRupee }}</p>
+
+          <h5>Loyalty Tiers</h5>
+          <div class="tiers-list">
+            <div *ngFor="let tier of loyaltyProgram.tiers" class="tier-card">
+              <div class="tier-header">
+                <h6>{{ tier.name }}</h6>
+                <span class="tier-discount">{{ tier.discount }}% Discount</span>
+              </div>
+              <p><strong>Minimum Points:</strong> {{ tier.minPoints }}</p>
+              <div class="tier-benefits">
+                <strong>Benefits:</strong>
+                <ul>
+                  <li *ngFor="let benefit of tier.benefits">{{ benefit }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Reminder Modal -->
+  <div class="modal-overlay" [class.hidden]="!showReminderModal" (click)="hideReminderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Set Customer Reminder</h3>
+        <button class="close-modal" (click)="hideReminderModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="reminderCustomer">Customer</label>
+            <select id="reminderCustomer" name="reminderCustomer" required>
+              <option value="">Select Customer</option>
+              <option *ngFor="let customer of customers" [value]="customer.id">{{ customer.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reminderType">Reminder Type</label>
+            <select id="reminderType" name="reminderType" required>
+              <option value="">Select Type</option>
+              <option value="Follow Up">Follow Up</option>
+              <option value="Payment Due">Payment Due</option>
+              <option value="Order Status">Order Status</option>
+              <option value="Loyalty Points">Loyalty Points</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reminderDate">Reminder Date</label>
+            <input type="date" id="reminderDate" name="reminderDate" required>
+          </div>
+          <div class="form-group">
+            <label for="reminderMessage">Message</label>
+            <textarea id="reminderMessage" name="reminderMessage" rows="4" placeholder="Enter reminder message"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-danger" (click)="hideReminderModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Set Reminder</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Analytics Modal -->
+  <div class="modal-overlay" [class.hidden]="!showAnalyticsModal" (click)="hideAnalyticsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Customer Analytics</h3>
+        <button class="close-modal" (click)="hideAnalyticsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="analytics-content">
+          <div class="analytics-section">
+            <h4>Customer Segmentation</h4>
+            <div class="segmentation-chart">
+              <div class="segment-item">
+                <span class="segment-label">Premium</span>
+                <div class="segment-bar">
+                  <div class="segment-fill" style="width: 25%"></div>
+                </div>
+                <span class="segment-value">25%</span>
+              </div>
+              <div class="segment-item">
+                <span class="segment-label">Regular</span>
+                <div class="segment-bar">
+                  <div class="segment-fill" style="width: 50%"></div>
+                </div>
+                <span class="segment-value">50%</span>
+              </div>
+              <div class="segment-item">
+                <span class="segment-label">New</span>
+                <div class="segment-bar">
+                  <div class="segment-fill" style="width: 20%"></div>
+                </div>
+                <span class="segment-value">20%</span>
+              </div>
+              <div class="segment-item">
+                <span class="segment-label">Inactive</span>
+                <div class="segment-bar">
+                  <div class="segment-fill" style="width: 5%"></div>
+                </div>
+                <span class="segment-value">5%</span>
+              </div>
+            </div>
+          </div>
+          <div class="analytics-section">
+            <h4>Loyalty Distribution</h4>
+            <div class="loyalty-distribution">
+              <div class="loyalty-item">
+                <i class="pi pi-star-fill"></i>
+                <span>Gold: {{ getLoyaltyStats().goldMembers }}</span>
+              </div>
+              <div class="loyalty-item">
+                <i class="pi pi-star"></i>
+                <span>Silver: {{ getLoyaltyStats().silverMembers }}</span>
+              </div>
+              <div class="loyalty-item">
+                <i class="pi pi-circle"></i>
+                <span>Bronze: {{ getLoyaltyStats().bronzeMembers }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

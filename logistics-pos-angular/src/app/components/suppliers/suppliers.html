@@ -1,0 +1,272 @@
+<div class="suppliers-container">
+  <div class="content-header">
+    <h1>Supplier & Vendor Management</h1>
+    <p>Comprehensive supplier management with purchase orders, settlements, and vendor relationships</p>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showAddSupplier()">
+        <i class="pi pi-plus"></i>
+        Add Supplier
+      </button>
+      <button class="btn btn-success" (click)="showCreatePurchaseOrder()">
+        <i class="pi pi-shopping-cart"></i>
+        Create PO
+      </button>
+      <button class="btn btn-info" (click)="showSupplierSettlement()">
+        <i class="pi pi-money-bill"></i>
+        Settlement
+      </button>
+    </div>
+  </div>
+
+  <!-- Supplier Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Supplier Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select [(ngModel)]="categoryFilter" name="categoryFilter">
+            <option value="">All Categories</option>
+            <option value="Raw Materials">Raw Materials</option>
+            <option value="Packaging">Packaging</option>
+            <option value="Equipment">Equipment</option>
+            <option value="Services">Services</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="statusFilter" name="statusFilter">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Preferred">Preferred</option>
+            <option value="Blacklisted">Blacklisted</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Rating</label>
+          <select [(ngModel)]="ratingFilter" name="ratingFilter">
+            <option value="">All Ratings</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-building"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getSupplierStats().totalSuppliers }}</div>
+        <div class="stat-label">Total Suppliers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getSupplierStats().activeSuppliers }}</div>
+        <div class="stat-label">Active Suppliers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-star"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getSupplierStats().preferredSuppliers }}</div>
+        <div class="stat-label">Preferred Suppliers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-star-fill"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getSupplierStats().avgRating | number:'1.1-1' }}</div>
+        <div class="stat-label">Avg Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchase Order Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-file"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getPurchaseOrderStats().totalOrders }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-clock"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getPurchaseOrderStats().pendingOrders }}</div>
+        <div class="stat-label">Pending Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getPurchaseOrderStats().deliveredOrders }}</div>
+        <div class="stat-label">Delivered Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-money-bill"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">₹{{ getPurchaseOrderStats().totalValue | number:'1.0-0' }}</div>
+        <div class="stat-label">Total Value</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier Directory -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Supplier Directory</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportSuppliers()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+        <button class="btn btn-success" (click)="showSupplierAnalytics()">
+          <i class="pi pi-chart-bar"></i>
+          Analytics
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Supplier ID</th>
+              <th>Name</th>
+              <th>Contact Person</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Rating</th>
+              <th>Total Orders</th>
+              <th>Total Amount</th>
+              <th>Last Order</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let supplier of getFilteredSuppliers()">
+              <td>{{ supplier.id }}</td>
+              <td>{{ supplier.name }}</td>
+              <td>{{ supplier.contactPerson }}</td>
+              <td>{{ supplier.email }}</td>
+              <td>{{ supplier.phone }}</td>
+              <td>{{ supplier.category }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(supplier.status)">{{ supplier.status }}</span></td>
+              <td>
+                <div class="rating">
+                  <i *ngFor="let star of [1,2,3,4,5]"
+                      class="pi"
+                      [class.pi-star-fill]="star <= supplier.rating"
+                      [class.pi-star]="star > supplier.rating">
+                  </i>
+                </div>
+              </td>
+              <td>{{ supplier.totalOrders }}</td>
+              <td>₹{{ supplier.totalAmount | number:'1.0-0' }}</td>
+              <td>{{ supplier.lastOrderDate }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-info">
+                    <i class="pi pi-shopping-cart"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchase Orders -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Purchase Orders</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportPurchaseOrders()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>PO ID</th>
+              <th>Supplier</th>
+              <th>Order Date</th>
+              <th>Expected Date</th>
+              <th>Status</th>
+              <th>Total Amount</th>
+              <th>Items</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let po of purchaseOrders">
+              <td>{{ po.id }}</td>
+              <td>{{ po.supplierName }}</td>
+              <td>{{ po.orderDate }}</td>
+              <td>{{ po.expectedDate }}</td>
+              <td><span class="status-badge" [class]="getOrderStatusClass(po.status)">{{ po.status }}</span></td>
+              <td>₹{{ po.totalAmount | number:'1.0-0' }}</td>
+              <td>{{ po.items.length }} items</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="pi pi-print"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,389 @@
+<div class="orders-container">
+  <div class="content-header">
+    <h1>Order Management</h1>
+    <p>Manage customer orders, purchase orders, and production orders</p>
+    <button class="btn btn-primary" (click)="showAddOrderModal()">
+      <i class="pi pi-plus"></i>
+      New Order
+    </button>
+  </div>
+
+  <!-- Order Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-shopping-cart"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ (orders$ | async)?.length || 0 }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-clock"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getPendingOrdersCount() }}</div>
+        <div class="stat-label">Pending Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getDeliveredOrdersCount() }}</div>
+        <div class="stat-label">Delivered Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-money-bill"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">₹{{ getTotalOrdersValue() | number:'1.0-0' }}</div>
+        <div class="stat-label">Total Value</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Order Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Order Type</label>
+          <select [(ngModel)]="typeFilter" name="typeFilter">
+            <option value="">All Types</option>
+            <option value="Customer">Customer</option>
+            <option value="Purchase">Purchase</option>
+            <option value="Production">Production</option>
+            <option value="Internal">Internal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="statusFilter" name="statusFilter">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="In Production">In Production</option>
+            <option value="Dispatched">Dispatched</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select [(ngModel)]="priorityFilter" name="priorityFilter">
+            <option value="">All Priorities</option>
+            <option value="Urgent">Urgent</option>
+            <option value="High">High</option>
+            <option value="Normal">Normal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Workflow Status -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Order Workflow Status</h3>
+    </div>
+    <div class="card-body">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">{{ getPendingApprovalCount() }}</div>
+          <div class="stat-label">Pending Approval</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-number">{{ getInProductionCount() }}</div>
+          <div class="stat-label">In Production</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getDispatchedCount() }}</div>
+          <div class="stat-label">Dispatched</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-number">{{ getDeliveredCount() }}</div>
+          <div class="stat-label">Delivered</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="card">
+    <div class="card-header">
+      <h3>All Orders</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportOrders()">Export</button>
+        <button class="btn btn-success" (click)="bulkApproveOrders()">Bulk Approve</button>
+        <button class="btn btn-info" (click)="showReturnRefundModal()">Process Return</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAllOrders"></th>
+              <th>Order ID</th>
+              <th>Type</th>
+              <th>Customer/Distributor</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Date</th>
+              <th>Delivery Date</th>
+              <th>Payment Terms</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders$ | async">
+              <td><input type="checkbox" [value]="order.id"></td>
+              <td>{{ order.id }}</td>
+              <td>{{ order.type }}</td>
+              <td>{{ order.customer }}</td>
+              <td>₹{{ order.total | number:'1.0-0' }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(order.status)">{{ order.status }}</span></td>
+              <td><span class="status-badge" [class]="getPriorityClass(order.priority)">{{ order.priority }}</span></td>
+              <td>{{ order.date }}</td>
+              <td>{{ order.deliveryDate }}</td>
+              <td>{{ order.paymentTerms }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary" (click)="showOrderDetails(order)">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success" (click)="updateOrderStatus(order, 'Delivered')">
+                    <i class="pi pi-check"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteOrder(order)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Order Modal -->
+  <div class="modal-overlay" [class.hidden]="!showAddModal" (click)="hideAddOrderModal()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add New Order</h3>
+        <button class="close-modal" (click)="hideAddOrderModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="addOrder()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orderId">Order ID</label>
+              <input type="text" id="orderId" [(ngModel)]="newOrder.id" name="orderId" readonly>
+            </div>
+            <div class="form-group">
+              <label for="orderType">Order Type</label>
+              <select id="orderType" [(ngModel)]="newOrder.type" name="orderType" required>
+                <option value="Customer">Customer Order</option>
+                <option value="Distributor">Distributor Order</option>
+                <option value="Internal">Internal Order</option>
+                <option value="Production">Production Order</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orderPriority">Priority</label>
+              <select id="orderPriority" [(ngModel)]="newOrder.priority" name="orderPriority" required>
+                <option value="Normal">Normal</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="customer">Customer/Distributor</label>
+              <select id="customer" [(ngModel)]="newOrder.customer" name="customer" required>
+                <option value="">Select Customer/Distributor</option>
+                <option value="ABC Distributors">ABC Distributors</option>
+                <option value="XYZ Retail">XYZ Retail</option>
+                <option value="Direct Customer">Direct Customer</option>
+                <option value="PQR Wholesale">PQR Wholesale</option>
+                <option value="LMN Stores">LMN Stores</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orderDate">Order Date</label>
+              <input type="date" id="orderDate" [(ngModel)]="newOrder.date" name="orderDate" required>
+            </div>
+            <div class="form-group">
+              <label for="deliveryDate">Expected Delivery Date</label>
+              <input type="date" id="deliveryDate" [(ngModel)]="newOrder.deliveryDate" name="deliveryDate" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paymentTerms">Payment Terms</label>
+              <select id="paymentTerms" [(ngModel)]="newOrder.paymentTerms" name="paymentTerms" required>
+                <option value="COD">Cash on Delivery</option>
+                <option value="Net15">Net 15 Days</option>
+                <option value="Net30">Net 30 Days</option>
+                <option value="Advance">Advance Payment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="instructions">Special Instructions</label>
+              <textarea id="instructions" [(ngModel)]="newOrder.instructions" name="instructions" placeholder="Any special instructions or notes" rows="3"></textarea>
+            </div>
+          </div>
+
+          <!-- Order Items -->
+          <div class="order-items-section">
+            <h4>Order Items</h4>
+            <div class="add-item-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Product</label>
+                  <input type="text" [(ngModel)]="newOrderItem.product" name="product" placeholder="Product name">
+                </div>
+                <div class="form-group">
+                  <label>Quantity</label>
+                  <input type="number" [(ngModel)]="newOrderItem.quantity" name="quantity" placeholder="Qty" min="1">
+                </div>
+                <div class="form-group">
+                  <label>Price</label>
+                  <input type="number" step="0.01" [(ngModel)]="newOrderItem.price" name="price" placeholder="Price" min="0">
+                </div>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn btn-primary" (click)="addOrderItem()">Add Item</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="items-list" *ngIf="newOrder.items.length > 0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of newOrder.items; let i = index">
+                    <td>{{ item.product }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price }}</td>
+                    <td>₹{{ item.total }}</td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-danger" (click)="removeOrderItem(i)">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th colspan="3">Total</th>
+                    <th>₹{{ newOrder.total }}</th>
+                    <th></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-danger" (click)="hideAddOrderModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="newOrder.items.length === 0">Create Order</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Order Modal -->
+  <div class="modal-overlay" [class.hidden]="!showViewModal" (click)="hideViewModal()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Order Details - {{ selectedOrder?.id }}</h3>
+        <button class="close-modal" (click)="hideViewModal()">&times;</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedOrder">
+        <div class="order-details">
+          <div class="detail-row">
+            <strong>Customer:</strong> {{ selectedOrder.customer }}
+          </div>
+          <div class="detail-row">
+            <strong>Type:</strong> {{ selectedOrder.type }}
+          </div>
+          <div class="detail-row">
+            <strong>Priority:</strong> <span class="status-badge" [class]="getPriorityClass(selectedOrder.priority)">{{ selectedOrder.priority }}</span>
+          </div>
+          <div class="detail-row">
+            <strong>Date:</strong> {{ selectedOrder.date }}
+          </div>
+          <div class="detail-row">
+            <strong>Delivery Date:</strong> {{ selectedOrder.deliveryDate }}
+          </div>
+          <div class="detail-row">
+            <strong>Payment Terms:</strong> {{ selectedOrder.paymentTerms }}
+          </div>
+          <div class="detail-row">
+            <strong>Status:</strong> <span class="status-badge" [class]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span>
+          </div>
+          <div class="detail-row">
+            <strong>Total:</strong> ₹{{ selectedOrder.total | number:'1.0-0' }}
+          </div>
+          <div class="detail-row" *ngIf="selectedOrder.instructions">
+            <strong>Instructions:</strong> {{ selectedOrder.instructions }}
+          </div>
+        </div>
+
+        <div class="order-items">
+          <h4>Order Items</h4>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td>{{ item.product }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>₹{{ item.total }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3">Total</th>
+                <th>₹{{ selectedOrder.total }}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

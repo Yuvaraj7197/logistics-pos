@@ -1,0 +1,274 @@
+<div class="reports-container">
+  <div class="content-header">
+    <h1>Reports & Analytics</h1>
+    <p>Comprehensive reporting and analytics dashboard with customizable reports and performance metrics</p>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showSalesReport()">
+        <i class="pi pi-chart-line"></i>
+        Sales Report
+      </button>
+      <button class="btn btn-success" (click)="showInventoryReport()">
+        <i class="pi pi-box"></i>
+        Inventory Report
+      </button>
+      <button class="btn btn-info" (click)="showFinancialReport()">
+        <i class="pi pi-money-bill"></i>
+        Financial Report
+      </button>
+      <button class="btn btn-warning" (click)="showPerformanceReport()">
+        <i class="pi pi-chart-bar"></i>
+        Performance Report
+      </button>
+      <button class="btn btn-secondary" (click)="showCustomReport()">
+        <i class="pi pi-cog"></i>
+        Custom Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Report Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Report Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Report Type</label>
+          <select [(ngModel)]="reportTypeFilter" name="reportTypeFilter">
+            <option value="">All Types</option>
+            <option value="Sales">Sales</option>
+            <option value="Inventory">Inventory</option>
+            <option value="Financial">Financial</option>
+            <option value="Performance">Performance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="statusFilter" name="statusFilter">
+            <option value="">All Status</option>
+            <option value="Generated">Generated</option>
+            <option value="Pending">Pending</option>
+            <option value="Failed">Failed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date Range</label>
+          <select [(ngModel)]="dateFilter" name="dateFilter">
+            <option value="">All Dates</option>
+            <option value="Today">Today</option>
+            <option value="This Week">This Week</option>
+            <option value="This Month">This Month</option>
+            <option value="This Quarter">This Quarter</option>
+            <option value="This Year">This Year</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-file"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getReportStats().totalReports }}</div>
+        <div class="stat-label">Total Reports</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getReportStats().generatedReports }}</div>
+        <div class="stat-label">Generated</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-clock"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getReportStats().pendingReports }}</div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-hourglass"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getReportStats().avgGenerationTime }}m</div>
+        <div class="stat-label">Avg Generation Time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Overview -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-money-bill"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">₹{{ getAnalyticsStats().totalRevenue | number:'1.0-0' }}</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-shopping-cart"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getAnalyticsStats().totalOrders }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getAnalyticsStats().totalCustomers }}</div>
+        <div class="stat-label">Total Customers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getAnalyticsStats().avgGrowth | number:'1.0-0' }}%</div>
+        <div class="stat-label">Avg Growth Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quarterly Analytics -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Quarterly Analytics</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Revenue</th>
+              <th>Orders</th>
+              <th>Customers</th>
+              <th>Products</th>
+              <th>Growth Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of analyticsData">
+              <td>{{ data.period }}</td>
+              <td>₹{{ data.revenue | number:'1.0-0' }}</td>
+              <td>{{ data.orders }}</td>
+              <td>{{ data.customers }}</td>
+              <td>{{ data.products }}</td>
+              <td>
+                <span class="growth-indicator" [class.positive]="data.growth > 0" [class.negative]="data.growth < 0">
+                  {{ data.growth > 0 ? '+' : '' }}{{ data.growth }}%
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generated Reports -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Generated Reports</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Date Range</th>
+              <th>Generated Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of getFilteredReports()">
+              <td>{{ report.id }}</td>
+              <td>{{ report.name }}</td>
+              <td><span class="status-badge" [class]="getTypeClass(report.type)">{{ report.type }}</span></td>
+              <td>{{ report.dateRange }}</td>
+              <td>{{ report.generatedDate }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(report.status)">{{ report.status }}</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary" (click)="exportReport(report)">
+                    <i class="pi pi-download"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-info">
+                    <i class="pi pi-print"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="pi pi-share"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Quick Actions</h3>
+    </div>
+    <div class="card-body">
+      <div class="quick-actions">
+        <button class="btn btn-primary">
+          <i class="pi pi-calendar"></i>
+          Schedule Report
+        </button>
+        <button class="btn btn-success">
+          <i class="pi pi-download"></i>
+          Export All
+        </button>
+        <button class="btn btn-info">
+          <i class="pi pi-refresh"></i>
+          Refresh Data
+        </button>
+        <button class="btn btn-warning">
+          <i class="pi pi-cog"></i>
+          Report Settings
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

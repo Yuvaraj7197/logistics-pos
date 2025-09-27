@@ -1,0 +1,336 @@
+<div class="logistics-container">
+  <div class="content-header">
+    <h1>Logistics & Dispatch Management</h1>
+    <p>Comprehensive delivery management with vehicle tracking, driver assignment, and route optimization</p>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showScheduleDelivery()">
+        <i class="pi pi-calendar-plus"></i>
+        Schedule Delivery
+      </button>
+      <button class="btn btn-success" (click)="showVehicleManagement()">
+        <i class="pi pi-car"></i>
+        Vehicle Management
+      </button>
+      <button class="btn btn-info" (click)="showDriverManagement()">
+        <i class="pi pi-user"></i>
+        Driver Management
+      </button>
+      <button class="btn btn-warning" (click)="showRouteOptimization()">
+        <i class="pi pi-map"></i>
+        Route Optimization
+      </button>
+    </div>
+  </div>
+
+  <!-- Logistics Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Delivery Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="statusFilter" name="statusFilter">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select [(ngModel)]="priorityFilter" name="priorityFilter">
+            <option value="">All Priorities</option>
+            <option value="Urgent">Urgent</option>
+            <option value="High">High</option>
+            <option value="Normal">Normal</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Vehicle</label>
+          <select [(ngModel)]="vehicleFilter" name="vehicleFilter">
+            <option value="">All Vehicles</option>
+            <option *ngFor="let vehicle of vehicles" [value]="vehicle.id">{{ vehicle.registrationNumber }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logistics Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-car"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLogisticsStats().activeVehicles }}</div>
+        <div class="stat-label">Active Vehicles</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-directions"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLogisticsStats().onRoute }}</div>
+        <div class="stat-label">On Route</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-clock"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLogisticsStats().pendingDeliveries }}</div>
+        <div class="stat-label">Pending Deliveries</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getLogisticsStats().onTimeRate }}%</div>
+        <div class="stat-label">On-Time Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Driver Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getDriverStats().totalDrivers }}</div>
+        <div class="stat-label">Total Drivers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-user-check"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getDriverStats().availableDrivers }}</div>
+        <div class="stat-label">Available Drivers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-directions"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getDriverStats().onRouteDrivers }}</div>
+        <div class="stat-label">On Route</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="pi pi-star"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getDriverStats().avgRating | number:'1.1-1' }}</div>
+        <div class="stat-label">Avg Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Management -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Delivery Management</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportDeliveries()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Delivery ID</th>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Vehicle</th>
+              <th>Driver</th>
+              <th>Scheduled Date</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Estimated Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let delivery of getFilteredDeliveries()">
+              <td>{{ delivery.id }}</td>
+              <td>{{ delivery.orderId }}</td>
+              <td>{{ delivery.customerName }}</td>
+              <td>{{ delivery.customerAddress }}</td>
+              <td>{{ delivery.vehicleId || 'Unassigned' }}</td>
+              <td>{{ delivery.driverId || 'Unassigned' }}</td>
+              <td>{{ delivery.scheduledDate }}</td>
+              <td><span class="status-badge" [class]="getStatusClass(delivery.status)">{{ delivery.status }}</span></td>
+              <td><span class="status-badge" [class]="getPriorityClass(delivery.priority)">{{ delivery.priority }}</span></td>
+              <td>{{ delivery.estimatedTime }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary" (click)="updateDeliveryStatus(delivery, 'In Transit')">
+                    <i class="pi pi-play"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success" (click)="updateDeliveryStatus(delivery, 'Delivered')">
+                    <i class="pi pi-check"></i>
+                  </button>
+                  <button class="btn btn-sm btn-info">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle Fleet -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Vehicle Fleet</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportVehicles()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Registration</th>
+              <th>Type</th>
+              <th>Capacity (kg)</th>
+              <th>Status</th>
+              <th>Driver</th>
+              <th>Location</th>
+              <th>Fuel Level</th>
+              <th>Next Maintenance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let vehicle of vehicles">
+              <td>{{ vehicle.registrationNumber }}</td>
+              <td>{{ vehicle.type }}</td>
+              <td>{{ vehicle.capacity | number:'1.0-0' }}</td>
+              <td><span class="status-badge" [class]="getVehicleStatusClass(vehicle.status)">{{ vehicle.status }}</span></td>
+              <td>{{ vehicle.driverName || 'Unassigned' }}</td>
+              <td>{{ vehicle.location }}</td>
+              <td>
+                <div class="fuel-level">
+                  <div class="fuel-bar" [style.width.%]="vehicle.fuelLevel"></div>
+                  <span>{{ vehicle.fuelLevel }}%</span>
+                </div>
+              </td>
+              <td>{{ vehicle.nextMaintenance }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="pi pi-wrench"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Driver Management -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Driver Management</h3>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="exportDrivers()">
+          <i class="pi pi-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Driver ID</th>
+              <th>Name</th>
+              <th>License</th>
+              <th>Phone</th>
+              <th>Experience</th>
+              <th>Status</th>
+              <th>Vehicle</th>
+              <th>Rating</th>
+              <th>Total Deliveries</th>
+              <th>On-Time Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let driver of drivers">
+              <td>{{ driver.id }}</td>
+              <td>{{ driver.name }}</td>
+              <td>{{ driver.licenseNumber }}</td>
+              <td>{{ driver.phone }}</td>
+              <td>{{ driver.experience }} years</td>
+              <td><span class="status-badge" [class]="getStatusClass(driver.status)">{{ driver.status }}</span></td>
+              <td>{{ driver.vehicleId || 'Unassigned' }}</td>
+              <td>
+                <div class="rating">
+                  <i *ngFor="let star of [1,2,3,4,5]"
+                      class="pi"
+                      [class.pi-star-fill]="star <= driver.rating"
+                      [class.pi-star]="star > driver.rating">
+                  </i>
+                  <span>{{ driver.rating | number:'1.1-1' }}</span>
+                </div>
+              </td>
+              <td>{{ driver.totalDeliveries }}</td>
+              <td>{{ Math.round((driver.onTimeDeliveries / driver.totalDeliveries) * 100) }}%</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-primary">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-success">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-info">
+                    <i class="pi pi-phone"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
