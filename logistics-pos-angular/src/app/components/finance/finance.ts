@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService, Transaction } from '../../services/data';
+import { DataService, Transaction, Invoice, SalesReport, CreditDebitNote, TaxDetails, PaymentGateway, AccountingIntegration } from '../../services/data';
 import { Observable } from 'rxjs';
 
 export interface Receivable {
@@ -26,9 +26,18 @@ export interface Payable {
 })
 export class FinanceComponent implements OnInit {
   transactions$: Observable<Transaction[]>;
+  invoices$: Observable<Invoice[]>;
+  salesReports$: Observable<SalesReport[]>;
+
   showAddTransactionModal: boolean = false;
   showReceivablesModal: boolean = false;
   showPayablesModal: boolean = false;
+  showInvoiceModal: boolean = false;
+  showSalesReportModal: boolean = false;
+  showTaxManagementModal: boolean = false;
+  showPaymentGatewayModal: boolean = false;
+  showAccountingIntegrationModal: boolean = false;
+  showCreditDebitNoteModal: boolean = false;
 
   Math = Math; // Make Math available in template
 
@@ -40,7 +49,84 @@ export class FinanceComponent implements OnInit {
     currency: 'INR',
     gst: 0,
     description: '',
-    status: 'Completed'
+    status: 'Completed',
+    invoice: undefined,
+    paymentGateway: undefined,
+    taxDetails: undefined,
+    accountingIntegration: undefined
+  };
+
+  newInvoice: Invoice = {
+    id: '',
+    invoiceNumber: '',
+    orderId: '',
+    customerId: '',
+    issueDate: new Date().toISOString().split('T')[0],
+    dueDate: '',
+    amount: 0,
+    taxAmount: 0,
+    totalAmount: 0,
+    status: 'Draft',
+    gstCompliant: true,
+    items: [],
+    paymentTerms: 'Net30',
+    notes: ''
+  };
+
+  newSalesReport: SalesReport = {
+    id: '',
+    reportType: 'Monthly',
+    period: '',
+    customerWise: [],
+    productWise: [],
+    locationWise: [],
+    totalSales: 0,
+    totalProfit: 0,
+    generatedDate: new Date().toISOString(),
+    generatedBy: ''
+  };
+
+  newCreditDebitNote: CreditDebitNote = {
+    id: '',
+    noteNumber: '',
+    type: 'Credit',
+    customerId: '',
+    invoiceId: '',
+    amount: 0,
+    reason: '',
+    issueDate: new Date().toISOString().split('T')[0],
+    status: 'Draft',
+    appliedToInvoice: ''
+  };
+
+  taxDetails: TaxDetails = {
+    gstNumber: 'GST123456789',
+    cgst: 0,
+    sgst: 0,
+    igst: 0,
+    cess: 0,
+    totalTax: 0,
+    taxFilingPeriod: '2024-09',
+    filingStatus: 'Pending'
+  };
+
+  paymentGateway: PaymentGateway = {
+    id: '',
+    gatewayName: 'Razorpay',
+    transactionId: '',
+    amount: 0,
+    currency: 'INR',
+    status: 'Pending',
+    paymentMethod: 'Card',
+    processedDate: '',
+    fees: 0
+  };
+
+  accountingIntegration: AccountingIntegration = {
+    software: 'Tally',
+    syncStatus: 'Pending',
+    lastSyncDate: '',
+    syncErrors: []
   };
 
   receivables: Receivable[] = [
@@ -62,6 +148,8 @@ export class FinanceComponent implements OnInit {
 
   constructor(private dataService: DataService) {
     this.transactions$ = this.dataService.getTransactions();
+    this.invoices$ = this.dataService.getInvoices();
+    this.salesReports$ = this.dataService.getSalesReports();
   }
 
   ngOnInit(): void {
@@ -166,6 +254,157 @@ export class FinanceComponent implements OnInit {
       description: '',
       status: 'Completed'
     };
+  }
+
+  // Invoice Management Methods
+  showInvoiceManagement(): void {
+    this.showInvoiceModal = true;
+  }
+
+  hideInvoiceModal(): void {
+    this.showInvoiceModal = false;
+  }
+
+  generateInvoice(orderId: string): void {
+    this.newInvoice.orderId = orderId;
+    this.newInvoice.invoiceNumber = `INV-${Date.now()}`;
+    this.dataService.addInvoice({...this.newInvoice});
+  }
+
+  // Sales Report Methods
+  showSalesReportGeneration(): void {
+    this.showSalesReportModal = true;
+  }
+
+  hideSalesReportModal(): void {
+    this.showSalesReportModal = false;
+  }
+
+  generateSalesReport(reportType: string, period: string): void {
+    this.newSalesReport.reportType = reportType as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+    this.newSalesReport.period = period;
+    this.newSalesReport.generatedBy = 'Current User';
+    this.dataService.addSalesReport({...this.newSalesReport});
+  }
+
+  // Tax Management Methods
+  showTaxManagement(): void {
+    this.showTaxManagementModal = true;
+  }
+
+  hideTaxManagementModal(): void {
+    this.showTaxManagementModal = false;
+  }
+
+  calculateTax(amount: number, taxRate: number = 18): number {
+    return amount * (taxRate / 100);
+  }
+
+  updateTaxDetails(): void {
+    this.taxDetails.totalTax = this.taxDetails.cgst + this.taxDetails.sgst + this.taxDetails.igst + this.taxDetails.cess;
+  }
+
+  // Payment Gateway Methods
+  showPaymentGatewayIntegration(): void {
+    this.showPaymentGatewayModal = true;
+  }
+
+  hidePaymentGatewayModal(): void {
+    this.showPaymentGatewayModal = false;
+  }
+
+  processPayment(amount: number, paymentMethod: string): void {
+    this.paymentGateway.amount = amount;
+    this.paymentGateway.paymentMethod = paymentMethod;
+    this.paymentGateway.transactionId = `TXN-${Date.now()}`;
+    this.paymentGateway.processedDate = new Date().toISOString();
+    this.paymentGateway.status = 'Success';
+  }
+
+  // Accounting Integration Methods
+  showAccountingIntegration(): void {
+    this.showAccountingIntegrationModal = true;
+  }
+
+  hideAccountingIntegrationModal(): void {
+    this.showAccountingIntegrationModal = false;
+  }
+
+  syncWithAccounting(): void {
+    this.accountingIntegration.syncStatus = 'Synced';
+    this.accountingIntegration.lastSyncDate = new Date().toISOString();
+  }
+
+  // Credit/Debit Note Methods
+  showCreditDebitNote(): void {
+    this.showCreditDebitNoteModal = true;
+  }
+
+  hideCreditDebitNoteModal(): void {
+    this.showCreditDebitNoteModal = false;
+  }
+
+  createCreditDebitNote(type: 'Credit' | 'Debit', customerId: string, amount: number, reason: string): void {
+    this.newCreditDebitNote.type = type;
+    this.newCreditDebitNote.customerId = customerId;
+    this.newCreditDebitNote.amount = amount;
+    this.newCreditDebitNote.reason = reason;
+    this.newCreditDebitNote.noteNumber = `${type === 'Credit' ? 'CN' : 'DN'}-${Date.now()}`;
+  }
+
+  // Multi-Currency Support
+  getSupportedCurrencies(): string[] {
+    return ['INR', 'USD', 'EUR', 'GBP', 'JPY'];
+  }
+
+  convertCurrency(amount: number, fromCurrency: string, toCurrency: string): number {
+    // Simple conversion rates (in real app, use live rates)
+    const rates: { [key: string]: number } = {
+      'INR': 1,
+      'USD': 83,
+      'EUR': 89,
+      'GBP': 102,
+      'JPY': 0.55
+    };
+
+    const fromRate = rates[fromCurrency] || 1;
+    const toRate = rates[toCurrency] || 1;
+
+    return (amount * fromRate) / toRate;
+  }
+
+  // Profit & Loss Analysis
+  getProfitLossAnalysis(period: string): { revenue: number, expenses: number, profit: number, margin: number } {
+    let revenue = 0;
+    let expenses = 0;
+
+    this.transactions$.subscribe(transactions => {
+      revenue = transactions
+        .filter(t => t.type === 'Sale' && t.status === 'Completed')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      expenses = transactions
+        .filter(t => (t.type === 'Purchase' || t.type === 'Expense') && t.status === 'Completed')
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    });
+
+    const profit = revenue - expenses;
+    const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+
+    return { revenue, expenses, profit, margin };
+  }
+
+  // Export Methods
+  exportFinancialReport(format: 'PDF' | 'Excel'): void {
+    console.log(`Exporting financial report in ${format} format`);
+  }
+
+  exportTaxReport(): void {
+    console.log('Exporting tax report');
+  }
+
+  exportInvoice(invoiceId: string): void {
+    console.log(`Exporting invoice: ${invoiceId}`);
   }
 
   getStatusClass(status: string): string {

@@ -235,9 +235,9 @@
             </thead>
             <tbody>
               <tr *ngFor="let attendance of attendanceData">
-                <td>{{ attendance.employeeName }}</td>
-                <td>{{ attendance.checkinTime || 'Not checked in' }}</td>
-                <td>{{ attendance.checkoutTime || 'Not checked out' }}</td>
+                <td>{{ 'test' }}</td>
+                <td>{{  'Not checked in' }}</td>
+                <td>{{  'Not checked out' }}</td>
                 <td>{{ attendance.hoursWorked }} hrs</td>
                 <td>{{ attendance.overtime }} hrs</td>
                 <td><span class="status-badge" [class]="getStatusClass(attendance.status)">{{ attendance.status }}</span></td>

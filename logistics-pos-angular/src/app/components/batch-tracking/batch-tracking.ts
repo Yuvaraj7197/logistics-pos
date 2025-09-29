@@ -195,12 +195,102 @@ export class BatchTrackingComponent implements OnInit {
     return this.batchMovements.filter(m => m.batchId === batchId);
   }
 
+  getExpiringBatches(days: number = 30): Batch[] {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() + days);
+
+    return this.batches.filter(batch => {
+      const expiryDate = new Date(batch.expiryDate);
+      return expiryDate <= cutoffDate && batch.status === 'Active';
+    });
+  }
+
+  getExpiredBatches(): Batch[] {
+    const today = new Date();
+    return this.batches.filter(batch => {
+      const expiryDate = new Date(batch.expiryDate);
+      return expiryDate < today && batch.status === 'Active';
+    });
+  }
+
+  getBatchTraceability(batchNumber: string): { batch: Batch, movements: BatchMovement[], qualityChecks: any[] } {
+    const batch = this.batches.find(b => b.batchNumber === batchNumber);
+    const movements = this.batchMovements.filter(m => m.batchNumber === batchNumber);
+    const qualityChecks:any = []; // Mock quality checks data
+
+    return { batch: batch!, movements, qualityChecks };
+  }
+
+  calculateBatchAge(batch: Batch): number {
+    const productionDate = new Date(batch.productionDate);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - productionDate.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  calculateDaysToExpiry(batch: Batch): number {
+    const expiryDate = new Date(batch.expiryDate);
+    const today = new Date();
+    const diffTime = expiryDate.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  getBatchQualityMetrics(): { passed: number, failed: number, pending: number, avgTemperature: number, avgHumidity: number } {
+    const passed = this.batches.filter(b => b.qualityStatus === 'Passed').length;
+    const failed = this.batches.filter(b => b.qualityStatus === 'Failed').length;
+    const pending = this.batches.filter(b => b.qualityStatus === 'Pending').length;
+    const avgTemperature = this.batches.length > 0 ?
+      this.batches.reduce((sum, b) => sum + b.temperature, 0) / this.batches.length : 0;
+    const avgHumidity = this.batches.length > 0 ?
+      this.batches.reduce((sum, b) => sum + b.humidity, 0) / this.batches.length : 0;
+
+    return { passed, failed, pending, avgTemperature: Math.round(avgTemperature * 100) / 100, avgHumidity: Math.round(avgHumidity * 100) / 100 };
+  }
+
   exportBatchData(): void {
-    console.log('Exporting batch data...');
+    const csvContent = "Batch Number,Product,Quantity,Production Date,Expiry Date,Status,Location,Quality Status,Temperature,Humidity\n" +
+      this.batches.map(batch =>
+        `${batch.batchNumber},${batch.productName},${batch.quantity},${batch.productionDate},${batch.expiryDate},${batch.status},${batch.location},${batch.qualityStatus},${batch.temperature},${batch.humidity}`
+      ).join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'batch_data.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 
   exportMovementData(): void {
-    console.log('Exporting movement data...');
+    const csvContent = "Movement ID,Batch Number,Movement Type,From Location,To Location,Quantity,Date,Operator,Reason\n" +
+      this.batchMovements.map(movement =>
+        `${movement.id},${movement.batchNumber},${movement.movementType},${movement.fromLocation},${movement.toLocation},${movement.quantity},${movement.date},${movement.operator},${movement.reason}`
+      ).join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'batch_movements.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  exportExpiryReport(): void {
+    const expiringBatches = this.getExpiringBatches(30);
+    const csvContent = "Batch Number,Product,Quantity,Expiry Date,Days to Expiry,Location,Status\n" +
+      expiringBatches.map(batch =>
+        `${batch.batchNumber},${batch.productName},${batch.quantity},${batch.expiryDate},${this.calculateDaysToExpiry(batch)},${batch.location},${batch.status}`
+      ).join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'expiry_report.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 
   private isBatchValid(): boolean {
