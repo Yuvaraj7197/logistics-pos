@@ -108,7 +108,7 @@ body {
     font-size: 1.4rem;
     color: #333;
     font-weight: 600;
-    margin: 0;
+    margin: 5px 0 0 10px;
   }
 
   .header-actions {
@@ -528,6 +528,13 @@ body {
     font-size: 1.2rem;
   }
 }
+
+ .card-title {
+            font-size: 1.4rem;
+            color: #333;
+            font-weight: 600;
+            padding: 10px 10px;
+        }
 
 /* Table Container */
 .table-container {
