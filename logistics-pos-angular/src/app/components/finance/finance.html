@@ -1,49 +1,125 @@
 <div class="finance-container">
   <div class="content-header">
-    <h1>Financial Management</h1>
-    <p>Manage transactions, receivables, and payables</p>
-    <button class="btn btn-primary" (click)="showAddTransaction()">
-      <i class="pi pi-plus"></i>
-      Add Transaction
-    </button>
+    <h1>Accounting & Finance</h1>
+    <p>GST-compliant billing, payment gateway integration, multi-currency support, and tax management</p>
+  </div>
+
+  <!-- Financial Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Financial Filters</h3>
+    </div>
+    <div class="filter-row">
+      <div class="form-group">
+        <label>Period</label>
+        <select class="form-input" [(ngModel)]="periodFilter" (change)="filterFinancials()">
+          <option value="">All Periods</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="quarter">This Quarter</option>
+          <option value="year">This Year</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select class="form-input" [(ngModel)]="typeFilter" (change)="filterFinancials()">
+          <option value="">All Types</option>
+          <option value="Sale">Sales</option>
+          <option value="Purchase">Purchases</option>
+          <option value="Expense">Expenses</option>
+          <option value="Payment">Payments</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Currency</label>
+        <select class="form-input" [(ngModel)]="currencyFilter" (change)="filterFinancials()">
+          <option value="">All Currencies</option>
+          <option value="INR">INR (₹)</option>
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" (click)="showInvoiceManagement()">Create Invoice</button>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-success" (click)="showPaymentGatewayIntegration()">Process Payment</button>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" (click)="showTaxManagement()">Tax Report</button>
+      </div>
+    </div>
   </div>
 
   <!-- Financial Overview -->
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-money-bill"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">₹{{ getTotalReceivables() | number:'1.0-0' }}</div>
-        <div class="stat-label">Total Receivables</div>
-      </div>
+    <div class="stat-card green">
+      <div class="stat-number">₹{{ getMonthlyRevenue() | number:'1.0-0' }}</div>
+      <div class="stat-label">Monthly Revenue</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-credit-card"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">₹{{ getTotalPayables() | number:'1.0-0' }}</div>
-        <div class="stat-label">Total Payables</div>
-      </div>
+      <div class="stat-number">₹{{ getMonthlyExpenses() | number:'1.0-0' }}</div>
+      <div class="stat-label">Expenses</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-number">₹{{ getPendingPayments() | number:'1.0-0' }}</div>
+      <div class="stat-label">Pending Payments</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-chart-line"></i>
+      <div class="stat-number">₹{{ getNetProfit() | number:'1.0-0' }}</div>
+      <div class="stat-label">Net Profit</div>
+    </div>
+  </div>
+
+  <!-- GST & Tax Overview -->
+  <div class="card">
+    <div class="card-header">
+      <h3>GST & Tax Overview</h3>
+      <button class="btn btn-primary" (click)="showTaxManagement()">GST Settings</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">₹{{ taxDetails.cgst | number:'1.0-0' }}</div>
+        <div class="stat-label">CGST Collected</div>
       </div>
-      <div class="stat-content">
-        <div class="stat-number">₹{{ getNetReceivables() | number:'1.0-0' }}</div>
-        <div class="stat-label">Net Receivables</div>
+      <div class="stat-card">
+        <div class="stat-number">₹{{ taxDetails.sgst | number:'1.0-0' }}</div>
+        <div class="stat-label">SGST Collected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">₹{{ taxDetails.igst | number:'1.0-0' }}</div>
+        <div class="stat-label">IGST Collected</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-number">₹{{ taxDetails.totalTax | number:'1.0-0' }}</div>
+        <div class="stat-label">Total GST</div>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-shopping-cart"></i>
+  </div>
+
+  <!-- Multi-Currency Overview -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Multi-Currency Overview</h3>
+      <button class="btn btn-primary" (click)="showCurrencySettings()">Currency Settings</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">₹{{ getINRRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-label">INR Revenue</div>
       </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ (transactions$ | async)?.length || 0 }}</div>
-        <div class="stat-label">Total Transactions</div>
+      <div class="stat-card">
+        <div class="stat-number">${{ getUSDRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-label">USD Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">€{{ getEURRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-label">EUR Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">₹{{ getTotalMultiCurrencyRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-label">Total Revenue (INR)</div>
       </div>
     </div>
   </div>

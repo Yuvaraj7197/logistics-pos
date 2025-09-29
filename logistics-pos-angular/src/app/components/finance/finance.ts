@@ -145,6 +145,7 @@ export class FinanceComponent implements OnInit {
   typeFilter: string = '';
   statusFilter: string = '';
   currencyFilter: string = '';
+  periodFilter: string = '';
 
   constructor(private dataService: DataService) {
     this.transactions$ = this.dataService.getTransactions();
@@ -405,6 +406,105 @@ export class FinanceComponent implements OnInit {
 
   exportInvoice(invoiceId: string): void {
     console.log(`Exporting invoice: ${invoiceId}`);
+  }
+
+  getMonthlyRevenue(): number {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    let revenue = 0;
+
+    this.transactions$.subscribe(transactions => {
+      revenue = transactions
+        .filter(t => {
+          const transactionDate = new Date(t.date);
+          return transactionDate.getMonth() === currentMonth &&
+                 transactionDate.getFullYear() === currentYear &&
+                 t.type === 'Sale';
+        })
+        .reduce((sum, t) => sum + t.amount, 0);
+    });
+
+    return revenue;
+  }
+
+  getMonthlyExpenses(): number {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    let expenses = 0;
+
+    this.transactions$.subscribe(transactions => {
+      expenses = transactions
+        .filter(t => {
+          const transactionDate = new Date(t.date);
+          return transactionDate.getMonth() === currentMonth &&
+                 transactionDate.getFullYear() === currentYear &&
+                 (t.type === 'Purchase' || t.type === 'Expense');
+        })
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    });
+
+    return expenses;
+  }
+
+  getPendingPayments(): number {
+    return this.receivables
+      .filter(r => r.status === 'Pending' || r.status === 'Overdue')
+      .reduce((sum, r) => sum + r.amount, 0);
+  }
+
+  getNetProfit(): number {
+    return this.getMonthlyRevenue() - this.getMonthlyExpenses();
+  }
+
+  getINRRevenue(): number {
+    let revenue = 0;
+    this.transactions$.subscribe(transactions => {
+      revenue = transactions
+        .filter(t => t.currency === 'INR' && t.type === 'Sale')
+        .reduce((sum, t) => sum + t.amount, 0);
+    });
+    return revenue;
+  }
+
+  getUSDRevenue(): number {
+    let revenue = 0;
+    this.transactions$.subscribe(transactions => {
+      revenue = transactions
+        .filter(t => t.currency === 'USD' && t.type === 'Sale')
+        .reduce((sum, t) => sum + t.amount, 0);
+    });
+    return revenue;
+  }
+
+  getEURRevenue(): number {
+    let revenue = 0;
+    this.transactions$.subscribe(transactions => {
+      revenue = transactions
+        .filter(t => t.currency === 'EUR' && t.type === 'Sale')
+        .reduce((sum, t) => sum + t.amount, 0);
+    });
+    return revenue;
+  }
+
+  getTotalMultiCurrencyRevenue(): number {
+    const inrRevenue = this.getINRRevenue();
+    const usdRevenue = this.convertCurrency(this.getUSDRevenue(), 'USD', 'INR');
+    const eurRevenue = this.convertCurrency(this.getEURRevenue(), 'EUR', 'INR');
+
+    return inrRevenue + usdRevenue + eurRevenue;
+  }
+
+  filterFinancials(): void {
+    // Implementation for filtering financial data
+    console.log('Filtering financials:', {
+      period: this.periodFilter,
+      type: this.typeFilter,
+      currency: this.currencyFilter
+    });
+  }
+
+  showCurrencySettings(): void {
+    console.log('Showing currency settings');
   }
 
   getStatusClass(status: string): string {

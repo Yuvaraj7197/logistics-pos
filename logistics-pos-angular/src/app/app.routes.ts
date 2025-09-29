@@ -50,6 +50,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'finance',
+    loadComponent: () => import('./components/finance/finance').then(m => m.FinanceComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'batch-tracking',
     loadComponent: () => import('./components/batch-tracking/batch-tracking').then(m => m.BatchTrackingComponent),
     canActivate: [authGuard]
