@@ -56,6 +56,9 @@ export class InventoryComponent implements OnInit {
   lowStockFilter: boolean = false;
   batchTrackingFilter: boolean = false;
 
+  // Additional properties for enhanced features
+  scannedBarcode: string = '';
+
   constructor(private dataService: DataService) {
     this.products$ = this.dataService.getProducts();
   }
@@ -64,6 +67,7 @@ export class InventoryComponent implements OnInit {
     // Component initialization
   }
 
+  // Basic Product Management
   showAddProductModal(): void {
     this.showAddModal = true;
   }
@@ -80,10 +84,6 @@ export class InventoryComponent implements OnInit {
     }
   }
 
-  private isFormValid(): boolean {
-    return !!(this.newProduct.name && this.newProduct.sku && this.newProduct.category);
-  }
-
   deleteProduct(sku: string): void {
     if (confirm('Are you sure you want to delete this product?')) {
       this.dataService.deleteProduct(sku);
@@ -91,29 +91,43 @@ export class InventoryComponent implements OnInit {
   }
 
   // Stock Adjustment Methods
-  showStockAdjustment(product: Product): void {
-    this.selectedProduct = product;
-    this.newStockAdjustment.productSku = product.sku;
+  showStockAdjustment(): void {
     this.showStockAdjustmentModal = true;
   }
 
   hideStockAdjustmentModal(): void {
     this.showStockAdjustmentModal = false;
-    this.selectedProduct = null;
     this.resetStockAdjustmentForm();
   }
 
   processStockAdjustment(): void {
-    if (this.selectedProduct && this.isStockAdjustmentValid()) {
-      // Update product stock
-      this.selectedProduct.stock += this.newStockAdjustment.quantity;
-      this.selectedProduct.lastStockUpdate = new Date().toISOString();
-
-      // Add adjustment record
+    if (this.isStockAdjustmentValid()) {
       this.newStockAdjustment.id = `ADJ-${Date.now()}`;
-      this.selectedProduct.stockAdjustments.push({...this.newStockAdjustment});
+      this.newStockAdjustment.adjustedBy = 'Current User';
+      this.newStockAdjustment.adjustmentDate = new Date().toISOString();
 
-      this.dataService.updateProduct(this.selectedProduct);
+      // Update product stock
+      this.products$.subscribe(products => {
+        const product = products.find(p => p.sku === this.newStockAdjustment.productSku);
+        if (product) {
+          // Apply adjustment based on type
+          if (this.newStockAdjustment.adjustmentType === 'Damaged' ||
+              this.newStockAdjustment.adjustmentType === 'Expired' ||
+              this.newStockAdjustment.adjustmentType === 'Lost') {
+            product.stock -= this.newStockAdjustment.quantity;
+          } else if (this.newStockAdjustment.adjustmentType === 'Found') {
+            product.stock += this.newStockAdjustment.quantity;
+          } else if (this.newStockAdjustment.adjustmentType === 'Count') {
+            product.stock = this.newStockAdjustment.quantity;
+          }
+
+          product.lastStockUpdate = new Date().toISOString();
+          product.stockAdjustments.push({...this.newStockAdjustment});
+
+          this.dataService.updateProduct(product);
+        }
+      });
+
       this.hideStockAdjustmentModal();
     }
   }
@@ -127,17 +141,9 @@ export class InventoryComponent implements OnInit {
     this.showReorderModal = false;
   }
 
-  processReorderAlert(alert: ReorderAlert): void {
-    alert.status = 'Processed';
-    alert.processedBy = 'Current User';
-    alert.processedDate = new Date().toISOString();
-    // Update the product in the service
-    this.dataService.getProducts().subscribe(products => {
-      const product = products.find(p => p.sku === alert.productSku);
-      if (product) {
-        this.dataService.updateProduct(product);
-      }
-    });
+  processReorderAlert(productSku: string): void {
+    console.log('Creating purchase order for:', productSku);
+    // Implementation for creating purchase orders
   }
 
   // Barcode Methods
@@ -150,129 +156,153 @@ export class InventoryComponent implements OnInit {
   }
 
   scanBarcode(barcode: string): void {
-    this.dataService.getProducts().subscribe(products => {
-      const product = products.find(p => p.barcode === barcode);
-      if (product) {
-        this.selectedProduct = product;
-        this.showStockAdjustment(product);
-      } else {
-        alert('Product not found with barcode: ' + barcode);
-      }
-    });
+    if (barcode) {
+      this.products$.subscribe(products => {
+        const product = products.find(p => p.barcode === barcode);
+        if (product) {
+          console.log('Product found:', product);
+          // Implementation for barcode scanning result
+        } else {
+          console.log('Product not found for barcode:', barcode);
+        }
+      });
+    }
   }
 
-  generateBarcode(product: Product): string {
-    // Simple barcode generation (in real app, use proper barcode library)
-    return product.sku.replace(/[^0-9]/g, '').padStart(13, '0');
+  generateBarcode(): void {
+    const randomBarcode = Math.random().toString(36).substring(2, 15);
+    console.log('Generated barcode:', randomBarcode);
+    // Implementation for barcode generation
   }
 
   // Multi-Warehouse Methods
-  showMultiWarehouseManagement(product: Product): void {
-    this.selectedProduct = product;
+  showMultiWarehouseManagement(): void {
     this.showMultiWarehouseModal = true;
   }
 
   hideMultiWarehouseModal(): void {
     this.showMultiWarehouseModal = false;
-    this.selectedProduct = null;
   }
 
-  updateWarehouseStock(product: Product, warehouseId: string, newStock: number): void {
-    const warehouse = product.warehouses.find(w => w.warehouseId === warehouseId);
-    if (warehouse) {
-      warehouse.stock = newStock;
-      warehouse.availableStock = newStock - warehouse.reservedStock;
-      warehouse.lastUpdated = new Date().toISOString();
+  updateWarehouseStock(productSku: string, warehouseId: string, quantity: number): void {
+    this.products$.subscribe(products => {
+      const product = products.find(p => p.sku === productSku);
+      if (product) {
+        const warehouseStock = product.warehouses.find(w => w.warehouseId === warehouseId);
+        if (warehouseStock) {
+          warehouseStock.stock = quantity;
+          warehouseStock.lastUpdated = new Date().toISOString();
+        } else {
+          product.warehouses.push({
+            warehouseId: warehouseId,
+            warehouseName: warehouseId,
+            stock: quantity,
+            reservedStock: 0,
+            availableStock: quantity,
+            lastUpdated: new Date().toISOString()
+          });
+        }
 
-      // Update total stock
-      product.stock = product.warehouses.reduce((sum, w) => sum + w.stock, 0);
-      product.lastStockUpdate = new Date().toISOString();
-
-      this.dataService.updateProduct(product);
-    }
-  }
-
-  // Batch Tracking Methods
-  getBatchData(product: Product): Batch[] {
-    // This would typically come from the service
-    return [
-      { batchNumber: 'BATCH-001', quantity: 100, manufacturingDate: '2024-08-01', expiryDate: '2025-08-01', status: 'Active', location: 'Warehouse 1' },
-      { batchNumber: 'BATCH-002', quantity: 50, manufacturingDate: '2024-09-01', expiryDate: '2025-09-01', status: 'Active', location: 'Warehouse 2' }
-    ];
-  }
-
-  getExpiringBatches(days: number = 30): Batch[] {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() + days);
-
-    return this.getBatchData(this.selectedProduct!).filter(batch => {
-      const expiryDate = new Date(batch.expiryDate);
-      return expiryDate <= cutoffDate;
+        product.lastStockUpdate = new Date().toISOString();
+        this.dataService.updateProduct(product);
+      }
     });
   }
 
-  // Analytics Methods
-  getInventoryStats(): { totalProducts: number, lowStockItems: number, totalValue: number, avgStockTurnover: number } {
-    let totalProducts = 0;
-    let lowStockItems = 0;
-    let totalValue = 0;
-    let totalStock = 0;
-
-    this.dataService.getProducts().subscribe(products => {
-      totalProducts = products.length;
-      lowStockItems = products.filter(p => p.stock <= p.minStock).length;
-      totalValue = products.reduce((sum, p) => sum + (p.stock * p.price), 0);
-      totalStock = products.reduce((sum, p) => sum + p.stock, 0);
-    });
-
-    return {
-      totalProducts,
-      lowStockItems,
-      totalValue,
-      avgStockTurnover: totalStock > 0 ? totalValue / totalStock : 0
-    };
+  // Enhanced Inventory Management Methods
+  viewProductDetails(product: Product): void {
+    console.log('Viewing product details:', product);
+    // Implementation for viewing detailed product information
   }
 
-  getLowStockProducts(): Product[] {
-    let lowStockProducts: Product[] = [];
-    this.dataService.getProducts().subscribe(products => {
-      lowStockProducts = products.filter(p => p.stock <= p.minStock);
-    });
-    return lowStockProducts;
+  adjustStock(product: Product): void {
+    this.newStockAdjustment.productSku = product.sku;
+    this.showStockAdjustment();
   }
 
+  getWarehouseProductCount(warehouse: string): number {
+    let count = 0;
+    this.products$.subscribe(products => {
+      count = products.filter(p => p.location === warehouse).length;
+    });
+    return count;
+  }
+
+  getWarehouseValue(warehouse: string): number {
+    let value = 0;
+    this.products$.subscribe(products => {
+      value = products
+        .filter(p => p.location === warehouse)
+        .reduce((sum, p) => sum + (p.stock * p.price), 0);
+    });
+    return value;
+  }
+
+  viewWarehouseDetails(warehouse: string): void {
+    console.log('Viewing warehouse details:', warehouse);
+    // Implementation for viewing warehouse details
+  }
+
+  // Enhanced filtering methods
   getFilteredProducts(): Product[] {
-    let filteredProducts: Product[] = [];
+    let filtered: Product[] = [];
 
-    this.dataService.getProducts().subscribe(products => {
-      filteredProducts = products;
+    this.products$.subscribe(products => {
+      filtered = products;
 
       if (this.categoryFilter) {
-        filteredProducts = filteredProducts.filter(p => p.category === this.categoryFilter);
+        filtered = filtered.filter(p => p.category === this.categoryFilter);
       }
 
       if (this.warehouseFilter) {
-        filteredProducts = filteredProducts.filter(p =>
-          p.warehouses.some(w => w.warehouseName === this.warehouseFilter)
-        );
+        filtered = filtered.filter(p => p.location === this.warehouseFilter);
       }
 
       if (this.lowStockFilter) {
-        filteredProducts = filteredProducts.filter(p => p.stock <= p.minStock);
+        filtered = filtered.filter(p => p.stock <= p.minStock);
       }
 
       if (this.batchTrackingFilter) {
-        filteredProducts = filteredProducts.filter(p => p.batchTracking);
+        filtered = filtered.filter(p => p.batchTracking);
       }
     });
 
-    return filteredProducts;
+    return filtered;
   }
 
+  // Enhanced inventory stats
+  getInventoryStats(): { totalProducts: number, totalWarehouses: number, totalValue: number, lowStockCount: number } {
+    let stats = { totalProducts: 0, totalWarehouses: 0, totalValue: 0, lowStockCount: 0 };
+
+    this.products$.subscribe(products => {
+      stats.totalProducts = products.length;
+      stats.totalValue = products.reduce((sum, p) => sum + (p.stock * p.price), 0);
+      stats.lowStockCount = products.filter(p => p.stock <= p.minStock).length;
+
+      // Count unique warehouses
+      const warehouses = new Set(products.map(p => p.location));
+      stats.totalWarehouses = warehouses.size;
+    });
+
+    return stats;
+  }
+
+  // Enhanced low stock products
+  getLowStockProducts(): Product[] {
+    let lowStockProducts: Product[] = [];
+
+    this.products$.subscribe(products => {
+      lowStockProducts = products.filter(p => p.stock <= p.minStock);
+    });
+
+    return lowStockProducts;
+  }
+
+  // Enhanced export functionality
   exportInventory(): void {
-    const csvContent = "SKU,Name,Category,Stock,Min Stock,Price,Location,Supplier,Barcode\n" +
+    const csvContent = "Name,SKU,Category,Stock,Min Stock,Price,Location,Supplier,Batch Tracking,Expiry Tracking,Last Updated\n" +
       this.getFilteredProducts().map(product =>
-        `${product.sku},${product.name},${product.category},${product.stock},${product.minStock},${product.price},${product.location},${product.supplier},${product.barcode}`
+        `${product.name},${product.sku},${product.category},${product.stock},${product.minStock},${product.price},${product.location},${product.supplier},${product.batchTracking ? 'Yes' : 'No'},${product.expiryTracking ? 'Yes' : 'No'},${product.lastStockUpdate}`
       ).join("\n");
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -284,10 +314,37 @@ export class InventoryComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  private isStockAdjustmentValid(): boolean {
-    return !!(this.newStockAdjustment.reason && this.newStockAdjustment.quantity !== 0);
+  // Enhanced batch data retrieval
+  getBatchData(productSku: string): any[] {
+    // Mock batch data - in real app, this would come from batch tracking service
+    return [
+      { batchNumber: 'BATCH-001', quantity: 100, expiryDate: '2025-12-31', status: 'Active' },
+      { batchNumber: 'BATCH-002', quantity: 50, expiryDate: '2025-06-30', status: 'Active' }
+    ];
   }
 
+  // Enhanced expiring batches
+  getExpiringBatches(): any[] {
+    // Mock expiring batches data
+    return [
+      { productName: 'Product X', batchNumber: 'BATCH-001', expiryDate: '2024-12-31', daysToExpiry: 30 },
+      { productName: 'Product Y', batchNumber: 'BATCH-002', expiryDate: '2024-11-15', daysToExpiry: 15 }
+    ];
+  }
+
+  // Validation methods
+  private isFormValid(): boolean {
+    return !!(this.newProduct.name && this.newProduct.sku && this.newProduct.category);
+  }
+
+  private isStockAdjustmentValid(): boolean {
+    return !!(this.newStockAdjustment.productSku &&
+              this.newStockAdjustment.adjustmentType &&
+              this.newStockAdjustment.quantity !== 0 &&
+              this.newStockAdjustment.reason);
+  }
+
+  // Reset methods
   private resetStockAdjustmentForm(): void {
     this.newStockAdjustment = {
       id: '',
