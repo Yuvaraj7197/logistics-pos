@@ -7,22 +7,22 @@
   <div class="dashboard-grid">
     <!-- Statistics Cards -->
     <div class="stat-card">
-      <div class="stat-number">{{ getTotalOrders() }}</div>
+      <div class="stat-number">1,247</div>
       <div class="stat-label">Total Orders</div>
     </div>
 
     <div class="stat-card green">
-      <div class="stat-number">₹{{ getTodayRevenue() | number:'1.0-0' }}</div>
+      <div class="stat-number">₹5,67,890</div>
       <div class="stat-label">Revenue Today</div>
     </div>
 
     <div class="stat-card orange">
-      <div class="stat-number">{{ getPendingOrders() }}</div>
+      <div class="stat-number">156</div>
       <div class="stat-label">Pending Orders</div>
     </div>
 
     <div class="stat-card red">
-      <div class="stat-number">{{ getLowStockItems() }}</div>
+      <div class="stat-number">23</div>
       <div class="stat-label">Low Stock Items</div>
     </div>
   </div>
@@ -45,7 +45,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of getRecentOrders()">
+          <tr *ngFor="let order of recentOrders">
             <td>{{ order.id }}</td>
             <td>{{ order.customer }}</td>
             <td>₹{{ order.amount | number:'1.0-0' }}</td>
@@ -54,6 +54,31 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Order Workflow Status -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Order Workflow Status</h3>
+    </div>
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Pending Approval</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-number">0</div>
+        <div class="stat-label">In Production</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Dispatched</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Delivered</div>
+      </div>
     </div>
   </div>
 

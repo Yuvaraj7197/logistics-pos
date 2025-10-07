@@ -10,66 +10,58 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <h2>POS Application</h2>
-        <!-- <p>Logistics & Production</p> -->
-        <!-- <div *ngIf="currentUser" class="user-info">
+        <p>Logistics & Production</p>
+        <div *ngIf="currentUser" class="user-info">
           <p>Welcome, <strong>{{ currentUser.name }}</strong></p>
           <small>{{ currentUser.role }}</small>
-        </div> -->
+        </div>
+        <button class="btn btn-danger" (click)="logout()" style="margin-top: 10px; padding: 8px 16px; font-size: 0.8rem;">
+          <i class="pi pi-sign-out"></i> Logout
+        </button>
       </div>
 
       <nav class="nav-menu">
         <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
-          <i class="pi pi-chart-line"></i>
+          <i class="pi pi-home"></i>
           <span>Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/orders" routerLinkActive="active">
+          <i class="pi pi-shopping-cart"></i>
+          <span>Order Management</span>
         </a>
         <a class="nav-item" routerLink="/inventory" routerLinkActive="active">
           <i class="pi pi-box"></i>
           <span>Inventory</span>
         </a>
-        <a class="nav-item" routerLink="/orders" routerLinkActive="active">
-          <i class="pi pi-shopping-cart"></i>
-          <span>Orders</span>
-        </a>
         <a class="nav-item" routerLink="/staff" routerLinkActive="active">
           <i class="pi pi-users"></i>
-          <span>Staff</span>
+          <span>Staff Management</span>
+        </a>
+        <a class="nav-item" routerLink="/accounting" routerLinkActive="active">
+          <i class="pi pi-calculator"></i>
+          <span>Accounting</span>
         </a>
         <a class="nav-item" routerLink="/crm" routerLinkActive="active">
-          <i class="pi pi-heart"></i>
+          <i class="pi pi-user"></i>
           <span>CRM</span>
         </a>
         <a class="nav-item" routerLink="/suppliers" routerLinkActive="active">
           <i class="pi pi-building"></i>
           <span>Suppliers</span>
         </a>
-        <a class="nav-item" routerLink="/logistics" routerLinkActive="active">
-          <i class="pi pi-truck"></i>
-          <span>Logistics</span>
-        </a>
-        <a class="nav-item" routerLink="/finance" routerLinkActive="active">
-          <i class="pi pi-money-bill"></i>
-          <span>Finance</span>
-        </a>
         <a class="nav-item" routerLink="/production" routerLinkActive="active">
           <i class="pi pi-cog"></i>
           <span>Production</span>
         </a>
+        <a class="nav-item" routerLink="/logistics" routerLinkActive="active">
+          <i class="pi pi-truck"></i>
+          <span>Logistics</span>
+        </a>
         <a class="nav-item" routerLink="/reports" routerLinkActive="active">
-          <i class="pi pi-file"></i>
+          <i class="pi pi-chart-bar"></i>
           <span>Reports</span>
         </a>
-        <a class="nav-item" routerLink="/batch-tracking" routerLinkActive="active">
-          <i class="pi pi-tags"></i>
-          <span>Batch Tracking</span>
-        </a>
       </nav>
-
-      <div class="sidebar-footer">
-        <button class="logout-btn" (click)="logout()">
-          <i class="pi pi-sign-out"></i>
-          <span>Logout</span>
-        </button>
-      </div>
     </div>
 
     <!-- Main Content -->

@@ -1,121 +1,141 @@
 <div class="staff-container">
   <div class="content-header">
     <h1>Staff Management</h1>
-    <p>Manage employees, attendance, and productivity</p>
-    <button class="btn btn-primary" (click)="showAddStaffModal()">
-      <i class="pi pi-plus"></i>
-      Add Staff
-    </button>
+    <p>Manage staff profiles, attendance, biometric check-in, and performance tracking</p>
   </div>
 
-  <!-- Staff Statistics -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-users"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ (staff$ | async)?.length || 0 }}</div>
-        <div class="stat-label">Total Staff</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-check-circle"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ getPresentStaffCount() }}</div>
-        <div class="stat-label">Present Today</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-calendar-times"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ getOnLeaveStaffCount() }}</div>
-        <div class="stat-label">On Leave</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-chart-line"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">95%</div>
-        <div class="stat-label">Avg Attendance</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <button class="action-btn" (click)="showAttendanceManagement()">
-      <i class="pi pi-calendar"></i>
-      <span>Attendance Management</span>
-    </button>
-    <button class="action-btn">
-      <i class="pi pi-chart-bar"></i>
-      <span>Productivity Reports</span>
-    </button>
-    <button class="action-btn">
-      <i class="pi pi-clock"></i>
-      <span>Shift Management</span>
-    </button>
-    <button class="action-btn">
-      <i class="pi pi-print"></i>
-      <span>Print Reports</span>
-    </button>
-  </div>
-
-  <!-- Staff Table -->
+  <!-- Staff Filters -->
   <div class="card">
     <div class="card-header">
-      <h3>Staff Directory</h3>
+      <h3 class="card-title">Staff Filters</h3>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Department</th>
-              <th>Shift</th>
-              <th>Status</th>
-              <th>Check-in Time</th>
-              <th>Productivity</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let member of staff$ | async">
-              <td>{{ member.id }}</td>
-              <td>{{ member.name }}</td>
-              <td>{{ member.role }}</td>
-              <td>{{ member.department }}</td>
-              <td>{{ member.shift }}</td>
-              <td><span class="status-badge" [class]="getStatusClass(member.status)">{{ member.status }}</span></td>
-              <td>{{ member.checkinTime || 'Not checked in' }}</td>
-              <td>{{ member.productivityScore }}%</td>
-              <td>
-                <div class="action-buttons">
-                  <button class="btn btn-sm btn-primary" (click)="checkIn(member)" *ngIf="!member.checkinTime">
-                    <i class="pi pi-sign-in"></i>
-                  </button>
-                  <button class="btn btn-sm btn-warning" (click)="checkOut(member)" *ngIf="member.checkinTime && !member.checkoutTime">
-                    <i class="pi pi-sign-out"></i>
-                  </button>
-                  <button class="btn btn-sm btn-success">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; padding: 20px;">
+      <select class="form-input" [(ngModel)]="departmentFilter" style="width: 150px;">
+        <option value="">All Departments</option>
+        <option value="Production">Production</option>
+        <option value="Logistics">Logistics</option>
+        <option value="Sales">Sales</option>
+        <option value="Finance">Finance</option>
+      </select>
+      <select class="form-input" [(ngModel)]="roleFilter" style="width: 150px;">
+        <option value="">All Roles</option>
+        <option value="Manager">Manager</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Operator">Operator</option>
+        <option value="Clerk">Clerk</option>
+      </select>
+      <select class="form-input" [(ngModel)]="statusFilter" style="width: 150px;">
+        <option value="">All Status</option>
+        <option value="Present">Present</option>
+        <option value="On Leave">On Leave</option>
+        <option value="Absent">Absent</option>
+      </select>
+      <button class="btn btn-primary" (click)="showAddStaffModal()">Add Staff</button>
+      <button class="btn btn-success" (click)="showBiometricCheckin()">Biometric Check-in</button>
+      <button class="btn btn-primary" (click)="showShiftSchedule()">Shift Schedule</button>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="stat-card">
+      <div class="stat-number">45</div>
+      <div class="stat-label">Total Staff</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-number">42</div>
+      <div class="stat-label">Present Today</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-number">3</div>
+      <div class="stat-label">On Leave</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">98%</div>
+      <div class="stat-label">Attendance Rate</div>
+    </div>
+  </div>
+
+  <!-- Shift Management -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Current Shift Schedule</h3>
+      <button class="btn btn-primary" (click)="showAddShiftModal()">Add Shift</button>
+    </div>
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-number">15</div>
+        <div class="stat-label">Morning Shift (6AM-2PM)</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-number">18</div>
+        <div class="stat-label">Afternoon Shift (2PM-10PM)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">12</div>
+        <div class="stat-label">Night Shift (10PM-6AM)</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-number">45</div>
+        <div class="stat-label">Total Scheduled</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Staff Overview</h3>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" (click)="exportStaffData()">Export</button>
+        <button class="btn btn-success" (click)="generatePayroll()">Generate Payroll</button>
+        <button class="btn btn-primary" (click)="showPerformanceReport()">Performance Report</button>
+      </div>
+    </div>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Shift</th>
+            <th>Status</th>
+            <th>Check-in Time</th>
+            <th>Productivity Score</th>
+            <th>Attendance Rate</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let member of sampleStaff">
+            <td>{{ member.id }}</td>
+            <td>{{ member.name }}</td>
+            <td>{{ member.role }}</td>
+            <td>{{ member.department }}</td>
+            <td>{{ member.shift }}</td>
+            <td><span class="status-badge" [class]="getStatusClass(member.status)">{{ member.status }}</span></td>
+            <td>{{ member.checkinTime || 'Not checked in' }}</td>
+            <td>{{ member.productivityScore }}%</td>
+            <td>{{ member.attendanceRate }}%</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-info" (click)="viewStaffDetails(member)">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" (click)="editStaff(member)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-primary" (click)="manageAttendance(member.id)">
+                  <i class="pi pi-calendar"></i>
+                </button>
+                <button class="btn btn-sm btn-success" (click)="changeShift(member.id)">
+                  <i class="pi pi-clock"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -235,14 +255,14 @@
             </thead>
             <tbody>
               <tr *ngFor="let attendance of attendanceData">
-                <td>{{ 'test' }}</td>
-                <td>{{  'Not checked in' }}</td>
-                <td>{{  'Not checked out' }}</td>
+                <td>{{ getStaffName(attendance.staffId) }}</td>
+                <td>{{ attendance.checkInTime || 'Not checked in' }}</td>
+                <td>{{ attendance.checkOutTime || 'Not checked out' }}</td>
                 <td>{{ attendance.hoursWorked }} hrs</td>
                 <td>{{ attendance.overtime }} hrs</td>
                 <td><span class="status-badge" [class]="getStatusClass(attendance.status)">{{ attendance.status }}</span></td>
                 <td>
-                  <button class="btn btn-sm btn-primary">Manage</button>
+                  <button class="btn btn-sm btn-primary" (click)="manageAttendance(attendance.staffId)">Manage</button>
                 </td>
               </tr>
             </tbody>

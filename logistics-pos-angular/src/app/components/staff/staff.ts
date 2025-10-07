@@ -30,6 +30,66 @@ export class StaffComponent implements OnInit {
   showPermissionsModal: boolean = false;
   selectedStaff: Staff | null = null;
 
+  // Filters
+  departmentFilter: string = '';
+  roleFilter: string = '';
+  statusFilter: string = '';
+
+  // Sample staff data
+  sampleStaff = [
+    {
+      id: 'EMP001',
+      name: 'John Smith',
+      role: 'Manager',
+      department: 'Production',
+      status: 'Present',
+      email: 'john.smith@company.com',
+      phone: '+91 98765 43210',
+      shift: 'Morning (6AM-2PM)',
+      salary: 50000,
+      biometricId: 'BIO001',
+      joiningDate: '2023-01-15',
+      checkinTime: '08:30',
+      checkoutTime: null,
+      productivityScore: 95,
+      attendanceRate: 98
+    },
+    {
+      id: 'EMP002',
+      name: 'Sarah Johnson',
+      role: 'Supervisor',
+      department: 'Logistics',
+      status: 'Present',
+      email: 'sarah.johnson@company.com',
+      phone: '+91 98765 43211',
+      shift: 'Afternoon (2PM-10PM)',
+      salary: 40000,
+      biometricId: 'BIO002',
+      joiningDate: '2023-03-20',
+      checkinTime: '14:00',
+      checkoutTime: null,
+      productivityScore: 88,
+      attendanceRate: 96
+    },
+    {
+      id: 'EMP003',
+      name: 'Mike Wilson',
+      role: 'Operator',
+      department: 'Production',
+      status: 'On Leave',
+      email: 'mike.wilson@company.com',
+      phone: '+91 98765 43212',
+      shift: 'Morning (6AM-2PM)',
+      salary: 30000,
+      biometricId: 'BIO003',
+      joiningDate: '2023-05-10',
+      checkinTime: null,
+      checkoutTime: null,
+      productivityScore: 82,
+      attendanceRate: 94
+    }
+  ];
+
   newStaff: Staff = {
     id: '',
     name: '',
@@ -193,9 +253,7 @@ export class StaffComponent implements OnInit {
   ];
 
   // Filters
-  departmentFilter: string = '';
-  roleFilter: string = '';
-  statusFilter: string = '';
+
 
   constructor(private dataService: DataService) {
     this.staff$ = this.dataService.getStaff();
@@ -346,7 +404,7 @@ export class StaffComponent implements OnInit {
     this.showPayrollModal = false;
   }
 
-  generatePayroll(staffId: string, payPeriod: string): void {
+  generatePayrolls(staffId: string, payPeriod: string): void {
     this.staff$.subscribe(staff => {
       const staffMember = staff.find(s => s.id === staffId);
       if (staffMember) {
@@ -580,5 +638,51 @@ export class StaffComponent implements OnInit {
       case 'absent': return 'status-cancelled';
       default: return 'status-pending';
     }
+  }
+
+  // Additional missing methods
+  showBiometricCheckin(): void {
+    console.log('Show biometric check-in');
+  }
+
+  showShiftSchedule(): void {
+    this.showShiftModal = true;
+  }
+
+  showAddShiftModal(): void {
+    console.log('Show add shift modal');
+  }
+
+  showPerformanceReport(): void {
+    console.log('Show performance report');
+  }
+
+  getStaffName(staffId: string): string {
+    const staff = this.sampleStaff.find(s => s.id === staffId);
+    return staff ? staff.name : 'Unknown';
+  }
+
+  viewStaffDetails(member: any): void {
+    console.log('View staff details:', member);
+  }
+
+  editStaff(member: any): void {
+    console.log('Edit staff:', member);
+  }
+
+  manageAttendance(staffId: string): void {
+    console.log('Manage attendance for:', staffId);
+  }
+
+  changeShift(staffId: string): void {
+    console.log('Change shift for:', staffId);
+  }
+
+  generatePayroll(){
+    const totalPayroll = this.sampleStaff.reduce((sum, member) => sum + member.salary, 0);
+    const presentStaff = this.sampleStaff.filter(member => member.status === 'Present');
+    const presentPayroll = presentStaff.reduce((sum, member) => sum + member.salary, 0);
+
+    alert(`Payroll Summary:\n\nTotal Staff: ${this.sampleStaff.length}\nPresent Today: ${presentStaff.length}\nTotal Monthly Payroll: ₹${totalPayroll.toLocaleString()}\nPresent Staff Payroll: ₹${presentPayroll.toLocaleString()}\n\nPayroll report generated successfully!`);
   }
 }

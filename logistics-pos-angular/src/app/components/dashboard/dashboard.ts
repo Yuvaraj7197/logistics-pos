@@ -1,8 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DataService } from '../../services/data';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,72 +8,19 @@ import { Observable } from 'rxjs';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class DashboardComponent implements OnInit {
-  products$: Observable<any[]>;
-  orders$: Observable<any[]>;
-  staff$: Observable<any[]>;
-  transactions$: Observable<any[]>;
-
-  constructor(private dataService: DataService) {
-    this.products$ = this.dataService.getProducts();
-    this.orders$ = this.dataService.getOrders();
-    this.staff$ = this.dataService.getStaff();
-    this.transactions$ = this.dataService.getTransactions();
-  }
-
-  ngOnInit(): void {
-    // Component initialization
-  }
-
-  getTotalOrders(): number {
-    let total = 0;
-    this.orders$.subscribe(orders => {
-      total = orders.length;
-    });
-    return total;
-  }
-
-  getTodayRevenue(): number {
-    const today = new Date().toISOString().split('T')[0];
-    let revenue = 0;
-    this.orders$.subscribe(orders => {
-      revenue = orders
-        .filter(order => order.date === today)
-        .reduce((sum, order) => sum + order.total, 0);
-    });
-    return revenue;
-  }
-
-  getPendingOrders(): number {
-    let pending = 0;
-    this.orders$.subscribe(orders => {
-      pending = orders.filter(order => order.status === 'Pending').length;
-    });
-    return pending;
-  }
-
-  getLowStockItems(): number {
-    let lowStock = 0;
-    this.products$.subscribe(products => {
-      lowStock = products.filter(product => product.stock <= product.minStock).length;
-    });
-    return lowStock;
-  }
-
-  getRecentOrders(): any[] {
-    let recentOrders: any[] = [];
-    this.orders$.subscribe(orders => {
-      recentOrders = orders
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5);
-    });
-    return recentOrders;
-  }
+export class DashboardComponent {
+  recentOrders = [
+    { id: 'ORD-001', customer: 'John Doe', amount: 1250, status: 'Delivered', date: '2024-01-15' },
+    { id: 'ORD-002', customer: 'Jane Smith', amount: 890, status: 'Pending', date: '2024-01-14' },
+    { id: 'ORD-003', customer: 'Bob Johnson', amount: 2100, status: 'In Production', date: '2024-01-13' },
+    { id: 'ORD-004', customer: 'Alice Brown', amount: 675, status: 'Dispatched', date: '2024-01-12' },
+    { id: 'ORD-005', customer: 'Charlie Wilson', amount: 1450, status: 'Delivered', date: '2024-01-11' }
+  ];
 
   getStatusClass(status: string): string {
     switch (status.toLowerCase()) {
       case 'delivered': return 'status-delivered';
-      case 'dispatched': return 'status-delivered';
+      case 'dispatched': return 'status-dispatched';
       case 'in production': return 'status-pending';
       case 'pending': return 'status-pending';
       case 'cancelled': return 'status-cancelled';

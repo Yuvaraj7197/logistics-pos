@@ -1,170 +1,182 @@
 <div class="inventory-container">
   <div class="content-header">
-    <h1>Inventory Management</h1>
-    <p>Manage your products, stock levels, and warehouse operations</p>
-    <div class="header-actions">
-      <button class="btn btn-primary" (click)="showAddProductModal()">
-        <i class="pi pi-plus"></i>
-        Add Product
-      </button>
-      <button class="btn btn-secondary" (click)="showStockAdjustment()">
-        <i class="pi pi-refresh"></i>
-        Stock Adjustment
-      </button>
-      <button class="btn btn-info" (click)="showReorderAlerts()">
-        <i class="pi pi-exclamation-triangle"></i>
-        Reorder Alerts
-      </button>
-      <button class="btn btn-success" (click)="showBarcodeScanner()">
-        <i class="pi pi-qrcode"></i>
-        Barcode Scanner
-      </button>
-      <button class="btn btn-warning" (click)="showMultiWarehouseManagement()">
-        <i class="pi pi-building"></i>
-        Multi-Warehouse
-      </button>
-    </div>
+    <h1>Stock & Inventory Management</h1>
+    <p>Real-time stock tracking with barcode/QR integration and multi-warehouse management</p>
   </div>
 
-  <!-- Inventory Stats Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-box"></i>
-      </div>
-      <div class="stat-content">
-        <h3>{{ getInventoryStats().totalProducts }}</h3>
-        <p>Total Products</p>
-      </div>
+  <!-- Inventory Filters -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Inventory Filters</h3>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-exclamation-triangle"></i>
-      </div>
-      <div class="stat-content">
-        <h3>{{ getLowStockProducts().length }}</h3>
-        <p>Low Stock Items</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-building"></i>
-      </div>
-      <div class="stat-content">
-        <h3>{{ getInventoryStats().totalWarehouses }}</h3>
-        <p>Warehouses</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-chart-line"></i>
-      </div>
-      <div class="stat-content">
-        <h3>{{ getInventoryStats().totalValue | currency:'INR' }}</h3>
-        <p>Total Value</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="filters-section">
-    <div class="filter-group">
-      <label>Category:</label>
-      <select [(ngModel)]="categoryFilter" (change)="getFilteredProducts()">
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; padding: 20px;">
+      <select class="form-input" [(ngModel)]="categoryFilter" style="width: 150px;">
         <option value="">All Categories</option>
         <option value="Raw Materials">Raw Materials</option>
         <option value="Finished Goods">Finished Goods</option>
-        <option value="Packaging">Packaging</option>
-        <option value="Tools">Tools</option>
+        <option value="Packaging">Packaging Materials</option>
       </select>
-    </div>
-    <div class="filter-group">
-      <label>Warehouse:</label>
-      <select [(ngModel)]="warehouseFilter" (change)="getFilteredProducts()">
-        <option value="">All Warehouses</option>
-        <option value="Warehouse A">Warehouse A</option>
-        <option value="Warehouse B">Warehouse B</option>
-        <option value="Warehouse C">Warehouse C</option>
+      <select class="form-input" [(ngModel)]="locationFilter" style="width: 150px;">
+        <option value="">All Locations</option>
+        <option value="Warehouse 1">Warehouse 1</option>
+        <option value="Warehouse 2">Warehouse 2</option>
+        <option value="Warehouse 3">Warehouse 3</option>
+        <option value="Production Floor">Production Floor</option>
       </select>
-    </div>
-    <div class="filter-group">
-      <label>
-        <input type="checkbox" [(ngModel)]="lowStockFilter" (change)="getFilteredProducts()">
-        Low Stock Only
-      </label>
-    </div>
-    <div class="filter-group">
-      <label>
-        <input type="checkbox" [(ngModel)]="batchTrackingFilter" (change)="getFilteredProducts()">
-        Batch Tracking
-      </label>
+      <select class="form-input" [(ngModel)]="statusFilter" style="width: 150px;">
+        <option value="">All Status</option>
+        <option value="low-stock">Low Stock</option>
+        <option value="out-of-stock">Out of Stock</option>
+        <option value="normal">Normal Stock</option>
+      </select>
+      <button class="btn btn-primary" (click)="showAddProductModal()">Add Product</button>
+      <button class="btn btn-success" (click)="showBarcodeScanner()">Scan Barcode</button>
+      <button class="btn btn-primary" (click)="showStockAdjustment()">Stock Adjustment</button>
     </div>
   </div>
 
-  <!-- Products Table -->
+  <div class="dashboard-grid">
+    <div class="stat-card">
+      <div class="stat-number">2,458</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-number">23</div>
+      <div class="stat-label">Low Stock</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-number">5</div>
+      <div class="stat-label">Out of Stock</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-number">₹12,45,678</div>
+      <div class="stat-label">Total Inventory Value</div>
+    </div>
+  </div>
+
+  <!-- Multi-Warehouse Overview -->
   <div class="card">
     <div class="card-header">
-      <h3>Products</h3>
-      <div class="card-actions">
-        <button class="btn btn-sm btn-success" (click)="exportInventory()">
-          <i class="pi pi-download"></i>
-          Export
-        </button>
-      </div>
+      <h3 class="card-title">Multi-Warehouse Overview</h3>
+      <button class="btn btn-primary" (click)="showMultiWarehouseManagement()">Add Warehouse</button>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Stock</th>
-              <th>Min Stock</th>
-              <th>Price</th>
-              <th>Location</th>
-              <th>Supplier</th>
-              <th>Batch Tracking</th>
-              <th>Last Updated</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let product of getFilteredProducts()">
-              <td>{{ product.name }}</td>
-              <td>{{ product.sku }}</td>
-              <td>{{ product.category }}</td>
-              <td [class.low-stock]="product.stock <= product.minStock">{{ product.stock }}</td>
-              <td>{{ product.minStock }}</td>
-              <td>{{ product.price | currency:'INR' }}</td>
-              <td>{{ product.location }}</td>
-              <td>{{ product.supplier }}</td>
-              <td>
-                <span [class]="product.batchTracking ? 'status-delivered' : 'status-cancelled'">
-                  {{ product.batchTracking ? 'Yes' : 'No' }}
-                </span>
-              </td>
-              <td>{{ product.lastStockUpdate | date:'short' }}</td>
-              <td>
-                <div class="action-buttons">
-                  <button class="btn btn-sm btn-info" (click)="viewProductDetails(product)">
-                    <i class="pi pi-eye"></i>
-                  </button>
-                  <button class="btn btn-sm btn-warning" (click)="adjustStock(product)">
-                    <i class="pi pi-refresh"></i>
-                  </button>
-                  <button class="btn btn-sm btn-danger" (click)="deleteProduct(product.sku)">
-                    <i class="pi pi-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-number">1,245</div>
+        <div class="stat-label">Warehouse 1 Items</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">856</div>
+        <div class="stat-label">Warehouse 2 Items</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">357</div>
+        <div class="stat-label">Warehouse 3 Items</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">₹8,45,678</div>
+        <div class="stat-label">Total Value</div>
       </div>
     </div>
   </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Inventory Overview</h3>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" (click)="exportInventory()">Export</button>
+        <button class="btn btn-success" (click)="generateReorderReport()">Reorder Report</button>
+        <button class="btn btn-primary" (click)="showBatchTracking()">Batch Tracking</button>
+      </div>
+    </div>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Current Stock</th>
+            <th>Min Stock Level</th>
+            <th>Price</th>
+            <th>Location</th>
+            <th>Supplier</th>
+            <th>Batch Tracking</th>
+            <th>Last Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of sampleProducts">
+            <td>{{ product.name }}</td>
+            <td>{{ product.sku }}</td>
+            <td>{{ product.category }}</td>
+            <td [class.low-stock]="product.stock <= product.minStock">{{ product.stock }}</td>
+            <td>{{ product.minStock }}</td>
+            <td>₹{{ product.price | number:'1.0-0' }}</td>
+            <td>{{ product.location }}</td>
+            <td>{{ product.supplier }}</td>
+            <td>
+              <span [class]="product.batchTracking ? 'status-delivered' : 'status-cancelled'">
+                {{ product.batchTracking ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>{{ product.lastStockUpdate | date:'short' }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-info" (click)="viewProductDetails(product)">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" (click)="adjustStock(product)">
+                  <i class="pi pi-refresh"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="deleteProduct(product.sku)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Reorder Alerts -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Reorder Alerts</h3>
+    </div>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Current Stock</th>
+            <th>Min Stock Level</th>
+            <th>Reorder Quantity</th>
+            <th>Supplier</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let alert of reorderAlerts">
+            <td>{{ alert.product }}</td>
+            <td class="low-stock">{{ alert.currentStock }}</td>
+            <td>{{ alert.minStock }}</td>
+            <td>{{ alert.reorderQuantity }}</td>
+            <td>{{ alert.supplier }}</td>
+            <td>
+              <button class="btn btn-sm btn-primary" (click)="createPurchaseOrder(alert)">
+                <i class="pi pi-shopping-cart"></i>
+                Create PO
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 
   <!-- Add Product Modal -->
   <div class="modal-overlay" [class.hidden]="!showAddModal" (click)="hideAddProductModal()">
@@ -339,7 +351,7 @@
             <label for="adjustmentProduct">Product</label>
             <select id="adjustmentProduct" [(ngModel)]="newStockAdjustment.productSku" name="adjustmentProduct" required>
               <option value="">Select Product</option>
-              <option *ngFor="let product of products$ | async" [value]="product.sku">{{ product.name }} ({{ product.sku }})</option>
+              <option *ngFor="let product of sampleProducts" [value]="product.sku">{{ product.name }} ({{ product.sku }})</option>
             </select>
           </div>
           <div class="form-group">
@@ -407,24 +419,22 @@
             <thead>
               <tr>
                 <th>Product</th>
-                <th>SKU</th>
                 <th>Current Stock</th>
-                <th>Min Stock</th>
-                <th>Reorder Qty</th>
-                <th>Alert Date</th>
+                <th>Min Stock Level</th>
+                <th>Reorder Quantity</th>
+                <th>Supplier</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let alert of getLowStockProducts()">
-                <td>{{ alert.name }}</td>
-                <td>{{ alert.sku }}</td>
-                <td class="low-stock">{{ alert.stock }}</td>
+              <tr *ngFor="let alert of reorderAlerts">
+                <td>{{ alert.product }}</td>
+                <td>{{ alert.currentStock }}</td>
                 <td>{{ alert.minStock }}</td>
-                <td>{{ alert.reorderQty }}</td>
-                <td>--</td>
+                <td>{{ alert.reorderQuantity }}</td>
+                <td>{{ alert.supplier }}</td>
                 <td>
-                  <button class="btn btn-sm btn-primary" (click)="processReorderAlert(alert.sku)">
+                  <button class="btn btn-sm btn-primary" (click)="createPurchaseOrder(alert)">
                     <i class="pi pi-shopping-cart"></i>
                     Create PO
                   </button>
