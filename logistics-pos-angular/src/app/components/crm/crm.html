@@ -21,80 +21,52 @@
   <!-- CRM Filters -->
   <div class="card">
     <div class="card-header">
-      <h3>CRM Filters</h3>
+      <h3 class="card-title">CRM Filters</h3>
     </div>
-    <div class="card-body">
-      <div class="filter-row">
-        <div class="form-group">
-          <label>Customer Segment</label>
-          <select [(ngModel)]="segmentFilter" name="segmentFilter">
-            <option value="">All Segments</option>
-            <option value="Premium">Premium</option>
-            <option value="Regular">Regular</option>
-            <option value="New">New</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select [(ngModel)]="statusFilter" name="statusFilter">
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="VIP">VIP</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Loyalty Tier</label>
-          <select [(ngModel)]="loyaltyTierFilter" name="loyaltyTierFilter">
-            <option value="">All Tiers</option>
-            <option value="Gold">Gold (1000+)</option>
-            <option value="Silver">Silver (500-999)</option>
-            <option value="Bronze">Bronze (100-499)</option>
-            <option value="Basic">Basic (0-99)</option>
-          </select>
-        </div>
-      </div>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; padding: 20px;">
+      <select class="form-input" [(ngModel)]="segmentFilter" name="segmentFilter" style="width: 150px;">
+        <option value="">All Segments</option>
+        <option value="Premium">Premium</option>
+        <option value="Regular">Regular</option>
+        <option value="New">New</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+      <select class="form-input" [(ngModel)]="statusFilter" name="statusFilter" style="width: 150px;">
+        <option value="">All Status</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="VIP">VIP</option>
+      </select>
+      <select class="form-input" [(ngModel)]="loyaltyTierFilter" name="loyaltyTierFilter" style="width: 150px;">
+        <option value="">All Tiers</option>
+        <option value="Gold">Gold (1000+)</option>
+        <option value="Silver">Silver (500-999)</option>
+        <option value="Bronze">Bronze (100-499)</option>
+        <option value="Basic">Basic (0-99)</option>
+      </select>
+      <button class="btn btn-primary" (click)="showAddCustomer()">Add Customer</button>
+      <button class="btn btn-success" (click)="showLoyaltyProgram()">Loyalty Program</button>
+      <button class="btn btn-primary" (click)="showCustomerReminder()">Set Reminder</button>
     </div>
   </div>
 
   <!-- Customer Statistics -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-users"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ getCustomerStats().totalCustomers }}</div>
-        <div class="stat-label">Total Customers</div>
-      </div>
+  <div class="dashboard-grid">
+    <div class="stat-card green">
+      <div class="stat-number">1,250</div>
+      <div class="stat-label">Total Customers</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-check-circle"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ getCustomerStats().activeCustomers }}</div>
-        <div class="stat-label">Active Customers</div>
-      </div>
+      <div class="stat-number">₹2,45,678</div>
+      <div class="stat-label">Customer Revenue</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-number">85%</div>
+      <div class="stat-label">Satisfaction Rate</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-star"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ getCustomerStats().premiumCustomers }}</div>
-        <div class="stat-label">Premium Customers</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="pi pi-heart"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ getCustomerStats().avgSatisfaction | number:'1.1-1' }}</div>
-        <div class="stat-label">Avg Satisfaction</div>
-      </div>
+      <div class="stat-number">45</div>
+      <div class="stat-label">New Customers</div>
     </div>
   </div>
 

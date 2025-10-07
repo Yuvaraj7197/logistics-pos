@@ -53,21 +53,21 @@
   </div>
 
   <!-- Financial Overview -->
-  <div class="stats-grid">
+  <div class="dashboard-grid">
     <div class="stat-card green">
-      <div class="stat-number">₹{{ getMonthlyRevenue() | number:'1.0-0' }}</div>
+      <div class="stat-number">₹45,67,890</div>
       <div class="stat-label">Monthly Revenue</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">₹{{ getMonthlyExpenses() | number:'1.0-0' }}</div>
+      <div class="stat-number">₹12,34,567</div>
       <div class="stat-label">Expenses</div>
     </div>
     <div class="stat-card orange">
-      <div class="stat-number">₹{{ getPendingPayments() | number:'1.0-0' }}</div>
+      <div class="stat-number">₹2,45,678</div>
       <div class="stat-label">Pending Payments</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">₹{{ getNetProfit() | number:'1.0-0' }}</div>
+      <div class="stat-number">₹33,33,223</div>
       <div class="stat-label">Net Profit</div>
     </div>
   </div>
@@ -78,21 +78,21 @@
       <h3>GST & Tax Overview</h3>
       <button class="btn btn-primary" (click)="showTaxManagement()">GST Settings</button>
     </div>
-    <div class="stats-grid">
+    <div class="dashboard-grid">
       <div class="stat-card">
-        <div class="stat-number">₹{{ taxDetails.cgst | number:'1.0-0' }}</div>
+        <div class="stat-number">₹4,56,789</div>
         <div class="stat-label">CGST Collected</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">₹{{ taxDetails.sgst | number:'1.0-0' }}</div>
+        <div class="stat-number">₹4,56,789</div>
         <div class="stat-label">SGST Collected</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">₹{{ taxDetails.igst | number:'1.0-0' }}</div>
+        <div class="stat-number">₹2,34,567</div>
         <div class="stat-label">IGST Collected</div>
       </div>
       <div class="stat-card green">
-        <div class="stat-number">₹{{ taxDetails.totalTax | number:'1.0-0' }}</div>
+        <div class="stat-number">₹11,48,145</div>
         <div class="stat-label">Total GST</div>
       </div>
     </div>
@@ -104,21 +104,21 @@
       <h3>Multi-Currency Overview</h3>
       <button class="btn btn-primary" (click)="showCurrencySettings()">Currency Settings</button>
     </div>
-    <div class="stats-grid">
+    <div class="dashboard-grid">
       <div class="stat-card">
-        <div class="stat-number">₹{{ getINRRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-number">₹45,67,890</div>
         <div class="stat-label">INR Revenue</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">${{ getUSDRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-number">$12,345</div>
         <div class="stat-label">USD Revenue</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">€{{ getEURRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-number">€8,765</div>
         <div class="stat-label">EUR Revenue</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">₹{{ getTotalMultiCurrencyRevenue() | number:'1.0-0' }}</div>
+        <div class="stat-number">₹52,45,678</div>
         <div class="stat-label">Total Revenue (INR)</div>
       </div>
     </div>
@@ -147,11 +147,14 @@
   <!-- Transactions Table -->
   <div class="card">
     <div class="card-header">
-      <h3>Recent Transactions</h3>
+      <h3 class="card-title">Financial Transactions</h3>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" (click)="showAddTransaction()">Add Transaction</button>
+        <button class="btn btn-success" (click)="exportFinancialReport('Excel')">Export</button>
+      </div>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table">
+    <div class="table-container">
+      <table class="table">
           <thead>
             <tr>
               <th>Date</th>
@@ -166,7 +169,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let transaction of transactions$ | async">
+          <tr *ngFor="let transaction of (transactions$ | async)">
               <td>{{ transaction.date }}</td>
               <td>{{ transaction.id }}</td>
               <td>{{ transaction.type }}</td>
@@ -192,7 +195,61 @@
               </td>
             </tr>
           </tbody>
-        </table>
+      </table>
+    </div>
+  </div>
+
+  <!-- Receivables & Payables -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Receivables & Payables</h3>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0 20px 20px;">
+      <div>
+        <h4>Accounts Receivable</h4>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of receivables">
+                <td>{{ r.customer }}</td>
+                <td>₹{{ r.amount | number:'1.0-0' }}</td>
+                <td>{{ r.dueDate }}</td>
+                <td><span class="status-badge" [class]="getStatusClass(r.status)">{{ r.status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h4>Accounts Payable</h4>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of payables">
+                <td>{{ p.supplier }}</td>
+                <td>₹{{ p.amount | number:'1.0-0' }}</td>
+                <td>{{ p.dueDate }}</td>
+                <td><span class="status-badge" [class]="getStatusClass(p.status)">{{ p.status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
