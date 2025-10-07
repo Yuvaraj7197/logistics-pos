@@ -254,6 +254,31 @@
     </div>
   </div>
 
+  <!-- Payment Gateway Status -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Payment Gateway Status</h3>
+    </div>
+    <div class="dashboard-grid">
+      <div class="stat-card green">
+        <div class="stat-number">98.5%</div>
+        <div class="stat-label">Success Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">₹12,34,567</div>
+        <div class="stat-label">Processed Today</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-number">23</div>
+        <div class="stat-label">Failed Transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">₹45,678</div>
+        <div class="stat-label">Refunds</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Transaction Modal -->
   <div class="modal-overlay" [class.hidden]="!showAddTransactionModal" (click)="hideAddTransaction()">
     <div class="modal-content" (click)="$event.stopPropagation()">
