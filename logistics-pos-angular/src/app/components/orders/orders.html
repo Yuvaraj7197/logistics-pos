@@ -192,12 +192,12 @@
             </div>
             <div class="form-group">
               <label for="orderType">Order Type</label>
-              <select id="orderType" [(ngModel)]="newOrder.type" name="orderType" required>
-                <option value="Customer">Customer Order</option>
-                <option value="Distributor">Distributor Order</option>
-                <option value="Internal">Internal Order</option>
-                <option value="Production">Production Order</option>
-              </select>
+              <select [(ngModel)]="selectedOrderType" name="selectedOrderType" class="form-control">
+              <option [ngValue]="null">Select Order Type</option>
+              <option *ngFor="let type of orderTypes" [ngValue]="type.type_id">
+                {{ type.type_name }}
+              </option>
+            </select>
             </div>
           </div>
 

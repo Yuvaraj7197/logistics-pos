@@ -1,0 +1,116 @@
+.verify-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f7f7f7;
+}
+
+.verify-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 350px;
+}
+
+.verify-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.verify-card button {
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.reset-password-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.reset-password-card {
+  width: 400px;
+  padding: 30px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  text-align: center;
+
+  .icon {
+    margin-bottom: 15px;
+  }
+
+  h2 { margin-bottom: 5px; }
+  p { margin-bottom: 20px; font-size: 14px; color: #555; }
+
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+
+    label {
+      font-size: 13px;
+      color: #666;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+  }
+
+  .otp-group {
+    display: flex;
+    gap: 5px;
+
+    input { flex: 1; }
+    .btn-verify, .btn-resend {
+      padding: 10px 12px;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-verify { background: #a061ff; }
+    .btn-resend { background: #ff61a0; }
+  }
+
+  .btn-reset {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(to right, #a061ff, #ff61a0);
+    color: #fff;
+    font-size: 15px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  .error-message { color: red; font-size: 13px; margin-top: 8px; }
+  .success-message { color: green; font-size: 13px; margin-top: 8px; }
+
+  .back-to-login {
+    margin-top: 15px;
+    font-size: 13px;
+    color: green;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}

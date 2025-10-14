@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { RouterOutlet, Router, RouterLinkActive, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from './services/auth';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, RouterLinkActive, RouterLink],
+  imports: [RouterOutlet, CommonModule, RouterLinkActive, RouterLink,HttpClientModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

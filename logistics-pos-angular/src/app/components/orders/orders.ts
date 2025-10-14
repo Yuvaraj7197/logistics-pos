@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Order, ApprovalWorkflow, ReturnRefund, DeliveryTracking } from '../../services/data';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { OrderService } from '../../services/order.service';
 
 @Component({
   selector: 'app-orders',
@@ -52,8 +53,10 @@ export class OrdersComponent implements OnInit {
   typeFilter: string = '';
   statusFilter: string = '';
   priorityFilter: string = '';
+  orderTypes: any[] = [];
+  selectedOrderType: any = null;
 
-  constructor(private dataService: DataService) {
+  constructor(private dataService: DataService, private order: OrderService) {
     this.orders$ = this.dataService.getOrders();
     this.orders$.subscribe(orders => {
       this.orders = orders;
@@ -62,6 +65,8 @@ export class OrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.generateOrderId();
+    this.loadOrderTypes();
+
   }
 
   generateOrderId(): void {
@@ -283,8 +288,17 @@ export class OrdersComponent implements OnInit {
     this.dataService.updateOrder(order);
   }
 
-  getOrderTypes(): string[] {
-    return ['Customer', 'Distributor', 'Internal', 'Production'];
+  loadOrderTypes(): void {
+    const payload = {};
+    this.order.orderType(payload).subscribe({
+      next: (res: any) => {
+        this.orderTypes = res; 
+        console.log('Order Types:', this.orderTypes);
+      },
+      error: (err) => {
+        console.error('Failed to fetch order types', err);
+      }
+    });
   }
 
   getOrderStatuses(): string[] {

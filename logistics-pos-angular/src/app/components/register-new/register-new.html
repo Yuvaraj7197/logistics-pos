@@ -1,0 +1,99 @@
+<div class="register-container">
+  <div class="floating-shapes">
+    <div class="shape"></div><div class="shape"></div>
+    <div class="shape"></div><div class="shape"></div>
+  </div>
+
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Create Account</h1>
+      <p>Join the POS System platform</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-group">
+        <label for="full_name">Full Name</label>
+        <input
+          type="text"
+          id="full_name"
+          [(ngModel)]="full_name"
+          name="full_name"
+          placeholder="Enter your name"
+          required
+          [disabled]="isLoading">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="Enter your email"
+          required
+          [disabled]="isLoading">
+      </div>
+
+     <!-- Password Field -->
+<div class="form-group password-group">
+  <label for="password">Password</label>
+  <div class="password-input-wrapper">
+    <input
+      [type]="showPassword ? 'text' : 'password'"
+      id="password"
+      [(ngModel)]="password"
+      name="password"
+      placeholder="Enter password"
+      required
+      [disabled]="isLoading">
+    
+    <button type="button" class="eye-btn" (click)="togglePassword()" [disabled]="isLoading">
+      <i class="fa" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Confirm Password Field -->
+<div class="form-group password-group">
+  <label for="confirmPassword">Confirm Password</label>
+  <div class="password-input-wrapper">
+    <input
+      [type]="showConfirmPassword ? 'text' : 'password'"
+      id="confirmPassword"
+      [(ngModel)]="confirmPassword"
+      name="confirmPassword"
+      placeholder="Confirm password"
+      required
+      [disabled]="isLoading">
+    
+    <button type="button" class="eye-btn" (click)="toggleConfirmPassword()" [disabled]="isLoading">
+      <i class="fa" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+    </button>
+  </div>
+</div>
+
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+          <span *ngIf="isLoading">Creating Account...</span>
+          <span *ngIf="!isLoading">Register</span>
+        </button>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+    </form>
+
+    <div class="login-section">
+      <p>Already have an account?
+        <a (click)="goToLogin()" class="login-link">Login</a>
+      </p>
+    </div>
+  </div>
+</div>

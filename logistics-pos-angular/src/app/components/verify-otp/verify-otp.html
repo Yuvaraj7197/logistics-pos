@@ -1,0 +1,64 @@
+<!-- <div class="verify-container">
+  <div class="verify-card">
+    <h2>Verify Your Email</h2>
+    <p>Please enter the OTP sent to <b>{{ email }}</b></p>
+
+    <div class="form-group">
+      <input type="text" [(ngModel)]="otp" placeholder="Enter OTP" />
+    </div>
+
+    <button (click)="verifyOtp()">Verify OTP</button>
+
+    <p class="message">{{ message }}</p>
+  </div>
+</div> -->
+
+<div class="reset-password-container">
+  <div class="reset-password-card">
+    <div class="icon">
+      <img src="assets/icons/user-plus.svg" alt="Reset Password">
+    </div>
+    <h2>Reset Password</h2>
+    <p>Enter OTP sent to your email and set a new password.</p>
+
+    <form (ngSubmit)="resetPassword()">
+      <!-- Email (read-only) -->
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="email" name="email" readonly />
+      </div>
+
+      <!-- OTP -->
+      <div class="form-group otp-group">
+        <label>OTP</label>
+        <input type="text" [(ngModel)]="otp" name="otp" placeholder="Enter OTP" />
+        <button type="button" (click)="verifyOtp()" class="btn-verify">Verify</button>
+        <button type="button" (click)="resendOtp()" class="btn-resend">Resend OTP</button>
+      </div>
+
+      <!-- New Password -->
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="New Password" />
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password" />
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn-reset" [disabled]="!otpVerified">
+  <span *ngIf="isLoading">Please wait...</span>
+  <span *ngIf="!isLoading">Reset Password</span>
+</button>
+
+      <!-- Messages -->
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+    </form>
+
+    <p class="back-to-login" (click)="backToLogin()">Back to Sign In</p>
+  </div>
+</div>

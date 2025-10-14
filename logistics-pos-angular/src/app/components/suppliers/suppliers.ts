@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data';
 import { Observable } from 'rxjs';
+import { SupplierService } from '../../services/supplier.service';
 
 export interface Supplier {
   id: string;
@@ -52,6 +53,9 @@ export class SuppliersComponent implements OnInit {
   showSettlementModal: boolean = false;
   showAnalyticsModal: boolean = false;
 
+  categories: any[] = [];  
+  categoryFilter: string = '';
+
   newSupplier: Supplier = {
     id: '',
     name: '',
@@ -94,17 +98,31 @@ export class SuppliersComponent implements OnInit {
     { id: 'PO-003', supplierId: 'SUP003', supplierName: 'Tech Equipment Inc', orderDate: '2024-09-15', expectedDate: '2024-10-15', status: 'In Transit', totalAmount: 100000, items: [{ product: 'Industrial Machine', quantity: 1, unitPrice: 100000, total: 100000 }], notes: 'Heavy machinery' }
   ];
 
-  // Filters
-  categoryFilter: string = '';
   statusFilter: string = '';
   ratingFilter: string = '';
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService,private supplierservice: SupplierService) {}
 
   ngOnInit(): void {
     this.generateSupplierId();
     this.generatePurchaseOrderId();
+    this.loadCategories();
+
   }
+
+  loadCategories(): void {
+  this.supplierservice.productCategory({}).subscribe({
+    next: (res: any) => {
+      this.categories = res; // Save API response
+      console.log('Categories:', this.categories);
+    },
+    error: (err) => {
+      console.error('Failed to fetch categories', err);
+    }
+  });
+}
+
+
 
   generateSupplierId(): void {
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');

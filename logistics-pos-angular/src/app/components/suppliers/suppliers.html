@@ -29,11 +29,11 @@
           <label>Category</label>
           <select [(ngModel)]="categoryFilter" name="categoryFilter">
             <option value="">All Categories</option>
-            <option value="Raw Materials">Raw Materials</option>
-            <option value="Packaging">Packaging</option>
-            <option value="Equipment">Equipment</option>
-            <option value="Services">Services</option>
+            <option *ngFor="let cat of categories" [value]="cat.category_name">
+              {{ cat.category_name }}
+            </option>
           </select>
+
         </div>
         <div class="form-group">
           <label>Status</label>
